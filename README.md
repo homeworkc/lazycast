@@ -16,7 +16,7 @@ Then, search for the wireless display named "lazycast" on the device you want to
 
 
 # Known issue
-Latency: Limited by the implementation of the rtp client used.
+Latency: Limited by the implementation of the rtp client used.  
 omxplayer unexpected quit: Execute: `omxplayer -b --avdict rtsp_transport:tcp rtp://192.168.101.80:1028/wfd1.0/streamid=0 --live --threshold 0.05 --timeout 10000` manually.
 
 
