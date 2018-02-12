@@ -12,7 +12,7 @@ Note: use omxplayer on Raspberry Pi for HW acceleration
 # Usage
 
 Run `./all.sh` to initiate lazycast receiver. Wait until the "The display is ready" message.
-Then, search for a Miracast screen named "lazycast" on the device you want to cast. Use the pin number under the "The display is ready" message if the device is asking the WPS pin number.
+Then, search for the wireless display named "lazycast" on the device you want to cast. Use the pin number under the "The display is ready" message if the device is asking the WPS pin number.
 
 # Known issue
 latency
