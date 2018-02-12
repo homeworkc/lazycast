@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 """
-   This software is part of lazycast, a simple Miracast receiver on Raspberry Pi
+   This software is part of lazycast, a simple wireless display receiver for Raspberry Pi
    Copyright (C) 2018 Hsun-Wei Cho
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -111,8 +111,11 @@ sock.sendall(m7req)
 data=(sock.recv(1000))
 print data
 
-#os.system('pkill omxplayer')
-#os.system('sleep 1; omxplayer -b --avdict rtsp_transport:tcp rtp://192.168.101.80:1028/wfd1.0/streamid=0 --live --threshold 0.05 --timeout 10000 &')
+'''
+#use this on Pi
+os.system('pkill omxplayer')
+os.system('sleep 1; omxplayer -b --avdict rtsp_transport:tcp rtp://192.168.101.80:1028/wfd1.0/streamid=0 --live --threshold 0.05 --timeout 10000 &')
+'''
 
 os.system('vlc rtp://0.0.0.0:1028/wfd1.0/streamid=0 &')
 
