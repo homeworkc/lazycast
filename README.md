@@ -1,7 +1,7 @@
 lazycast: A Simple Wireless Display Receiver for Raspberry Pi
 
 # Description
-lazycast is a simple wifi display (Miracast) receiver. It was originally targeted Raspberry Pi (as display) and Windows 8.1/10 (as source), but it **might** work with other linux distro and Miracast sources, too. In general, it does not require recompilation of wpa_supplicant to provide p2p capability, and should work "out of the box" with Raspberry Pi.
+lazycast is a simple wifi display receiver. It was originally targeted Raspberry Pi (as display) and Windows 8.1/10 (as source), but it **might** work with other linux distro and Miracast sources, too. In general, it does not require recompilation of wpa_supplicant to provide p2p capability, and should work "out of the box" with Raspberry Pi.
 
 # Required package
 net-tools python udhcpd vlc
