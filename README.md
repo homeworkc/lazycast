@@ -10,7 +10,7 @@ Note: udhcpd is a DHCP server for Ubuntu and Debian.
 Note: use omxplayer on Raspberry Pi for HW acceleration  
 
 # Usage
-
+Make all.sh executable: `chmod +x all.sh`  
 Run `./all.sh` to initiate lazycast receiver. Wait until the "The display is ready" message.
 Then, search for the wireless display named "lazycast" on the device you want to cast. Use the pin number under the "The display is ready" message if the device is asking a WPS pin number.  
 
