@@ -6,14 +6,12 @@ lazycast is a simple Miracast receiver. It was originally targeted Raspberry Pi 
 # Require package
 net-tools python udhcpd vlc
 
-Note: udhcpd is a DHCP server for Ubuntu and Debian.
-Note: use omxplayer on Raspberry Pi for HW acceleration
+Note: udhcpd is a DHCP server for Ubuntu and Debian.  
+Note: use omxplayer on Raspberry Pi for HW acceleration  
 
 # Usage
 
-Run
-./all.sh
-to initiate lazycast receiver. Wait until the "The display is ready" message.
+Run `./all.sh` to initiate lazycast receiver. Wait until the "The display is ready" message.
 Then, search for a Miracast screen named "lazycast" on the device you want to cast. Use the pin number below "The display is ready" message if the device is asking the WPS pin number.
 
 # Known issue
