@@ -17,12 +17,13 @@ Then, search for the wireless display named "lazycast" on the device you want to
 
 # Known issue
 Latency: Limited by the implementation of the rtp client used.  
-omxplayer unexpected quit: Execute `omxplayer -b --avdict rtsp_transport:tcp rtp://192.168.101.80:1028/wfd1.0/streamid=0 --live --threshold 0.05 --timeout 10000` manually until the screen is displayed.
+omxplayer unexpected quit: Execute `omxplayer -b --avdict rtsp_transport:tcp rtp://0.0.0.0:1028/wfd1.0/streamid=0 --live --threshold 0.05 --timeout 10000` manually until the screen is displayed.
 
 
 
 # TODO
 "wlo1"/"wlan0"  
+Detect which dhcp server program to use  
 UIBC: (feed cursor and keystroke back to source)  
 Latency reduction  
 Video/Sound sync

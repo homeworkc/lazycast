@@ -9,7 +9,7 @@
 #   under the GPL along with build & install instructions.
 #
 #################################################################################
-wlaninterface=wlan0
+wlaninterface=wlo1
 ain="$(sudo wpa_cli -i$wlaninterface interface)"
 echo "${ain}"
 if [ `echo "${ain}" |grep -c "p2p-wl"`  -gt 0 ] 

@@ -111,15 +111,13 @@ sock.sendall(m7req)
 data=(sock.recv(1000))
 print data
 
-
+'''
 #use this on Pi
 os.system('pkill omxplayer')
 os.system('sleep 2; omxplayer -b --avdict rtsp_transport:tcp rtp://0.0.0.0:1028/wfd1.0/streamid=0 --live &')
 '''
 
 os.system('vlc --fullscreen rtp://0.0.0.0:1028/wfd1.0/streamid=0 &')
-'''
-
 
 while True:
 	data=(sock.recv(1000))
