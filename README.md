@@ -22,5 +22,7 @@ omxplayer unexpected quit: Execute `omxplayer -b --avdict rtsp_transport:tcp rtp
 
 
 # TODO
+"wlo1"/"wlan0"  
 UIBC: (feed cursor and keystroke back to source)  
-Latency reduction
+Latency reduction  
+Video/Sound sync
