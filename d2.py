@@ -39,7 +39,7 @@ data=(sock.recv(1000))
 print data
 
 msg='wfd_client_rtp_ports: RTP/AVP/UDP;unicast 1028 0 mode=play\r\n'\
-+'wfd_audio_codecs: LPCM 00000003 00\r\n'\
++'wfd_audio_codecs: AAC 00000001 00\r\n'\
 +'wfd_video_formats: 00 00 01 04 0001FFFF 3FFFFFFF 00000FFF 00 0000 0000 00 none none\r\n'\
 +'wfd_3d_video_formats: none\r\n'\
 +'wfd_coupled_sink: none\r\n'\
@@ -118,6 +118,7 @@ os.system('sleep 2; omxplayer -b --avdict rtsp_transport:tcp rtp://0.0.0.0:1028/
 '''
 
 os.system('vlc --fullscreen rtp://0.0.0.0:1028/wfd1.0/streamid=0 &')
+#if vlc is used, use aac +'wfd_audio_codecs: AAC 00000001 00\r\n'\
 
 while True:
 	data=(sock.recv(1000))
