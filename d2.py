@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
 
 """
    This software is part of lazycast, a simple wireless display receiver for Raspberry Pi

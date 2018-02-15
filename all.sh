@@ -12,7 +12,7 @@
 wlaninterface=wlo1
 ain="$(sudo wpa_cli -i$wlaninterface interface)"
 echo "${ain}"
-if [ `echo "${ain}" |grep -c "p2p-wl"`  -gt 0 ] 
+if [ `echo "${ain}" | grep -c "p2p-wl"` -gt 0 ] 
 then
 	echo "already on"
 
@@ -43,8 +43,8 @@ sleep 1
 echo "The display is ready"
 sudo wpa_cli -i$p2pinterface wps_pin any
 pingresult=$(ping 192.168.101.80 -I $p2pinterface -c 1 -W 1)
-while [ `echo "${pingresult}" |grep -c "bytes from"`  -lt 1 ] 
-	do
-		pingresult=$(ping 192.168.101.80 -I $p2pinterface -c 1 -W 1)
-	done
-python d2.py
+while [ `echo "${pingresult}" | grep -c "bytes from"` -lt 1 ] 
+do
+    pingresult=$(ping 192.168.101.80 -I $p2pinterface -c 1 -W 1)
+done
+./d2.py
