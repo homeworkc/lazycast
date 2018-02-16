@@ -16,14 +16,13 @@ Then, search for the wireless display named "lazycast" on the device you want to
 
 
 # Known issue
-Latency: Limited by the implementation of the rtp client used.  
-omxplayer unexpected quit: Execute `omxplayer -b --avdict rtsp_transport:tcp rtp://0.0.0.0:1028/wfd1.0/streamid=0 --live --threshold 0.05 --timeout 10000` manually until the screen is displayed.
+Latency: Limited by the implementation of the rtp client used. (In VLC, latency can be reduced from 1200 to 300ms by lowering the network cache value.)  
+omxplayer unexpected quit: Execute `omxplayer -b --avdict rtsp_transport:tcp rtp://0.0.0.0:1028/wfd1.0/streamid=0 --live --threshold 0.05 --timeout 10000` manually until the screen is displayed.  
+omxplayer doesn't render smoothly for win 8 source.
 
 
 
-# TODO
-"wlo1"/"wlan0"  
+# TODO 
 Detect which dhcp server program to use  
 UIBC: (feed cursor and keystroke back to source)  
 Latency reduction  
-Video/Sound sync
