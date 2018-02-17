@@ -39,8 +39,8 @@ echo $p2pinterface
 
 sudo ifconfig $p2pinterface 192.168.101.1
 sed -i -e "s/\(interface \).*/\1$p2pinterface/"   udhcpd.conf
+sleep 3
 sudo udhcpd ./udhcpd.conf 
-sleep 1
 echo "The display is ready"
 sudo wpa_cli -i$p2pinterface wps_pin any
 pingresult=$(ping 192.168.101.80 -I $p2pinterface -c 1 -W 1)
