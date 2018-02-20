@@ -27,7 +27,7 @@ else
 	while [ `echo "${ain}" | grep -c "p2p-wl"`  -lt 1 ] 
 	do
 		sudo wpa_cli p2p_group_add
-		sleep 2
+		sleep 3
 		ain="$(sudo wpa_cli interface)"
 		echo "$ain"
 	done
