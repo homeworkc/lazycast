@@ -29,15 +29,26 @@ import Tkinter as Tk
 # import standard libraries
 import os
 import threading
+from threading import Thread
 import time
 import platform
 
-def setres(self):
-    print(time.ctime())
-    (px,py)=vlc.libvlc_video_get_size(self.player,0)
-    print px
-    print py
-    threading.Timer(1, setres, self).start()
+
+    
+class Setres(Thread):
+    def __init__(self, playerself):
+        Thread.__init__(self)
+        self.playerself = playerself
+        self.oldpxy=(0,0)
+    def run(self):
+        while 1:
+            pxy=vlc.libvlc_video_get_size(self.playerself.player,0)
+            (px,py)=pxy
+            if(pxy!=self.oldpxy):
+                print str(px)+'x'+str(py)
+                self.playerself.parent.geometry(str(px)+'x'+str(py)) 
+                time.sleep(0.2)
+                self.oldpxy=pxy
 
 class Player(Tk.Frame):
     """The main window has to deal with events.
@@ -87,7 +98,8 @@ class Player(Tk.Frame):
         self.parent.bind("<Button-2>", self.middleclick)
         self.parent.bind("<Button-3>", self.rightclick)
 
-        setres(self)
+        self.setres=Setres(self)
+        self.setres.start()
 
     def GetHandle(self):
         return self.videopanel.winfo_id()
