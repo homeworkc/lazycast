@@ -47,15 +47,15 @@ class Setres(Thread):
             if(pxy!=self.oldpxy):
                 print str(px)+'x'+str(py)
                 self.playerself.parent.geometry(str(px)+'x'+str(py)) 
-                time.sleep(0.2)
+                
                 self.oldpxy=pxy
+            time.sleep(0.2)
 
 class Player(Tk.Frame):
     """The main window has to deal with events.
     """
     def leftclick(caller,event):
         print "clicked at", event.x, event.y
-        print vlc.libvlc_video_get_size(caller.player,0)
     def middleclick(caller,event):
         print "clicked at", event.x, event.y
     def rightclick(caller,event):
