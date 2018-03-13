@@ -45,7 +45,7 @@ msg='wfd_client_rtp_ports: RTP/AVP/UDP;unicast 1028 0 mode=play\r\n'\
 +'wfd_coupled_sink: none\r\n'\
 +'wfd_display_edid: none\r\n'\
 +'wfd_connector_type: 05\r\n'\
-+'wfd_uibc_capability: input_category_list=HIDC;generic_cap_list=none;hidc_cap_list=Keyboard/USB, Mouse/USB;port=none\r\n'\
++'wfd_uibc_capability: input_category_list=GENERIC, HIDC;generic_cap_list=Keyboard, Mouse, MultiTouch;hidc_cap_list=Keyboard/USB, Mouse/USB;port=none\r\n'\
 +'wfd_standby_resume_capability: none\r\n'\
 +'wfd_content_protection: none\r\n'
 '''
@@ -126,12 +126,10 @@ while True:
 	print data
 	paralist=data.split('\r')
 	tmp=[x for x in paralist if 'CSeq' in x]
-	cseq=tmp[-1]
-	resp='RTSP/1.0 200 OK\r'+cseq+'\r\n\r\n';#cseq contains \n
-	print resp
-	if paralist[0]=='GET_PARAMETER rtsp://localhost/wfd1.0 RTSP/1.0':
-		sock.sendall(resp)
-	elif paralist[0]=='SET_PARAMETER rtsp://localhost/wfd1.0 RTSP/1.0':
+	print len(tmp)
+	for cseq in tmp:
+		resp='RTSP/1.0 200 OK\r'+cseq+'\r\n\r\n';#cseq contains \n
+		print resp
 		sock.sendall(resp)
 
 		

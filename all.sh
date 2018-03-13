@@ -26,10 +26,16 @@ else
 	sudo wpa_cli wfd_subelem_set 6 000700000000000000
 	while [ `echo "${ain}" | grep -c "p2p-wl"`  -lt 1 ] 
 	do
-		sudo wpa_cli p2p_group_add
-		sleep 2
+		while [ `echo "${ain}" | grep -c "p2p-wl"`  -lt 1 ]
+        	do
+			sudo wpa_cli p2p_group_add
+			sleep 2
+			ain="$(sudo wpa_cli interface)"
+			echo "$ain"
+		done
+		sleep 5
 		ain="$(sudo wpa_cli interface)"
-		echo "$ain"
+                echo "$ain"
 	done
 
 fi

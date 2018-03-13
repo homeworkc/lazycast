@@ -1,5 +1,5 @@
 
-OBJS = control.o
+OBJS = controlhidc.o
 BIN = control.bin
 
 
