@@ -126,7 +126,8 @@ while True:
 	print data
 	paralist=data.split('\r')
 	tmp=[x for x in paralist if 'CSeq' in x]
-	print len(tmp)
+	if(len(tmp)==0):
+		break
 	for cseq in tmp:
 		resp='RTSP/1.0 200 OK\r'+cseq+'\r\n\r\n';#cseq contains \n
 		print resp
