@@ -236,7 +236,16 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 	s = DefaultScreen(d);
-	w = XCreateSimpleWindow(d, RootWindow(d, s), 0, 0, 1280, 720, 1, BlackPixel(d, s), WhitePixel(d, s));
+
+	/*XSetWindowAttributes wa;
+	wa.override_redirect = True;
+	w = XCreateWindow(d, RootWindow(d, s), 0, 0, 1280, 720, 1, CopyFromParent, CopyFromParent,
+		CopyFromParent, CWOverrideRedirect, &wa);
+	*/
+	w = XCreateSimpleWindow(d, RootWindow(d, s), 0, 0, 800, 550, 1, BlackPixel(d, s), WhitePixel(d, s));
+
+
+
 
 	Atom delWindow = XInternAtom( d, "WM_DELETE_WINDOW", 0 );
 	XSetWMProtocols(d , w, &delWindow, 1);
@@ -245,10 +254,14 @@ int main(int argc, char **argv)
 
 	XMapWindow(d, w);
 
+	//XGrabKeyboard(d, DefaultRootWindow(d), True, GrabModeAsync, GrabModeAsync, CurrentTime);
+	//XGrabPointer(d, DefaultRootWindow(d), True, ButtonPressMask | ButtonReleaseMask | PointerMotionMask, GrabModeAsync,
+		//GrabModeAsync, None, None, CurrentTime);
 
-
+	XWarpPointer(d, None, DefaultRootWindow(d), 0, 0, 0, 0, 400, 400);
 
 	int oldx = 0, oldy = 0;
+	int warp = 0;
 	while(1) 
 	{
 
@@ -266,11 +279,30 @@ int main(int argc, char **argv)
 		else if (e.type == KeyPress)
 		{
 			int keyin = e.xkey.keycode;
-			if (keyin < 128)
+			if (keyin == 37)
+				keyboardinput[9] |= 1;
+			else if (keyin == 50)
+				keyboardinput[9] |= 1 << 1;
+			else if (keyin == 64)
+				keyboardinput[9] |= 1 << 2;
+			else if (keyin == 133)
+				keyboardinput[9] |= 1 << 3;
+			else if (keyin == 105)
+				keyboardinput[9] |= 1 << 4;
+			else if (keyin == 62)
+				keyboardinput[9] |= 1 << 5;
+			else if (keyin == 108)
+				keyboardinput[9] |= 1 << 6;
+			else if (keyin == 135)
+				keyboardinput[9] |= 1 << 7;
+			else if (keyin < 128)
 				keyboardinput[11] = usageid[keyin];
 			else
 				keyboardinput[11] = 0;
-			printf("KeyPress:%d\n", keyboardinput[11]);
+			printf("KeyPress:%d\n", keyin);
+
+
+
 			printf("send:%d\n", send(fd, keyboardinput, sizeof(keyboardinput), 0));
 
 
@@ -278,11 +310,25 @@ int main(int argc, char **argv)
 		else if (e.type == KeyRelease)
 		{
 			int keyin = e.xkey.keycode;
-			if (keyin < 128)
-				keyboardinput[11] = usageid[keyin];
+			if (keyin == 37)
+				keyboardinput[9] &= ~1;
+			else if (keyin == 50)
+				keyboardinput[9] &= ~(1 << 1);
+			else if (keyin == 64)
+				keyboardinput[9] &= ~(1 << 2);
+			else if (keyin == 133)
+				keyboardinput[9] &= ~(1 << 3);
+			else if (keyin == 105)
+				keyboardinput[9] &= ~(1 << 4);
+			else if (keyin == 62)
+				keyboardinput[9] &= ~(1 << 5);
+			else if (keyin == 108)
+				keyboardinput[9] &= ~(1 << 6);
+			else if (keyin == 135)
+				keyboardinput[9] &= ~(1 << 7);
 			else
 				keyboardinput[11] = 0;
-			printf("KeyRelease:%d\n", keyboardinput[11]);
+			printf("KeyRelease:%d\n", keyin);
 			printf("send:%d\n", send(fd, keyboardinput, sizeof(keyboardinput), 0));
 		}
 		else if (e.type == ButtonPress)
@@ -343,14 +389,32 @@ int main(int argc, char **argv)
 		{
 			int newx = e.xmotion.x;
 			int newy = e.xmotion.y;
-			
-			printf("MotionNotify:%d,%d\n", newx, newy);
-
-
 			int xdiff = newx - oldx;
 			int ydiff = newy - oldy;
 			oldx = newx;
 			oldy = newy;
+
+			printf("test:%d\n", e.xmotion.send_event);
+			printf("test2:%d\n", e.xmotion.state);
+			
+			if (warp == 1)
+			{
+				warp = 0;
+				continue;
+			}
+			if (newx < 128 || newx > 800-128 || newy < 128 || newy > 550-128)
+			{
+				XWarpPointer(d, None, DefaultRootWindow(d), 0, 0, 0, 0, 400, 300);
+				warp = 1;
+			}
+
+			printf("MotionNotify:%d,%d\n", newx, newy);
+
+
+			
+
+
+
 
 
 
