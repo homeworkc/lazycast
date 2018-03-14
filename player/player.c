@@ -16,7 +16,6 @@ static VCOS_LOG_CAT_T il_ffmpeg_log_category;
 #include "libavcodec/avcodec.h"
 #include <libavformat/avformat.h>
 
-char *IMG = "rtp://0.0.0.0:1028";
 
 static AVCodecContext *video_dec_ctx = NULL;
 static AVCodecContext *audio_dec_ctx = NULL;
@@ -179,7 +178,7 @@ OMX_ERRORTYPE copy_into_buffer_and_empty(AVPacket *pkt,COMPONENT_T *component,OM
 		{
 			long int rpts = pkt->pts - startpts;
 			buff_header->nTimeStamp = ToOMXTime((uint64_t)(rpts * 1000000 / time_base_den));
-			printf("rpts:%d\n", rpts);
+			//printf("rpts:%d\n", rpts);
 		}
 		else
 		{

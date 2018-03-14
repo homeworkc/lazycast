@@ -18,7 +18,33 @@
 import socket             
 import os
 import threading
+from threading import Thread
 import time
+import fcntl
+import errno
+from time import sleep
+import subprocess
+
+errorsignal = 0
+class Getplayererr(Thread):
+    def __init__(self):
+		Thread.__init__(self)
+		self.daemon=True
+		self.p = subprocess.Popen(["./player.bin"],stderr=subprocess.PIPE)
+    def run(self):
+		global errorsignal
+		while True:
+			#print len(p.stderr)#won't work
+			ln = self.p.stderr.readline()
+			print ln
+			if 'PES packet size' in ln or 'max delay reached' in ln:
+				lock.acquire()
+				errorsignal = 1
+				lock.release()
+
+
+	
+	
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = ('192.168.101.80', 7236)
@@ -121,17 +147,62 @@ else:
 	os.system('vlc --fullscreen rtp://0.0.0.0:1028/wfd1.0/streamid=0 &')
 	#if vlc is used, use aac +'wfd_audio_codecs: AAC 00000001 00\r\n'\
 
+
+fcntl.fcntl(sock, fcntl.F_SETFL, os.O_NONBLOCK)
+
+
+lock = threading.RLock()
+
+
+
+getplayererr = Getplayererr()
+getplayererr.start()
+
+csnum = 102
 while True:
-	data=(sock.recv(1000))
-	print data
-	paralist=data.split('\r')
-	tmp=[x for x in paralist if 'CSeq' in x]
-	if(len(tmp)==0):
-		break
-	for cseq in tmp:
-		resp='RTSP/1.0 200 OK\r'+cseq+'\r\n\r\n';#cseq contains \n
-		print resp
-		sock.sendall(resp)
+
+	try:
+		data=(sock.recv(1000))
+	except socket.error, e:
+		err = e.args[0]
+		if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
+			
+			if(errorsignal==1):
+				csnum = csnum + 1
+				msg = 'wfd-idr-request'
+				idrreq ='SET_PARAMETER rtsp://localhost/wfd1.0 RTSP/1.0\r\n'\
+				+'Content-Length: '+str(len(msg))+'\r\n'\
+				+'Content-Type: text/parameters\r\n'\
+				+'CSeq: '+str(csnum)+'\r\n\r\n'\
+				+msg
+
+
+				print idrreq
+
+				sock.sendall(idrreq)
+
+				lock.acquire()
+				errorsignal=0	
+				lock.release()
+			continue
+		else:
+			print e
+			sys.exit(1)
+	else:
+		
+		print data
+		paralist=data.split('\r')
+		tmp=[x for x in paralist if 'CSeq' in x]
+
+		if 'RTSP/1.0 200 OK' in data:
+			continue
+		elif (len(tmp)==0):
+			break
+		
+		for cseq in tmp:
+			resp='RTSP/1.0 200 OK\r'+cseq+'\r\n\r\n';#cseq contains \n
+			print resp
+			sock.sendall(resp)
 
 		
 sock.close()
