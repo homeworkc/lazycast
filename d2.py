@@ -29,15 +29,14 @@ errorsignal = 0
 class Getplayererr(Thread):
     def __init__(self):
 		Thread.__init__(self)
-		self.daemon=True
 		self.p = subprocess.Popen(["./player.bin"],stderr=subprocess.PIPE)
     def run(self):
 		global errorsignal
 		while True:
-			#print len(p.stderr)#won't work
 			ln = self.p.stderr.readline()
 			print ln
-			if 'PES packet size' in ln or 'max delay reached' in ln:
+			#if 'PES packet size' in ln or 'max delay reached' in ln:
+			if 'max delay reached' in ln:
 				lock.acquire()
 				errorsignal = 1
 				lock.release()
@@ -71,7 +70,7 @@ msg='wfd_client_rtp_ports: RTP/AVP/UDP;unicast 1028 0 mode=play\r\n'\
 +'wfd_coupled_sink: none\r\n'\
 +'wfd_display_edid: none\r\n'\
 +'wfd_connector_type: 05\r\n'\
-+'wfd_uibc_capability: input_category_list=GENERIC, HIDC;generic_cap_list=Keyboard, Mouse, MultiTouch;hidc_cap_list=Keyboard/USB, Mouse/USB;port=none\r\n'\
++'wfd_uibc_capability: input_category_list=GENERIC, HIDC;generic_cap_list=Keyboard, Mouse;hidc_cap_list=Keyboard/USB, Mouse/USB;port=none\r\n'\
 +'wfd_standby_resume_capability: none\r\n'\
 +'wfd_content_protection: none\r\n'
 '''
@@ -80,6 +79,8 @@ msg='wfd_client_rtp_ports: RTP/AVP/UDP;unicast 1028 0 mode=play\r\n'\
 +'intel_lower_bandwidth: none\r\n'\
 +'intel_interactivity_mode: none\r\n'\
 +'intel_fast_cursor: none\r\n'
+wfd2_video_formats
+00 01 02 0F 00000001FEFF 00003FFFFFFF 000000000FFF 00 0000 000f 00 00
 '''
 
 
@@ -156,8 +157,8 @@ lock = threading.RLock()
 
 
 getplayererr = Getplayererr()
+getplayererr.setDaemon(True)
 getplayererr.start()
-
 csnum = 102
 while True:
 
@@ -169,7 +170,7 @@ while True:
 			
 			if(errorsignal==1):
 				csnum = csnum + 1
-				msg = 'wfd-idr-request'
+				msg = 'wfd-idr-request\r\n'
 				idrreq ='SET_PARAMETER rtsp://localhost/wfd1.0 RTSP/1.0\r\n'\
 				+'Content-Length: '+str(len(msg))+'\r\n'\
 				+'Content-Type: text/parameters\r\n'\
@@ -184,6 +185,8 @@ while True:
 				lock.acquire()
 				errorsignal=0	
 				lock.release()
+			else:
+				sleep(0.05)
 			continue
 		else:
 			print e
@@ -191,15 +194,18 @@ while True:
 	else:
 		
 		print data
-		paralist=data.split('\r')
-		tmp=[x for x in paralist if 'CSeq' in x]
-
-		if 'RTSP/1.0 200 OK' in data:
-			continue
-		elif (len(tmp)==0):
+		if len(data)==0 or 'wfd_trigger_method: TEARDOWN' in data:
 			break
-		
-		for cseq in tmp:
+		messagelist=data.split('\r\n\r\n')
+		print messagelist
+		singlemessagelist=[x for x in messagelist if ('GET_PARAMETER' in x or 'SET_PARAMETER' in x )]
+		print singlemessagelist
+		for singlemessage in singlemessagelist:
+			entrylist=singlemessage.split('\r')
+			for entry in entrylist:
+				if 'CSeq' in entry:
+					cseq=entry
+
 			resp='RTSP/1.0 200 OK\r'+cseq+'\r\n\r\n';#cseq contains \n
 			print resp
 			sock.sendall(resp)

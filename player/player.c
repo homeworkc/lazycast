@@ -43,7 +43,7 @@ void printState(OMX_HANDLETYPE handle)
 
 char *err2str(int err) 
 {
-    return "error elided";
+    return "error";
 }
 
 void printClockState(COMPONENT_T *clockComponent) 
@@ -699,6 +699,14 @@ OMX_ERRORTYPE read_audio_into_buffer_and_empty(AVFrame *decoded_frame, COMPONENT
 	return r;
 }
 
+
+typedef struct Node
+{
+	AVPacket* current;
+	struct Node* next;
+} Nodetype;
+
+
 int main(int argc, char** argv) 
 {
 	char *audiorenderComponentName;
@@ -785,12 +793,12 @@ int main(int argc, char** argv)
     /* read frames from the file */
 	while (av_read_frame(pFormatCtx, &pkt) >= 0)
 	{
-		printf("Read pkt %d\n", pkt.size);
+		//printf("Read pkt %d\n", pkt.size);
 
 		AVPacket orig_pkt = pkt;
 		if (pkt.stream_index == video_stream_idx)
 		{
-			printf("  read video pkt %d\n", pkt.size);
+			//printf("  read video pkt %d\n", pkt.size);
 			buff_header = ilclient_get_input_buffer(decodeComponent, 130, 1 /* block */);
 			if (buff_header != NULL)
 			{
@@ -808,7 +816,7 @@ int main(int argc, char** argv)
 				0);
 			if (err < 0)
 			{
-				printf("No port settings change\n");
+				//printf("No port settings change\n");
 				//exit(1);
 			}
 			else
@@ -938,9 +946,15 @@ int main(int argc, char** argv)
 		AVFrame *frame = av_frame_alloc(); // av_frame_alloc
 
 		// now work through the file
-		while (av_read_frame(pFormatCtx, &pkt) >= 0) 
+
+		Nodetype* pnode;
+		while (1) 
 		{
-			AVPacket orig_pkt = pkt;
+			pnode = malloc(sizeof(Nodetype));
+
+			if (av_read_frame(pFormatCtx, &pkt) < 0)
+				break;
+
 
 			if (pkt.stream_index == video_stream_idx)
 			{
@@ -950,22 +964,17 @@ int main(int argc, char** argv)
 					copy_into_buffer_and_empty(&pkt, decodeComponent, buff_header);
 				}
 
-				err = ilclient_wait_for_event(decodeComponent, OMX_EventPortSettingsChanged, 131, 0, 0, 1, ILCLIENT_EVENT_ERROR | ILCLIENT_PARAMETER_CHANGED, 0);
-				if (err >= 0)
+				if (ilclient_wait_for_event(decodeComponent, OMX_EventPortSettingsChanged, 131, 0, 0, 1, ILCLIENT_EVENT_ERROR | ILCLIENT_PARAMETER_CHANGED, 0) >= 0)
 				{
 					printf("Another port settings change\n");
 					break;
 				}
 			}else if (pkt.stream_index == audio_stream_idx)
 			{
-				AVPacket avpkt;
 				int got_frame;
-				av_init_packet(&avpkt);
-				avpkt.data = pkt.data;
-				avpkt.size = pkt.size;
 
 
-				if (((err = avcodec_decode_audio4(codec_context, frame, &got_frame, &avpkt)) < 0) ||
+				if (((err = avcodec_decode_audio4(codec_context, frame, &got_frame, &pkt)) < 0) ||
 					!got_frame)
 				{
 					fprintf(stderr, "Error decoding %d\n", err);
@@ -976,7 +985,8 @@ int main(int argc, char** argv)
 
 
 			}
-			av_free_packet(&orig_pkt);
+
+			free(pnode);
 
 
 		}
