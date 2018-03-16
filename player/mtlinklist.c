@@ -29,7 +29,7 @@ static void * consume(Nodetype* oldnode)
 		free(oldnode);
 
 		oldnode = pnext;
-		numofnode--;
+		atomic_fetch_sub_explicit(&numofnode, 1);
 	}
 }
 
@@ -52,7 +52,7 @@ int main()
 		Nodetype* pnext = oldnode->next;
 
 		oldnode = pnext;
-		numofnode++;
+		atomic_fetch_add_explicit(&numofnode,1);
 	}
 
 	
