@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <unistd.h>
+#include <stdatomic.h>
+#include <pthread.h>
 
 #include <OMX_Core.h>
 #include <OMX_Component.h>
@@ -623,7 +626,7 @@ void setup_audio_renderComponent(ILCLIENT_T  *handle, char *componentName, COMPO
 	// must be before we enable buffers
 	set_audio_render_input_format(*component);
 
-	setOutputDevice(ilclient_get_handle(*component), "both");
+	setOutputDevice(ilclient_get_handle(*component), "hdmi");
 
 	// input port
 	ilclient_enable_port_buffers(*component, 100, NULL, NULL, NULL);
@@ -700,12 +703,42 @@ OMX_ERRORTYPE read_audio_into_buffer_and_empty(AVFrame *decoded_frame, COMPONENT
 }
 
 
+atomic_int numofnode = 0;
+
 typedef struct Node
 {
-	AVPacket* current;
+	AVPacket* pbuff;
 	struct Node* next;
 } Nodetype;
 
+
+static void * receivepkt(Nodetype* oldnode)
+{
+	while(1)
+	{
+		if (av_read_frame(pFormatCtx, &pkt) < 0)
+			continue;
+		if (numofnode < 0)
+		{
+			printf("terminate\n");
+			break;
+		}
+
+		oldnode->pbuff = malloc(sizeof(AVPacket));
+		
+
+		(*oldnode->pbuff) = pkt;
+		oldnode->next = malloc(sizeof(Nodetype));
+
+		Nodetype* pnext = oldnode->next;
+		pnext->next = NULL;
+
+		oldnode = pnext;
+		atomic_fetch_add(&numofnode, 1);
+	}
+
+
+}
 
 int main(int argc, char** argv) 
 {
@@ -945,51 +978,92 @@ int main(int argc, char** argv)
 
 		AVFrame *frame = av_frame_alloc(); // av_frame_alloc
 
-		// now work through the file
 
-		Nodetype* pnode;
+		Nodetype* oldnode = malloc(sizeof(Nodetype));
+		Nodetype* oldnodecopy = oldnode;
+		atomic_store(&numofnode, 0);
+
+
+		pthread_t thread;
+		if (pthread_create(&thread, NULL, receivepkt, oldnodecopy) != 0)
+			exit(1);
+
+
 		while (1) 
 		{
-			pnode = malloc(sizeof(Nodetype));
+			if (numofnode < 1)
+			{
+				usleep(10);
+				continue;
+			}
+			else if (numofnode != 1)
+				printf("numofnode: %d\n", numofnode);
 
-			if (av_read_frame(pFormatCtx, &pkt) < 0)
-				break;
+			//printf("%d\n", numofnode);
+
+			AVPacket renderpkt = *(oldnode->pbuff);
 
 
-			if (pkt.stream_index == video_stream_idx)
+			if (renderpkt.stream_index == video_stream_idx)
 			{
 				buff_header = ilclient_get_input_buffer(decodeComponent, 130, 1 /* block */);
 				if (buff_header != NULL)
-				{
-					copy_into_buffer_and_empty(&pkt, decodeComponent, buff_header);
-				}
+					copy_into_buffer_and_empty(&renderpkt, decodeComponent, buff_header);
 
 				if (ilclient_wait_for_event(decodeComponent, OMX_EventPortSettingsChanged, 131, 0, 0, 1, ILCLIENT_EVENT_ERROR | ILCLIENT_PARAMETER_CHANGED, 0) >= 0)
 				{
-					printf("Another port settings change\n");
+					printf("port change\n");
 					break;
 				}
-			}else if (pkt.stream_index == audio_stream_idx)
+			}
+			else if (renderpkt.stream_index == audio_stream_idx)
 			{
+				
 				int got_frame;
 
-
-				if (((err = avcodec_decode_audio4(codec_context, frame, &got_frame, &pkt)) < 0) ||
+				if (((err = avcodec_decode_audio4(codec_context, frame, &got_frame, &renderpkt)) < 0) ||
 					!got_frame)
-				{
-					fprintf(stderr, "Error decoding %d\n", err);
-					continue;
-				}
+					continue;//"Error decoding 
 
 				read_audio_into_buffer_and_empty(frame, audiorenderComponent);
 
 
 			}
+			
+			av_free_packet(&renderpkt);
+			Nodetype* pnext = oldnode->next;
+			free(oldnode);
 
-			free(pnode);
+			oldnode = pnext;
+			atomic_fetch_sub(&numofnode, 1);
 
 
 		}
+		atomic_fetch_sub(&numofnode, 10000);
+
+
+		if (pthread_join(thread, NULL) != 0)
+			exit(1);
+
+		while (1)
+		{
+			if (oldnode->next == NULL)
+			{
+				free(oldnode);
+				break;
+			}
+			AVPacket renderpkt = *(oldnode->pbuff);
+
+			av_free_packet(&renderpkt);
+			Nodetype* pnext = oldnode->next;
+			free(oldnode);
+
+			oldnode = pnext;
+		}
+
+
+
+		//free(oldnode);
 		
 
 

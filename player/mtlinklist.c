@@ -15,22 +15,21 @@ typedef struct Node
 	struct Node* next;
 } Nodetype;
 
-static void * consume(Nodetype* oldnode)
+static void * receivepkt(Nodetype* oldnode)
 {
-	for (int i = 0; i < 10000; i++)
+	for (int i = 0; i < 100; i++)
 	{
-		while (numofnode < 2)
-			usleep(10);
-		printf("%d\n", numofnode);
+		oldnode->pbuff = malloc(sizeof(int));
+		(*oldnode->pbuff) = i;
+		oldnode->next = malloc(sizeof(Nodetype));
 
-		printf("%d\n", *(oldnode->pbuff));
-		free(oldnode->pbuff);
 		Nodetype* pnext = oldnode->next;
-		free(oldnode);
 
 		oldnode = pnext;
-		atomic_fetch_sub_explicit(&numofnode, 1);
+		atomic_fetch_add(&numofnode, 1);
 	}
+	
+
 }
 
 int main()
@@ -40,20 +39,27 @@ int main()
 
 
 	pthread_t thread;
-	if (pthread_create(&thread, NULL, consume, oldnodecopy) != 0)
+	if (pthread_create(&thread, NULL, receivepkt, oldnodecopy) != 0)
 		exit(1);
-
-	for (int i = 0; i < 10000; i++)
+	
+	while (1)
 	{
-		oldnode->pbuff = malloc(sizeof(int));
-		(*oldnode->pbuff) = i;
-		oldnode->next = malloc(sizeof(Nodetype));
+		if (numofnode < 2)
+		{
+			usleep(10);
+			continue;
+		}
+		printf("%d\n", numofnode);
 
+		printf("%d\n", *(oldnode->pbuff));
+		free(oldnode->pbuff);
 		Nodetype* pnext = oldnode->next;
+		free(oldnode);
 
 		oldnode = pnext;
-		atomic_fetch_add_explicit(&numofnode,1);
+		atomic_fetch_sub(&numofnode, 1);
 	}
+	
 
 	
 
