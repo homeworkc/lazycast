@@ -141,9 +141,15 @@ print data
 
 if (os.uname()[-1][:4]=="armv"):
 	#use this on Pi
-	os.system('pkill omxplayer')
+	os.system('pkill player.bin')
 	os.system('sleep 2')
 	#os.system('omxplayer -b rtp://0.0.0.0:1028/wfd1.0/streamid=0 --live &')
+	lock = threading.RLock()
+
+	getplayererr = Getplayererr()
+	getplayererr.setDaemon(True)
+	getplayererr.start()
+
 else:
 	os.system('vlc --fullscreen rtp://0.0.0.0:1028/wfd1.0/streamid=0 &')
 	#if vlc is used, use aac +'wfd_audio_codecs: AAC 00000001 00\r\n'\
@@ -152,13 +158,7 @@ else:
 fcntl.fcntl(sock, fcntl.F_SETFL, os.O_NONBLOCK)
 
 
-lock = threading.RLock()
 
-
-
-getplayererr = Getplayererr()
-getplayererr.setDaemon(True)
-getplayererr.start()
 csnum = 102
 while True:
 
