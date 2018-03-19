@@ -24,6 +24,7 @@ import sys
 import ttk
 import socket  
 import binascii
+import struct
 
 import Tkinter as Tk
 
@@ -56,19 +57,28 @@ class Setres(Thread):
 class Player(Tk.Frame):
     """The main window has to deal with events.
     """
-    inputreport =b"\x00\x00\x00\x14\x02\x00 \
-	\x06\x01\x00\x00\x00\x00\x00\x00\x00\x00 \
-	\x00\x00\x00\x00"
 
     def leftclick(caller,event):
-        print "clicked at", event.x, event.y
+        inputreport = b"\x00\x00\x00\x14\x00\x00\x06\x01\x00"\
+        +struct.pack('>HH',event.x,event.y) \
+        +b"\x00\x00\x00\x00\x00\x00\x00"
+        caller.controlsock.sendall(inputreport)
+        print "click"+str(len(inputreport))
+    def leftrelease(caller,event):
+        inputreport = b"\x00\x00\x00\x14\x01\x00\x06\x01\x00"\
+        +struct.pack('>HH',event.x,event.y) \
+        +b"\x00\x00\x00\x00\x00\x00\x00"
+        caller.controlsock.sendall(inputreport)
+        print "release"
     def middleclick(caller,event):
         print "clicked at", event.x, event.y
     def rightclick(caller,event):
         print "clicked at", event.x, event.y
     def motion(caller,event):
-        print "motion: ", event.x, event.y
-
+        inputreport = b"\x00\x00\x00\x14\x02\x00\x06\x01\x00"\
+        +struct.pack('>HH',event.x,event.y) \
+        +b"\x00\x00\x00\x00\x00\x00\x00"
+        caller.controlsock.sendall(inputreport)
     
     def __init__(self, parent, title=None):
         Tk.Frame.__init__(self, parent)
@@ -98,20 +108,18 @@ class Player(Tk.Frame):
         if self.player.play() == -1:
             self.errorDialog("Unable to play.")
         
-        print binascii.hexlify(self.inputreport)
-        self.inputreport[2]=b"x00"
-        print binascii.hexlify(self.inputreport)
         
 
 
         portnum = int(sys.argv[1])
         print portnum
-        controlsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.controlsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_address = ('192.168.101.80', portnum)
-        controlsock.connect(server_address)
-
+        self.controlsock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        self.controlsock.connect(server_address)
 
         self.parent.bind("<Button-1>", self.leftclick)
+        self.parent.bind("<ButtonRelease-1>", self.leftrelease)
         self.parent.bind("<Button-2>", self.middleclick)
         self.parent.bind("<Button-3>", self.rightclick)
         self.parent.bind("<Motion>", self.motion)
