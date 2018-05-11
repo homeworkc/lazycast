@@ -20,26 +20,9 @@ import os
 import threading
 from threading import Thread
 import time
-import fcntl
-import errno
-from time import sleep
-import subprocess
 
-errorsignal = 0
-class Getplayererr(Thread):
-    def __init__(self):
-		Thread.__init__(self)
-		self.p = subprocess.Popen(["./player.bin"],stderr=subprocess.PIPE)
-    def run(self):
-		global errorsignal
-		while True:
-			ln = self.p.stderr.readline()
-			print ln
-			#if 'PES packet size' in ln or 'max delay reached' in ln:
-			if 'max delay reached' in ln:
-				lock.acquire()
-				errorsignal = 1
-				lock.release()
+
+
 
 
 	
@@ -142,57 +125,21 @@ print data
 if (os.uname()[-1][:4]=="armv"):
 	#use this on Pi
 	os.system('pkill player.bin')
-	os.system('sleep 2')
+	#os.system('sleep 2')
 	#os.system('omxplayer -b rtp://0.0.0.0:1028/wfd1.0/streamid=0 --live &')
-	lock = threading.RLock()
+	os.system('./player.bin &')
 
-	getplayererr = Getplayererr()
-	getplayererr.setDaemon(True)
-	getplayererr.start()
 
 else:
 	os.system('vlc --fullscreen rtp://0.0.0.0:1028/wfd1.0/streamid=0 &')
 	#if vlc is used, use aac +'wfd_audio_codecs: AAC 00000001 00\r\n'\
 
 
-fcntl.fcntl(sock, fcntl.F_SETFL, os.O_NONBLOCK)
 
-
-
-csnum = 102
 while True:
 
-	try:
 		data=(sock.recv(1000))
-	except socket.error, e:
-		err = e.args[0]
-		if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
-			
-			if(errorsignal==1):
-				csnum = csnum + 1
-				msg = 'wfd-idr-request\r\n'
-				idrreq ='SET_PARAMETER rtsp://localhost/wfd1.0 RTSP/1.0\r\n'\
-				+'Content-Length: '+str(len(msg))+'\r\n'\
-				+'Content-Type: text/parameters\r\n'\
-				+'CSeq: '+str(csnum)+'\r\n\r\n'\
-				+msg
-
-
-				print idrreq
-
-				sock.sendall(idrreq)
-
-				lock.acquire()
-				errorsignal=0	
-				lock.release()
-			else:
-				sleep(0.05)
-			continue
-		else:
-			print e
-			sys.exit(1)
-	else:
-		
+	
 		print data
 		if len(data)==0 or 'wfd_trigger_method: TEARDOWN' in data:
 			break

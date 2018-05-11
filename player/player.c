@@ -5,6 +5,9 @@
 #include <stdatomic.h>
 #include <pthread.h>
 
+#include <sys/socket.h>
+#include <arpa/inet.h>
+
 #include <OMX_Core.h>
 #include <OMX_Component.h>
 
@@ -324,6 +327,28 @@ OMX_ERRORTYPE set_video_decoder_input_format(COMPONENT_T *component)
 	    fprintf(stderr, "COMXVideo::Open error OMX_IndexParamPortDefinition omx_err(0x%08x)\n", err);
 	    return err;
 	}
+
+	OMX_PARAM_BRCMVIDEODECODEERRORCONCEALMENTTYPE errconceal;
+	memset(&errconceal, 0, sizeof(OMX_PARAM_BRCMVIDEODECODEERRORCONCEALMENTTYPE));
+	errconceal.nSize = sizeof(OMX_PARAM_BRCMVIDEODECODEERRORCONCEALMENTTYPE);
+	errconceal.nVersion.nVersion = OMX_VERSION;
+	errconceal.bStartWithValidFrame = OMX_FALSE;
+
+
+	err = OMX_SetParameter(ilclient_get_handle(component), OMX_IndexParamBrcmVideoDecodeErrorConcealment, &errconceal);
+	if (err != OMX_ErrorNone)
+	{
+		fprintf(stderr, "error concealment error(0x%08x)\n", err);
+		return err;
+	}
+	printf("no error in setting!\n");
+
+
+
+
+
+
+
 
     return OMX_ErrorNone;
 }
@@ -663,7 +688,7 @@ OMX_ERRORTYPE read_audio_into_buffer_and_empty(AVFrame *decoded_frame, COMPONENT
 
 	if (latency > latmax)
 	{
-		printf("drop, %d\n", latency);
+		//printf("drop, %d\n", latency);
 		return 0;
 	}
 	else if (latency<1000)
@@ -712,7 +737,7 @@ typedef struct Node
 } Nodetype;
 
 
-static void * receivepkt(Nodetype* oldnode)
+static void* receivepkt(Nodetype* oldnode)
 {
 	while(1)
 	{
@@ -740,6 +765,189 @@ static void * receivepkt(Nodetype* oldnode)
 
 }
 
+int largers(int a, int b)
+{
+	if (abs(a - b) < 32768)
+		return a > b;
+	else if (a - b <= -32768)
+		return 1;
+	else
+		return 0;
+}
+
+static void* addnullpacket()
+{
+	struct sockaddr_in addr1;
+	struct sockaddr_in sourceaddr;
+	struct sockaddr_in addr2;
+	socklen_t addrlen = sizeof(sourceaddr);
+	int fd;
+	int fd2;
+
+
+
+	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+	{
+		perror("cannot create socket\n");
+		return 0;
+	}
+	if ((fd2 = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+	{
+		perror("cannot create socket 2\n");
+		return 0;
+	}
+
+	memset((char *)&addr1, 0, sizeof(addr1));
+	addr1.sin_family = AF_INET;
+	addr1.sin_addr.s_addr = htonl(INADDR_ANY);
+	addr1.sin_port = htons(1028);
+
+	memset((char *)&addr2, 0, sizeof(addr2));
+	addr2.sin_family = AF_INET;
+	addr2.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+	addr2.sin_port = htons(57823);
+
+	if (bind(fd, (struct sockaddr *)&addr1, sizeof(addr1)) < 0)
+	{
+		perror("bind failed");
+		return 0;
+	}
+
+
+	
+
+	typedef struct srtppacket
+	{
+		unsigned char* buf;
+		int recvlen;
+		int seqnum;
+		struct srtppacket* next;
+	} rtppacket;
+
+
+	rtppacket* head = NULL;
+	int numofpacket = 0;
+	int osn = 0;
+	int hold = 0;
+
+	////error injection
+	int err = 1000;
+
+	////
+
+	unsigned char padpacket[2048];
+	padpacket[0] = 0x80;
+	padpacket[1] = 0x21;
+
+	while (1)
+	{
+		rtppacket* p1= malloc(sizeof(rtppacket));
+		p1->buf = malloc(2048 * sizeof(unsigned char));
+		p1->recvlen = recvfrom(fd, p1->buf, 2048, 0, (struct sockaddr *)&sourceaddr, &addrlen);
+		if (p1->recvlen <= 0)
+		{
+			free(p1->buf);
+			free(p1);
+			continue;
+		}
+
+
+		p1->seqnum = (p1->buf[2] << 8) + p1->buf[3];
+		p1->next = NULL;
+		
+		if (numofpacket == 0)
+		{
+			head = p1;
+		}
+		else
+		{
+			rtppacket* currentp = head;
+			rtppacket* prevp = NULL;
+
+
+			while (currentp != NULL)
+			{
+				//printf("%d,", currentp->seqnum);
+
+				if (largers(currentp->seqnum, p1->seqnum))
+				{
+					if (prevp == NULL)
+						head = p1;
+					else
+						prevp->next = p1;
+					p1->next = currentp;
+					//printf("%d,", p1->seqnum);
+
+					break;
+				}
+				prevp = currentp;
+				currentp = currentp->next;
+			}
+			
+
+			if (currentp == NULL)//end
+			{
+				prevp->next = p1;
+			}
+
+		}
+
+		numofpacket++;
+
+		if (head->seqnum == osn)
+		{
+			hold = 0;
+		}else if (numofpacket > 20)
+		{
+			hold = 0;
+			printf("start:%d, end:%d\n",osn,head->seqnum);
+			
+
+			while (osn != head->seqnum)
+			{
+				padpacket[2] = 0xFF & (osn >> 8);
+				padpacket[3] = 0xFF & (osn);
+				for (int i = 4; i < 12; i++)
+					padpacket[i] = head->buf[i];
+
+				if (sendto(fd2, padpacket, 12, 0, (struct sockaddr *)&addr2, addrlen) < 0)
+					perror("sendto error");
+				osn = 0xFFFF & (osn + 1);
+			}
+			//osn = head->seqnum;
+			
+		}
+
+		//printf("\n");
+		while (numofpacket > 0 && !hold)
+		{
+			if (osn != head->seqnum)
+			{
+				//printf("osn:%d, hsn:%d\n", osn,head->seqnum);
+				hold = 1;
+				break;
+			}
+			if (sendto(fd2, head->buf, head->recvlen, 0, (struct sockaddr *)&addr2, addrlen) < 0)
+				perror("sendto error");
+			
+			
+			osn = 0xFFFF & (osn + 1);
+			rtppacket* nexttemp = head->next;
+			free(head->buf);
+			free(head);
+			head = nexttemp;
+			numofpacket--;
+		}
+
+		
+
+
+	}
+
+
+}
+
+
 int main(int argc, char** argv) 
 {
 	char *audiorenderComponentName;
@@ -759,7 +967,13 @@ int main(int argc, char** argv)
 
     OMX_BUFFERHEADERTYPE *buff_header;
 	avformat_network_init();
-    setup_demuxer("rtp://0.0.0.0:1028");
+
+	pthread_t npthread;
+	if (pthread_create(&npthread, NULL, addnullpacket, NULL) != 0)
+		exit(1);
+
+    setup_demuxer("rtp://127.0.0.1:57823");
+	printf("mdly:%d\n",pFormatCtx->max_delay);
 
 	audiorenderComponentName = "audio_render";
 	decodeComponentName = "video_decode";
@@ -996,10 +1210,9 @@ int main(int argc, char** argv)
 				usleep(10);
 				continue;
 			}
-			else if (numofnode != 1)
-				printf("numofnode: %d\n", numofnode);
+			/*else if (numofnode != 1)
+				printf("numofnode: %d\n", numofnode);*/
 
-			//printf("%d\n", numofnode);
 
 			AVPacket renderpkt = *(oldnode->pbuff);
 
@@ -1069,6 +1282,9 @@ int main(int argc, char** argv)
 
 	}
 
+
+	if (pthread_join(npthread, NULL) != 0)
+		exit(1);
 	
     exit(0);
 }
