@@ -22,6 +22,9 @@ static VCOS_LOG_CAT_T il_ffmpeg_log_category;
 #include "libavcodec/avcodec.h"
 #include <libavformat/avformat.h>
 
+#define insertpacket
+#define stoprendering
+//#define injecterror
 
 static AVCodecContext *video_dec_ctx = NULL;
 static AVCodecContext *audio_dec_ctx = NULL;
@@ -152,7 +155,6 @@ OMX_TICKS ToOMXTime(int64_t pts)
 #define FromOMXTime(x) (x)
 #endif
 
-static int starting = 1;
 static long int startpts;
 
 
@@ -167,8 +169,7 @@ OMX_ERRORTYPE copy_into_buffer_and_empty(AVPacket *pkt,COMPONENT_T *component,OM
 
     while (size > 0) 
 	{
-		buff_header->nFilledLen = (size > buff_header->nAllocLen-1) ?
-			buff_header->nAllocLen-1 : size;
+		buff_header->nFilledLen = (size > buff_header->nAllocLen-1) ? buff_header->nAllocLen-1 : size;
 		memset(buff_header->pBuffer, 0x0, buff_header->nAllocLen);
 		memcpy(buff_header->pBuffer, content, buff_header->nFilledLen);
 		size -= buff_header->nFilledLen;
@@ -180,17 +181,16 @@ OMX_ERRORTYPE copy_into_buffer_and_empty(AVPacket *pkt,COMPONENT_T *component,OM
 			buff_header->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
 
 	
-		if (starting==0)
+		if (pkt->flags & AV_PKT_FLAG_KEY)
+		{
+			startpts = pkt->pts;
+			buff_header->nFlags |= OMX_BUFFERFLAG_STARTTIME;
+		}
+		else 
 		{
 			long int rpts = pkt->pts - startpts;
 			buff_header->nTimeStamp = ToOMXTime((uint64_t)(rpts * 1000000 / time_base_den));
 			//printf("rpts:%d\n", rpts);
-		}
-		else
-		{
-			startpts = pkt->pts;
-			buff_header->nFlags |= OMX_BUFFERFLAG_STARTTIME;
-			starting = 0;
 		}
 
 
@@ -332,7 +332,7 @@ OMX_ERRORTYPE set_video_decoder_input_format(COMPONENT_T *component)
 	memset(&errconceal, 0, sizeof(OMX_PARAM_BRCMVIDEODECODEERRORCONCEALMENTTYPE));
 	errconceal.nSize = sizeof(OMX_PARAM_BRCMVIDEODECODEERRORCONCEALMENTTYPE);
 	errconceal.nVersion.nVersion = OMX_VERSION;
-	errconceal.bStartWithValidFrame = OMX_FALSE;
+	errconceal.bStartWithValidFrame = OMX_TRUE;
 
 
 	err = OMX_SetParameter(ilclient_get_handle(component), OMX_IndexParamBrcmVideoDecodeErrorConcealment, &errconceal);
@@ -743,7 +743,7 @@ static void* receivepkt(Nodetype* oldnode)
 	{
 		if (av_read_frame(pFormatCtx, &pkt) < 0)
 			continue;
-		if (numofnode < 0)
+		if (atomic_load(&numofnode) < 0)
 		{
 			printf("terminate\n");
 			break;
@@ -774,6 +774,8 @@ int largers(int a, int b)
 	else
 		return 0;
 }
+
+atomic_int stoprender;
 
 static void* addnullpacket()
 {
@@ -829,6 +831,7 @@ static void* addnullpacket()
 	int numofpacket = 0;
 	int osn = 0;
 	int hold = 0;
+	atomic_store(&stoprender, 0);
 
 	////error injection
 	int err = 1000;
@@ -838,6 +841,8 @@ static void* addnullpacket()
 	unsigned char padpacket[2048];
 	padpacket[0] = 0x80;
 	padpacket[1] = 0x21;
+	for (int i = 12; i < 2048; i++)
+		padpacket[i] = 0xFF;
 
 	while (1)
 	{
@@ -850,7 +855,15 @@ static void* addnullpacket()
 			free(p1);
 			continue;
 		}
-
+#ifdef injecterror
+		if (err-- <= 0)
+		{
+			err = 500;
+			free(p1->buf);
+			free(p1);
+			continue;
+		}
+#endif
 
 		p1->seqnum = (p1->buf[2] << 8) + p1->buf[3];
 		p1->next = NULL;
@@ -902,7 +915,7 @@ static void* addnullpacket()
 			hold = 0;
 			printf("start:%d, end:%d\n",osn,head->seqnum);
 			
-
+#ifdef insertpacket
 			while (osn != head->seqnum)
 			{
 				padpacket[2] = 0xFF & (osn >> 8);
@@ -910,12 +923,16 @@ static void* addnullpacket()
 				for (int i = 4; i < 12; i++)
 					padpacket[i] = head->buf[i];
 
+				
 				if (sendto(fd2, padpacket, 12, 0, (struct sockaddr *)&addr2, addrlen) < 0)
 					perror("sendto error");
 				osn = 0xFFFF & (osn + 1);
 			}
-			//osn = head->seqnum;
-			
+#else
+			osn = head->seqnum;
+#endif
+			atomic_store(&stoprender, 1);
+
 		}
 
 		//printf("\n");
@@ -1205,13 +1222,13 @@ int main(int argc, char** argv)
 
 		while (1) 
 		{
-			if (numofnode < 1)
+			if (atomic_load(&numofnode) < 1)
 			{
 				usleep(10);
 				continue;
 			}
-			/*else if (numofnode != 1)
-				printf("numofnode: %d\n", numofnode);*/
+			//else if (numofnode != 1)
+				//printf("numofnode: %d\n", numofnode);
 
 
 			AVPacket renderpkt = *(oldnode->pbuff);
@@ -1219,9 +1236,27 @@ int main(int argc, char** argv)
 
 			if (renderpkt.stream_index == video_stream_idx)
 			{
+#ifdef stoprendering
+				if (!atomic_load(&stoprender))
+				{
+					buff_header = ilclient_get_input_buffer(decodeComponent, 130, 1 /* block */);
+					if (buff_header != NULL)
+						copy_into_buffer_and_empty(&renderpkt, decodeComponent, buff_header);
+				}else if (renderpkt.flags & AV_PKT_FLAG_KEY)
+				{
+					printf("keyframe\n");
+					atomic_store(&stoprender, 0);
+					buff_header = ilclient_get_input_buffer(decodeComponent, 130, 1 /* block */);
+					if (buff_header != NULL)
+						copy_into_buffer_and_empty(&renderpkt, decodeComponent, buff_header);
+				}
+#else
 				buff_header = ilclient_get_input_buffer(decodeComponent, 130, 1 /* block */);
 				if (buff_header != NULL)
 					copy_into_buffer_and_empty(&renderpkt, decodeComponent, buff_header);
+#endif
+
+
 
 				if (ilclient_wait_for_event(decodeComponent, OMX_EventPortSettingsChanged, 131, 0, 0, 1, ILCLIENT_EVENT_ERROR | ILCLIENT_PARAMETER_CHANGED, 0) >= 0)
 				{
