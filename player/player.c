@@ -779,12 +779,10 @@ atomic_int stoprender;
 
 static void* addnullpacket()
 {
-	struct sockaddr_in addr1;
+	struct sockaddr_in addr1, addr2, addr3;
 	struct sockaddr_in sourceaddr;
-	struct sockaddr_in addr2;
 	socklen_t addrlen = sizeof(sourceaddr);
-	int fd;
-	int fd2;
+	int fd, fd2, fd3;
 
 
 
@@ -794,6 +792,11 @@ static void* addnullpacket()
 		return 0;
 	}
 	if ((fd2 = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+	{
+		perror("cannot create socket 2\n");
+		return 0;
+	}
+	if ((fd3 = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 	{
 		perror("cannot create socket 2\n");
 		return 0;
@@ -808,6 +811,11 @@ static void* addnullpacket()
 	addr2.sin_family = AF_INET;
 	addr2.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 	addr2.sin_port = htons(57823);
+
+	memset((char *)&addr3, 0, sizeof(addr3));
+	addr3.sin_family = AF_INET;
+	addr3.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+	addr3.sin_port = htons(57925);
 
 	if (bind(fd, (struct sockaddr *)&addr1, sizeof(addr1)) < 0)
 	{
@@ -910,6 +918,7 @@ static void* addnullpacket()
 		if (head->seqnum == osn)
 		{
 			hold = 0;
+		
 		}else if (numofpacket > 20)
 		{
 			hold = 0;
@@ -933,6 +942,12 @@ static void* addnullpacket()
 #endif
 			atomic_store(&stoprender, 1);
 
+		}
+		else if (numofpacket > 12)
+		{
+			unsigned char topython[12];
+			if (sendto(fd3, topython, 12, 0, (struct sockaddr *)&addr3, addrlen) < 0)
+				perror("sendto error");
 		}
 
 		//printf("\n");
@@ -1237,7 +1252,7 @@ int main(int argc, char** argv)
 			if (renderpkt.stream_index == video_stream_idx)
 			{
 #ifdef stoprendering
-				if (!atomic_load(&stoprender))
+				if (!atomic_load(&stoprender) && atomic_load(&numofnode) < 20)
 				{
 					buff_header = ilclient_get_input_buffer(decodeComponent, 130, 1 /* block */);
 					if (buff_header != NULL)

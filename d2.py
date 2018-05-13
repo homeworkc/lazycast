@@ -15,18 +15,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import socket             
-import os
+import socket
+import fcntl, os
+import errno
 import threading
 from threading import Thread
 import time
+from time import sleep
 
-
-
-
-
-	
-	
+idrsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+idrsock_address = ('127.0.0.1', 57925)	
+idrsock.bind(idrsock_address)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = ('192.168.101.80', 7236)
@@ -134,12 +133,41 @@ else:
 	os.system('vlc --fullscreen rtp://0.0.0.0:1028/wfd1.0/streamid=0 &')
 	#if vlc is used, use aac +'wfd_audio_codecs: AAC 00000001 00\r\n'\
 
+fcntl.fcntl(sock, fcntl.F_SETFL, os.O_NONBLOCK)
+fcntl.fcntl(idrsock, fcntl.F_SETFL, os.O_NONBLOCK)
 
-
+csnum = 102
 while True:
+	try:
+		data = (sock.recv(1000))
+	except socket.error, e:
+		err = e.args[0]
+		if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
+			try:
+				dontcare = (idrsock.recv(1000))
+			except socket.error, e:
+				err = e.args[0]
+				if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
+					sleep(0.01)
+				else:
+					sys.exit(1)
+			else:
+				csnum = csnum + 1
+				msg = 'wfd-idr-request\r\n'
+				idrreq ='SET_PARAMETER rtsp://localhost/wfd1.0 RTSP/1.0\r\n'\
+				+'Content-Length: '+str(len(msg))+'\r\n'\
+				+'Content-Type: text/parameters\r\n'\
+				+'CSeq: '+str(csnum)+'\r\n\r\n'\
+				+msg
 
-		data=(sock.recv(1000))
-	
+
+				print idrreq
+
+				sock.sendall(idrreq)
+
+		else:
+			sys.exit(1)
+	else:
 		print data
 		if len(data)==0 or 'wfd_trigger_method: TEARDOWN' in data:
 			break
