@@ -193,8 +193,10 @@ char reportdescriptor[55] = {
 };*/
 
 
+#define fdsend
 int main(int argc, char **argv)
 {
+#ifdef fdsend
 	int fd;
 	if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
 	{
@@ -220,7 +222,7 @@ int main(int argc, char **argv)
 		perror("connect failed!");
 		exit(1);
 	}
-
+#endif
 	
 
 
@@ -229,7 +231,8 @@ int main(int argc, char **argv)
 	Window w;
 	XEvent e;
 
-	d = XOpenDisplay(NULL);
+	d = XOpenDisplay(":0.0");
+	
 	if (d == NULL)
 	{
 		printf("Cannot open display\n");
@@ -256,7 +259,7 @@ int main(int argc, char **argv)
 
 	//XGrabKeyboard(d, DefaultRootWindow(d), True, GrabModeAsync, GrabModeAsync, CurrentTime);
 	//XGrabPointer(d, DefaultRootWindow(d), True, ButtonPressMask | ButtonReleaseMask | PointerMotionMask, GrabModeAsync,
-		//GrabModeAsync, None, None, CurrentTime);
+	//	GrabModeAsync, None, None, CurrentTime);
 
 	XWarpPointer(d, None, DefaultRootWindow(d), 0, 0, 0, 0, 400, 400);
 
@@ -300,11 +303,9 @@ int main(int argc, char **argv)
 			else
 				keyboardinput[11] = 0;
 			printf("KeyPress:%d\n", keyin);
-
-
-
+#ifdef fdsend
 			printf("send:%d\n", send(fd, keyboardinput, sizeof(keyboardinput), 0));
-
+#endif
 
 		}
 		else if (e.type == KeyRelease)
@@ -329,7 +330,9 @@ int main(int argc, char **argv)
 			else
 				keyboardinput[11] = 0;
 			printf("KeyRelease:%d\n", keyin);
+#ifdef fdsend
 			printf("send:%d\n", send(fd, keyboardinput, sizeof(keyboardinput), 0));
+#endif
 		}
 		else if (e.type == ButtonPress)
 		{
@@ -354,10 +357,10 @@ int main(int argc, char **argv)
 			mouseinput[9] |= mask;
 			mouseinput[10] = 0;
 			mouseinput[11] = 0;
+
+#ifdef fdsend			
 			printf("send:%d\n", send(fd, mouseinput, sizeof(mouseinput), 0));
-
-
-
+#endif
 		}
 		else if (e.type == ButtonRelease)
 		{
@@ -383,7 +386,9 @@ int main(int argc, char **argv)
 			mouseinput[9] &= mask;
 			mouseinput[10] = 0;
 			mouseinput[11] = 0;
+#ifdef fdsend
 			printf("send:%d\n", send(fd, mouseinput, sizeof(mouseinput), 0));
+#endif
 		}
 		else if (e.type == MotionNotify)
 		{
@@ -394,8 +399,8 @@ int main(int argc, char **argv)
 			oldx = newx;
 			oldy = newy;
 
-			printf("test:%d\n", e.xmotion.send_event);
-			printf("test2:%d\n", e.xmotion.state);
+			//printf("test:%d\n", e.xmotion.send_event);
+			//printf("test2:%d\n", e.xmotion.state);
 			
 			if (warp == 1)
 			{
@@ -404,8 +409,14 @@ int main(int argc, char **argv)
 			}
 			if (newx < 128 || newx > 800-128 || newy < 128 || newy > 550-128)
 			{
+				//XWarpPointer(d,  None, DefaultRootWindow(d) , 200, 200, 800, 550, 400, 300);
 				XWarpPointer(d, None, DefaultRootWindow(d), 0, 0, 0, 0, 400, 300);
 				warp = 1;
+				printf("border\n");
+
+
+
+
 			}
 
 			printf("MotionNotify:%d,%d\n", newx, newy);
@@ -434,14 +445,16 @@ int main(int argc, char **argv)
 			//printf("xdiff:%d,ydiff:%d\n", xdiff, ydiff);
 			//for (int i = 0; i < sizeof(mouseinput); i++)
 				//printf("%d,",mouseinput[i]);
+#ifdef fdsend
 			printf("send:%d\n", send(fd, mouseinput, sizeof(mouseinput), 0));
-
+#endif 
 		}
 
 
 	}
+#ifdef fdsend
 	close(fd);
-
+#endif
 	XDestroyWindow(d, w);
 
 	XCloseDisplay(d);
