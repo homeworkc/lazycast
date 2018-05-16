@@ -38,11 +38,25 @@ char scroll[] = {
 	0x00,0x00
 };
 
+char keyboard[] = {
+	0x00,0x00,
+	0x00, 20,
+	0x03,
+	0x00,0x05,
+	0x00,
+	0x00,0x00,//key1
+	0x00,0x00,//key2
+	0x00,0x00,
+	0x00,0x00,
+	0x00,0x00,
+	0x00,0x00
+};
 
-#define fdsend
+
+//#define fdsend
+//#define warpcursor
 int main(int argc, char **argv)
 {
-
 #ifdef fdsend
 	int fd;
 	if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
@@ -53,7 +67,7 @@ int main(int argc, char **argv)
 
 	struct sockaddr_in serveraddr;
 
-
+	printf("using port:%s\n", argv[1]);
 
 	memset(&serveraddr, 0, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
@@ -78,7 +92,8 @@ int main(int argc, char **argv)
 	Window w;
 	XEvent e;
 
-	d = XOpenDisplay(":0.0");
+	//d = XOpenDisplay(":0.0");
+	d = XOpenDisplay(NULL);
 	if (d == NULL)
 	{
 		printf("Cannot open display\n");
@@ -100,11 +115,9 @@ int main(int argc, char **argv)
 	XWarpPointer(d, None, w, 0, 0, 0, 0, width/2, height/2);
 
 
-
 	int x = 0, y = 0;
 	int oldx = 0, oldy = 0;
 	int warp = 0;
-
 	while(1) 
 	{
 
@@ -120,9 +133,48 @@ int main(int argc, char **argv)
 		else if (e.type == ClientMessage)
 			break;
 		else if (e.type == KeyPress)
-			printf("KeyPress:%d\n", e.xkey.keycode);
+		{
+			printf("KeyPress code:%d\n", e.xkey.keycode);
+
+
+			int keysyms_per_keycode_return;
+			KeySym *keysym = XGetKeyboardMapping(d, e.xkey.keycode, 1, &keysyms_per_keycode_return);
+			
+			if (*keysym < 256)
+			{
+				unsigned char key;
+				if (e.xkey.state & ShiftMask)
+					key = keysym[1];
+				else if (e.xkey.state & LockMask && keysym[0] > 0x60 && keysym[0] < 0x7B)
+					key = keysym[1];
+				else
+					key = keysym[0];
+
+
+
+				if (key != NoSymbol)
+				{
+
+					printf("%x	", key);
+
+					printf("%s	", XKeysymToString(key));
+
+
+				}
+			}
+			printf("%s\n", XKeysymToString(*keysym));
+
+			XFree(keysym);
+
+		}
 		else if (e.type == KeyRelease)
-			printf("KeyRelease:%d\n", e.xkey.keycode);
+		{
+			
+
+
+
+
+		}
 		else if (e.type == ButtonPress)
 		{
 			int buttonnum = e.xbutton.button;
@@ -181,7 +233,7 @@ int main(int argc, char **argv)
 			oldx = newx;
 			oldy = newy;
 
-
+#ifdef warpcursor
 			if (warp == 1)
 			{
 				warp = 0;
@@ -195,7 +247,7 @@ int main(int argc, char **argv)
 				printf("border\n");
 
 			}
-
+#endif
 			printf("MotionNotify:%d,%d\n", newx, newy);
 
 			x += xdiff;

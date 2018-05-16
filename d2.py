@@ -77,6 +77,10 @@ print 'm3 success\n'
 
 data=(sock.recv(1000))
 print data
+
+if 'port=' in data:
+	print 'support'
+
 sock.sendall('RTSP/1.0 200 OK\r\nCSeq: 3\r\n\r\n')
 
 print 'm4 success\n'
@@ -124,9 +128,7 @@ print data
 if (os.uname()[-1][:4]=="armv"):
 	#use this on Pi
 	os.system('pkill player.bin')
-	#os.system('sleep 2')
-	#os.system('omxplayer -b rtp://0.0.0.0:1028/wfd1.0/streamid=0 --live &')
-	os.system('./player.bin &')
+	#os.system('./player.bin &')
 
 
 else:
@@ -179,11 +181,24 @@ while True:
 			entrylist=singlemessage.split('\r')
 			for entry in entrylist:
 				if 'CSeq' in entry:
-					cseq=entry
+					cseq = entry
 
 			resp='RTSP/1.0 200 OK\r'+cseq+'\r\n\r\n';#cseq contains \n
 			print resp
 			sock.sendall(resp)
+		
+		for entry in messagelist:
+			if 'wfd_uibc_capability:' in entry:
+				entrylist = entry.split(';')
+				uibcport = entrylist[-1]
+				uibcport = uibcport.split('\r')
+				uibcport = uibcport[0]
+				uibcport = uibcport.split('=')
+				uibcport = uibcport[1]
+				print 'uibcport:'+uibcport
+				if 'none' not in uibcport:
+					os.system('pkill control.bin')
+					os.system('./control/control.bin '+ uibcport + ' &')
 
 		
 sock.close()
