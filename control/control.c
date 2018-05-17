@@ -53,8 +53,8 @@ char keyboard[] = {
 };
 
 
-//#define fdsend
-//#define warpcursor
+#define fdsend
+#define warpcursor
 int main(int argc, char **argv)
 {
 #ifdef fdsend
@@ -92,8 +92,8 @@ int main(int argc, char **argv)
 	Window w;
 	XEvent e;
 
-	//d = XOpenDisplay(":0.0");
-	d = XOpenDisplay(NULL);
+	d = XOpenDisplay(":0.0");
+	//d = XOpenDisplay(NULL);
 	if (d == NULL)
 	{
 		printf("Cannot open display\n");
@@ -102,7 +102,6 @@ int main(int argc, char **argv)
 	s = DefaultScreen(d);
 	int width = XWidthOfScreen(DefaultScreenOfDisplay(d));
 	int height = XHeightOfScreen(DefaultScreenOfDisplay(d));
-	printf("w:%d\n", width);
 	w = XCreateSimpleWindow(d, RootWindow(d, s), 0, 0, width, height, 1, BlackPixel(d, s), WhitePixel(d, s));
 
 	Atom delWindow = XInternAtom( d, "WM_DELETE_WINDOW", 0 );
@@ -134,15 +133,16 @@ int main(int argc, char **argv)
 			break;
 		else if (e.type == KeyPress)
 		{
+			keyboard[4] = 0x03;
 			printf("KeyPress code:%d\n", e.xkey.keycode);
 
 
 			int keysyms_per_keycode_return;
 			KeySym *keysym = XGetKeyboardMapping(d, e.xkey.keycode, 1, &keysyms_per_keycode_return);
 			
-			if (*keysym < 256)
+			if ((*keysym) < 256)
 			{
-				unsigned char key;
+				char key;
 				if (e.xkey.state & ShiftMask)
 					key = keysym[1];
 				else if (e.xkey.state & LockMask && keysym[0] > 0x60 && keysym[0] < 0x7B)
@@ -156,23 +156,118 @@ int main(int argc, char **argv)
 				{
 
 					printf("%x	", key);
-
-					printf("%s	", XKeysymToString(key));
-
-
+					//printf("%s	", XKeysymToString(key));
+					keyboard[9] = key;
+#ifdef fdsend
+					printf("send:%d\n", send(fd, keyboard, sizeof(keyboard), 0));
+#endif
 				}
 			}
-			printf("%s\n", XKeysymToString(*keysym));
+			else if ((*keysym) == 0xff08 || (*keysym) == 0xff09
+				|| (*keysym) == 0xff0a || (*keysym) == 0xff0b
+				|| (*keysym) == 0xff0d || (*keysym) == 0xff13
+				|| (*keysym) == 0xff14 || (*keysym) == 0xff15
+				|| (*keysym) == 0xff1b)
+			{
+				keyboard[9] = 0xFF & (*keysym);
+#ifdef fdsend
+				printf("send:%d\n", send(fd, keyboard, sizeof(keyboard), 0));
+#endif
+			}
+			else if ((*keysym) == 0xffff)
+			{
+				keyboard[9] = 0x7F;
+				printf("special:%x\n", keyboard[9]);
+#ifdef fdsend
+				printf("send:%d\n", send(fd, keyboard, sizeof(keyboard), 0));
+#endif
+			}
+			else if ((*keysym) == 0xff52)
+			{
+				keyboard[9] = 38;
+				printf("special:%x\n", keyboard[9]);
+#ifdef fdsend
+				printf("send:%d\n", send(fd, keyboard, sizeof(keyboard), 0));
+#endif
+			}
+
+
+
+
+
+			printf("%x\n", *keysym);
+
+			//printf("%s\n", XKeysymToString(*keysym));
 
 			XFree(keysym);
 
 		}
 		else if (e.type == KeyRelease)
 		{
-			
+			keyboard[4] = 0x04;
+			printf("KeyRelease code:%d\n", e.xkey.keycode);
 
 
+			int keysyms_per_keycode_return;
+			KeySym *keysym = XGetKeyboardMapping(d, e.xkey.keycode, 1, &keysyms_per_keycode_return);
 
+			if ((*keysym) < 256)
+			{
+				char key;
+				if (e.xkey.state & ShiftMask)
+					key = keysym[1];
+				else if (e.xkey.state & LockMask && keysym[0] > 0x60 && keysym[0] < 0x7B)
+					key = keysym[1];
+				else
+					key = keysym[0];
+
+				printf("here\n");
+
+				if (key != NoSymbol)
+				{
+
+					printf("%x	", key);
+					//printf("%s	", XKeysymToString(key));
+					keyboard[9] = key;
+#ifdef fdsend
+					printf("send:%d\n", send(fd, keyboard, sizeof(keyboard), 0));
+#endif
+
+				}
+			}
+			else if ((*keysym) == 0xff08 || (*keysym) == 0xff09
+				|| (*keysym) == 0xff0a || (*keysym) == 0xff0b
+				|| (*keysym) == 0xff0d || (*keysym) == 0xff13
+				|| (*keysym) == 0xff14 || (*keysym) == 0xff15
+				|| (*keysym) == 0xff1b)
+			{
+				keyboard[9] = 0xFF & (*keysym);
+				printf("special:%x\n", keyboard[9]);
+#ifdef fdsend
+				printf("send:%d\n", send(fd, keyboard, sizeof(keyboard), 0));
+#endif
+			}
+			else if ( (*keysym) == 0xffff)
+			{
+				keyboard[9] = 0x7F;
+				printf("special:%x\n", keyboard[9]);
+#ifdef fdsend
+				printf("send:%d\n", send(fd, keyboard, sizeof(keyboard), 0));
+#endif
+			}
+			else if ((*keysym) == 0xff52)
+			{
+				keyboard[9] = 38;
+				printf("special:%x\n", keyboard[9]);
+#ifdef fdsend
+				printf("send:%d\n", send(fd, keyboard, sizeof(keyboard), 0));
+#endif
+			}
+
+
+			//printf("%s\n", XKeysymToString(*keysym));
+
+			XFree(keysym);
 
 		}
 		else if (e.type == ButtonPress)

@@ -144,10 +144,12 @@ char usageid[] =
 
 char mouseinput[] = {
 	0x00,0x01,
-	0x00,0x0c,
+	0x00, 14,
 	0x01,0x01,
+	0x00,
+	0x00,0x04,
+	0x00,
 	0x00,0x00,
-	0x03,0x00,
 	0x00,0x00
 };
 
@@ -155,15 +157,21 @@ char keyboardinput[] = {
 	0x00,0x01,
 	0x00,0x0c,
 	0x01,0x00,
-	0x00,0x00,
-	0x03,0x00,
+	0x00,
+	0x00,0x03,
+	0x00,
 	0x00,0x00
 };
-/*
-char reportdescriptor[55] = {
+
+
+char reportdescriptor[] = {
+	0x00,0x01,
+	0x00, 62,
+	
+	
 	0x01,0x01,
-	0x01,0x00,
-	50,
+	0x01,
+	0x00,	52,
 	0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
 	0x09, 0x02,                    // USAGE (Mouse)
 	0xa1, 0x01,                    // COLLECTION (Application)
@@ -183,14 +191,17 @@ char reportdescriptor[55] = {
 	0x05, 0x01,                    //     USAGE_PAGE (Generic Desktop)
 	0x09, 0x30,                    //     USAGE (X)
 	0x09, 0x31,                    //     USAGE (Y)
+	0x09, 0x38,                    //     USAGE (wheel)
 	0x15, 0x81,                    //     LOGICAL_MINIMUM (-127)
 	0x25, 0x7f,                    //     LOGICAL_MAXIMUM (127)
 	0x75, 0x08,                    //     REPORT_SIZE (8)
-	0x95, 0x02,                    //     REPORT_COUNT (2)
+	0x95, 0x03,                    //     REPORT_COUNT (3)
 	0x81, 0x06,                    //     INPUT (Data,Var,Rel)
 	0xc0,                          //   END_COLLECTION
-	0xc0                           // END_COLLECTION
-};*/
+	0xc0,                           // END_COLLECTION
+	0xFF
+
+};
 
 
 #define fdsend
@@ -225,51 +236,45 @@ int main(int argc, char **argv)
 #endif
 	
 
-
 	Display *d;
 	int s;
 	Window w;
 	XEvent e;
 
 	d = XOpenDisplay(":0.0");
-	
+	//d = XOpenDisplay(NULL);
 	if (d == NULL)
 	{
 		printf("Cannot open display\n");
 		exit(1);
 	}
 	s = DefaultScreen(d);
+	int width = XWidthOfScreen(DefaultScreenOfDisplay(d));
+	int height = XHeightOfScreen(DefaultScreenOfDisplay(d));
+	w = XCreateSimpleWindow(d, RootWindow(d, s), 0, 0, width, height, 1, BlackPixel(d, s), WhitePixel(d, s));
 
-	/*XSetWindowAttributes wa;
-	wa.override_redirect = True;
-	w = XCreateWindow(d, RootWindow(d, s), 0, 0, 1280, 720, 1, CopyFromParent, CopyFromParent,
-		CopyFromParent, CWOverrideRedirect, &wa);
-	*/
-	w = XCreateSimpleWindow(d, RootWindow(d, s), 0, 0, 800, 550, 1, BlackPixel(d, s), WhitePixel(d, s));
+	Atom delWindow = XInternAtom(d, "WM_DELETE_WINDOW", 0);
+	XSetWMProtocols(d, w, &delWindow, 1);
 
-
-
-
-	Atom delWindow = XInternAtom( d, "WM_DELETE_WINDOW", 0 );
-	XSetWMProtocols(d , w, &delWindow, 1);
-
-	XSelectInput(d, w, ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask  );
+	XSelectInput(d, w, ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask);
 
 	XMapWindow(d, w);
 
-	//XGrabKeyboard(d, DefaultRootWindow(d), True, GrabModeAsync, GrabModeAsync, CurrentTime);
-	//XGrabPointer(d, DefaultRootWindow(d), True, ButtonPressMask | ButtonReleaseMask | PointerMotionMask, GrabModeAsync,
-	//	GrabModeAsync, None, None, CurrentTime);
+	XWarpPointer(d, None, w, 0, 0, 0, 0, width / 2, height / 2);
 
-	XWarpPointer(d, None, DefaultRootWindow(d), 0, 0, 0, 0, 400, 400);
 
 	int oldx = 0, oldy = 0;
 	int warp = 0;
+	int senddes = 1;
 	while(1) 
 	{
-
-
-
+		if (--senddes == 0)
+		{
+			senddes = 100;
+#ifdef fdsend
+			printf("senddes:%d\n", send(fd, reportdescriptor, sizeof(reportdescriptor), 0));
+#endif
+		}
 
 
 		XNextEvent(d, &e);
@@ -339,24 +344,32 @@ int main(int argc, char **argv)
 			int buttonnum = e.xbutton.button;
 			printf("ButtonPress:%d\n", buttonnum);
 
-			char mask;
-			switch (buttonnum)
+			if (buttonnum < 4)
 			{
-			case 1:
-				mask = 1;
-				break;
-			case 3:
-				mask = 2;
-				break;
-			case 2:
-				mask = 4;
-				break;
-			default:
-				mask = 0;
+				char mask;
+				switch (buttonnum)
+				{
+				case 1:
+					mask = 1;
+					break;
+				case 3:
+					mask = 2;
+					break;
+				case 2:
+					mask = 4;
+					break;
+				default:
+					mask = 0;
+				}
+				mouseinput[9] |= mask;
+				mouseinput[10] = 0;
+				mouseinput[11] = 0;
 			}
-			mouseinput[9] |= mask;
-			mouseinput[10] = 0;
-			mouseinput[11] = 0;
+			else if (buttonnum < 6)
+			{
+				mouseinput[12] = buttonnum == 4 ? 1 : -1;
+			}
+			
 
 #ifdef fdsend			
 			printf("send:%d\n", send(fd, mouseinput, sizeof(mouseinput), 0));
@@ -367,25 +380,31 @@ int main(int argc, char **argv)
 			int buttonnum = e.xbutton.button;
 			printf("ButtonRelease:%d\n", buttonnum);
 
-			char mask;
-			switch (buttonnum)
+			if (buttonnum < 4)
 			{
-			case 1:
-				mask = 1;
-				break;
-			case 3:
-				mask = 2;
-				break;
-			case 2:
-				mask = 4;
-				break;
-			default:
-				mask = 0;
+				char mask;
+				switch (buttonnum)
+				{
+				case 1:
+					mask = 1;
+					break;
+				case 3:
+					mask = 2;
+					break;
+				case 2:
+					mask = 4;
+					break;
+				default:
+					mask = 0;
+				}
+				mouseinput[9] &= ~mask;
+				mouseinput[10] = 0;
+				mouseinput[11] = 0;
 			}
-			mask = ~mask;
-			mouseinput[9] &= mask;
-			mouseinput[10] = 0;
-			mouseinput[11] = 0;
+			else if (buttonnum < 6)
+			{
+				mouseinput[12] = 0;
+			}
 #ifdef fdsend
 			printf("send:%d\n", send(fd, mouseinput, sizeof(mouseinput), 0));
 #endif
@@ -398,35 +417,21 @@ int main(int argc, char **argv)
 			int ydiff = newy - oldy;
 			oldx = newx;
 			oldy = newy;
-
-			//printf("test:%d\n", e.xmotion.send_event);
-			//printf("test2:%d\n", e.xmotion.state);
 			
 			if (warp == 1)
 			{
 				warp = 0;
 				continue;
 			}
-			if (newx < 128 || newx > 800-128 || newy < 128 || newy > 550-128)
+			if (newx < 128 || newx > width - 128 || newy < 128 || newy > height - 128)
 			{
-				//XWarpPointer(d,  None, DefaultRootWindow(d) , 200, 200, 800, 550, 400, 300);
-				XWarpPointer(d, None, DefaultRootWindow(d), 0, 0, 0, 0, 400, 300);
+				XWarpPointer(d, None, w, 0, 0, 0, 0, width / 2, height / 2);
 				warp = 1;
 				printf("border\n");
-
-
-
 
 			}
 
 			printf("MotionNotify:%d,%d\n", newx, newy);
-
-
-			
-
-
-
-
 
 
 			if (xdiff > 127)

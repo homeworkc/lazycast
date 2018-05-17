@@ -23,6 +23,7 @@ from threading import Thread
 import time
 from time import sleep
 
+
 idrsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 idrsock_address = ('127.0.0.1', 57925)	
 idrsock.bind(idrsock_address)
@@ -77,11 +78,32 @@ print 'm3 success\n'
 
 data=(sock.recv(1000))
 print data
-
-if 'port=' in data:
-	print 'support'
-
 sock.sendall('RTSP/1.0 200 OK\r\nCSeq: 3\r\n\r\n')
+
+def uibcstart(sock, data):
+	print data
+	messagelist=data.split('\r\n\r\n')
+	for entry in messagelist:
+			if 'wfd_uibc_capability:' in entry:
+				entrylist = entry.split(';')
+				uibcport = entrylist[-1]
+				uibcport = uibcport.split('\r')
+				uibcport = uibcport[0]
+				uibcport = uibcport.split('=')
+				uibcport = uibcport[1]
+				print 'uibcport:'+uibcport
+				if 'none' not in uibcport:
+					os.system('pkill control.bin')
+					os.system('pkill controlhidc.bin')
+					if('hidc_cap_list=none' not in entry):
+						os.system('./control/controlhidc.bin '+ uibcport + ' &')
+					elif('generic_cap_list=none' not in entry):
+						os.system('./control/control.bin '+ uibcport + ' &')
+
+uibcstart(sock,data)
+
+
+
 
 print 'm4 success\n'
 
@@ -128,7 +150,7 @@ print data
 if (os.uname()[-1][:4]=="armv"):
 	#use this on Pi
 	os.system('pkill player.bin')
-	#os.system('./player.bin &')
+	os.system('./player.bin &')
 
 
 else:
@@ -187,19 +209,10 @@ while True:
 			print resp
 			sock.sendall(resp)
 		
-		for entry in messagelist:
-			if 'wfd_uibc_capability:' in entry:
-				entrylist = entry.split(';')
-				uibcport = entrylist[-1]
-				uibcport = uibcport.split('\r')
-				uibcport = uibcport[0]
-				uibcport = uibcport.split('=')
-				uibcport = uibcport[1]
-				print 'uibcport:'+uibcport
-				if 'none' not in uibcport:
-					os.system('pkill control.bin')
-					os.system('./control/control.bin '+ uibcport + ' &')
+		uibcstart(sock,data)
 
 		
 sock.close()
+
+
 
