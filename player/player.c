@@ -22,7 +22,7 @@ static VCOS_LOG_CAT_T il_ffmpeg_log_category;
 #include "libavcodec/avcodec.h"
 #include <libavformat/avformat.h>
 
-#define insertpacket
+//#define insertpacket
 #define stoprendering
 //#define injecterror
 
@@ -332,7 +332,7 @@ OMX_ERRORTYPE set_video_decoder_input_format(COMPONENT_T *component)
 	memset(&errconceal, 0, sizeof(OMX_PARAM_BRCMVIDEODECODEERRORCONCEALMENTTYPE));
 	errconceal.nSize = sizeof(OMX_PARAM_BRCMVIDEODECODEERRORCONCEALMENTTYPE);
 	errconceal.nVersion.nVersion = OMX_VERSION;
-	errconceal.bStartWithValidFrame = OMX_TRUE;
+	errconceal.bStartWithValidFrame = OMX_FALSE;
 
 
 	err = OMX_SetParameter(ilclient_get_handle(component), OMX_IndexParamBrcmVideoDecodeErrorConcealment, &errconceal);
@@ -777,6 +777,8 @@ int largers(int a, int b)
 
 atomic_int stoprender;
 
+int idrsockport;
+
 static void* addnullpacket()
 {
 	struct sockaddr_in addr1, addr2, addr3;
@@ -804,7 +806,7 @@ static void* addnullpacket()
 
 	memset((char *)&addr1, 0, sizeof(addr1));
 	addr1.sin_family = AF_INET;
-	addr1.sin_addr.s_addr = htonl(INADDR_ANY);
+	addr1.sin_addr.s_addr = inet_addr("192.168.101.1");
 	addr1.sin_port = htons(1028);
 
 	memset((char *)&addr2, 0, sizeof(addr2));
@@ -815,7 +817,7 @@ static void* addnullpacket()
 	memset((char *)&addr3, 0, sizeof(addr3));
 	addr3.sin_family = AF_INET;
 	addr3.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-	addr3.sin_port = htons(57925);
+	addr3.sin_port = htons(idrsockport);
 
 	if (bind(fd, (struct sockaddr *)&addr1, sizeof(addr1)) < 0)
 	{
@@ -837,8 +839,9 @@ static void* addnullpacket()
 
 	rtppacket* head = NULL;
 	int numofpacket = 0;
-	int osn = 0;
+	int osn = -1;
 	int hold = 0;
+	int sentseqnum = -1;
 	atomic_store(&stoprender, 0);
 
 	////error injection
@@ -866,7 +869,7 @@ static void* addnullpacket()
 #ifdef injecterror
 		if (err-- <= 0)
 		{
-			err = 500;
+			err = 5000;
 			free(p1->buf);
 			free(p1);
 			continue;
@@ -876,6 +879,14 @@ static void* addnullpacket()
 		p1->seqnum = (p1->buf[2] << 8) + p1->buf[3];
 		p1->next = NULL;
 		
+		if (largers(sentseqnum, p1->seqnum) && sentseqnum > 0)
+		{
+			printf("drop:%d\n", p1->seqnum);
+			free(p1->buf);
+			free(p1);
+			continue;
+		}
+
 		if (numofpacket == 0)
 		{
 			head = p1;
@@ -919,7 +930,7 @@ static void* addnullpacket()
 		{
 			hold = 0;
 		
-		}else if (numofpacket > 20)
+		}else if (numofpacket > 12)
 		{
 			hold = 0;
 			printf("start:%d, end:%d\n",osn,head->seqnum);
@@ -940,14 +951,16 @@ static void* addnullpacket()
 #else
 			osn = head->seqnum;
 #endif
+			sentseqnum = osn;
 			atomic_store(&stoprender, 1);
 
 		}
-		else if (numofpacket > 12)
+		else if (numofpacket == 3)
 		{
 			unsigned char topython[12];
 			if (sendto(fd3, topython, 12, 0, (struct sockaddr *)&addr3, addrlen) < 0)
 				perror("sendto error");
+			printf("sendidr\n");
 		}
 
 		//printf("\n");
@@ -961,14 +974,15 @@ static void* addnullpacket()
 			}
 			if (sendto(fd2, head->buf, head->recvlen, 0, (struct sockaddr *)&addr2, addrlen) < 0)
 				perror("sendto error");
-			
-			
+			//printf("%d\n", osn);
+			sentseqnum = osn;
 			osn = 0xFFFF & (osn + 1);
 			rtppacket* nexttemp = head->next;
 			free(head->buf);
 			free(head);
 			head = nexttemp;
 			numofpacket--;
+
 		}
 
 		
@@ -1000,11 +1014,16 @@ int main(int argc, char** argv)
     OMX_BUFFERHEADERTYPE *buff_header;
 	avformat_network_init();
 
+
+	idrsockport = atoi(argv[1]);
+	printf("idrsockport:%d\n", idrsockport);
+
 	pthread_t npthread;
 	if (pthread_create(&npthread, NULL, addnullpacket, NULL) != 0)
 		exit(1);
 
     setup_demuxer("rtp://127.0.0.1:57823");
+	pFormatCtx->max_delay = 100;
 	printf("mdly:%d\n",pFormatCtx->max_delay);
 
 	audiorenderComponentName = "audio_render";
@@ -1252,7 +1271,8 @@ int main(int argc, char** argv)
 			if (renderpkt.stream_index == video_stream_idx)
 			{
 #ifdef stoprendering
-				if (!atomic_load(&stoprender) && atomic_load(&numofnode) < 20)
+				//if (!atomic_load(&stoprender) && atomic_load(&numofnode) < 40)
+				if (!atomic_load(&stoprender) || (atomic_load(&stoprender)&& !(renderpkt.flags & AV_PKT_FLAG_KEY)))
 				{
 					buff_header = ilclient_get_input_buffer(decodeComponent, 130, 1 /* block */);
 					if (buff_header != NULL)
@@ -1261,10 +1281,11 @@ int main(int argc, char** argv)
 				{
 					printf("keyframe\n");
 					atomic_store(&stoprender, 0);
-					buff_header = ilclient_get_input_buffer(decodeComponent, 130, 1 /* block */);
-					if (buff_header != NULL)
-						copy_into_buffer_and_empty(&renderpkt, decodeComponent, buff_header);
+					//buff_header = ilclient_get_input_buffer(decodeComponent, 130, 1 /* block */);
+					//if (buff_header != NULL)
+					//	copy_into_buffer_and_empty(&renderpkt, decodeComponent, buff_header);
 				}
+
 #else
 				buff_header = ilclient_get_input_buffer(decodeComponent, 130, 1 /* block */);
 				if (buff_header != NULL)

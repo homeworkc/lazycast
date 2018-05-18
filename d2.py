@@ -25,8 +25,10 @@ from time import sleep
 
 
 idrsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-idrsock_address = ('127.0.0.1', 57925)	
+idrsock_address = ('127.0.0.1', 0)	
 idrsock.bind(idrsock_address)
+addr, idrsockport = idrsock.getsockname()
+
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = ('192.168.101.80', 7236)
@@ -150,7 +152,7 @@ print data
 if (os.uname()[-1][:4]=="armv"):
 	#use this on Pi
 	os.system('pkill player.bin')
-	os.system('./player.bin &')
+	os.system('./player.bin ' +str(idrsockport)+ ' &')
 
 
 else:
@@ -194,7 +196,11 @@ while True:
 	else:
 		print data
 		if len(data)==0 or 'wfd_trigger_method: TEARDOWN' in data:
+			os.system('pkill player.bin')
 			break
+		elif 'wfd_video_formats' in data:
+			os.system('pkill player.bin')
+			os.system('./player.bin ' +str(idrsockport)+ ' &')
 		messagelist=data.split('\r\n\r\n')
 		print messagelist
 		singlemessagelist=[x for x in messagelist if ('GET_PARAMETER' in x or 'SET_PARAMETER' in x )]
