@@ -23,13 +23,12 @@ chmod +x controlhidc.bin
 Run `./all.sh` to initiate lazycast receiver. Wait until the "The display is ready" message.  
 Then, search for the wireless display named "lazycast" on the source device you want to cast. Use the PIN number under the "The display is ready" message if the device is asking a WPS PIN number.  
 If backchannel control is supported by the source, keyboard and mouse input on Pi are redirected to the source as remote controls.  
-
+It is recommended to initiate the termination of the receiver on the source side. These user controls are often near the pairing controls on the source device. You can utilize the backchannel feature to remotely control the source device in order to close lazycast.  
 # Tips
 The pairing process (entering PIN) is needed after every Raspberry Pi reboot. Try clearing the 'lazycast' information on the source device if you run into pairing problems.  
 Initial pairings after Raspberry Pi reboot may be difficault due to ARP/routing/power-saving mechanisms. Try turning off/on WiFi interfaces on the source device and re-pairing. If all else fails, reboot both the source and Pi and pair them upon starting.  
 Set the resolution on the source side. lazycast advertises all possible resolutions regardless of the current rendering resolutions. Therefore, you may want to change the resolution (on the source) to match the actual resolution of the display connecting to Pi.  
 The maximum resolutions supported are 1920x1080p60 and 1920x1200p30. The GPU on Pi may struggle to handle 1920x1080p60, which results in high latency. In this case, reduce the FPS to 1920x1080p50.  
-It is recommended to initiate the termination of the receiver on the source side. These user controls are often near the pairing controls on the source device. You can utilize the backchannel control feature to remotely control the source device.  
 
 # Known issue
 Latency: Limited by the implementation of the rtp player used. (In VLC, latency can be reduced from 1200 to 300ms by lowering the network cache value.)  
