@@ -38,5 +38,5 @@ Due to the overcrowded nature of the 2.4GHz spectrum and the use of unreliable r
 Currently lazycast output sound samples to the HDMI port on Pi 3. Outputing sound samples to the 3.5mm jack is trivial but not currently integrated.  
 
 # Others
-Some part of video player are modified from the codes on https://github.com/Apress/raspberry-pi-gpu-audio-video-prog. Many thanks to the author of "Raspberry Pi GPU Audio Video Programming" and, by extension, authors of omxplayer.  
+Some part of the video player are modified from the codes on https://github.com/Apress/raspberry-pi-gpu-audio-video-prog. Many thanks to the author of "Raspberry Pi GPU Audio Video Programming" and, by extension, authors of omxplayer.  
 Using any part of the codes in this project in commercial products is prohibited.
