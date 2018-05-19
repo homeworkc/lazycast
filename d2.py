@@ -196,7 +196,11 @@ while True:
 	else:
 		print data
 		if len(data)==0 or 'wfd_trigger_method: TEARDOWN' in data:
+			os.system('pkill control.bin')
+			os.system('pkill controlhidc.bin')
 			os.system('pkill player.bin')
+
+			sleep(1)
 			break
 		elif 'wfd_video_formats' in data:
 			os.system('pkill player.bin')

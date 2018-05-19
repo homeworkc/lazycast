@@ -955,7 +955,7 @@ static void* addnullpacket()
 			atomic_store(&stoprender, 1);
 
 		}
-		else if (numofpacket == 3)
+		else if (numofpacket > 8)
 		{
 			unsigned char topython[12];
 			if (sendto(fd3, topython, 12, 0, (struct sockaddr *)&addr3, addrlen) < 0)
@@ -1256,7 +1256,7 @@ int main(int argc, char** argv)
 
 		while (1) 
 		{
-			if (atomic_load(&numofnode) < 1)
+			if (atomic_load(&numofnode) < 2)
 			{
 				usleep(10);
 				continue;
@@ -1272,7 +1272,16 @@ int main(int argc, char** argv)
 			{
 #ifdef stoprendering
 				//if (!atomic_load(&stoprender) && atomic_load(&numofnode) < 40)
-				if (!atomic_load(&stoprender) || (atomic_load(&stoprender)&& !(renderpkt.flags & AV_PKT_FLAG_KEY)))
+				if (atomic_load(&numofnode) > 10)
+				{
+					if (renderpkt.flags & AV_PKT_FLAG_KEY)
+					{
+						buff_header = ilclient_get_input_buffer(decodeComponent, 130, 1 /* block */);
+						if (buff_header != NULL)
+							copy_into_buffer_and_empty(&renderpkt, decodeComponent, buff_header);
+					}
+				}
+				else if (!atomic_load(&stoprender) || (atomic_load(&stoprender) && !(renderpkt.flags & AV_PKT_FLAG_KEY)))
 				{
 					buff_header = ilclient_get_input_buffer(decodeComponent, 130, 1 /* block */);
 					if (buff_header != NULL)

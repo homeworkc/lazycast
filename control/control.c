@@ -282,6 +282,9 @@ int main(int argc, char **argv)
 				mousemove[10] = 0xFF & x;
 				mousemove[11] = y >> 8;
 				mousemove[12] = 0xFF & y;
+#ifdef fdsend
+				printf("send:%d\n", send(fd, mousemove, sizeof(mousemove), 0));
+#endif
 			}
 			else if(buttonnum < 6)
 			{
@@ -299,13 +302,6 @@ int main(int argc, char **argv)
 
 			}
 
-
-
-
-			
-#ifdef fdsend
-			printf("send:%d\n", send(fd, mousemove, sizeof(mousemove), 0));
-#endif
 		}
 		else if (e.type == ButtonRelease)
 		{
