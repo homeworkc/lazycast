@@ -11,9 +11,10 @@ Note: an in-house player is written for Raspberry Pi 3. You may use vlc or omxpl
 
 # Preparation
 Install missing packages  
-Make all.sh, player.bin, control.bin, and controlhidc.bin executable: 
+Make all.sh, d2.py, player.bin, control.bin, and controlhidc.bin executable: 
 ```
 chmod +x all.sh
+chmod +x d2.py
 chmod +x player.bin
 cd control
 chmod +x control.bin
