@@ -157,15 +157,68 @@ OMX_TICKS ToOMXTime(int64_t pts)
 
 static long int startpts;
 
+atomic_int numofnode;
+atomic_int stoprender;
 
-OMX_ERRORTYPE copy_into_buffer_and_empty(AVPacket *pkt,COMPONENT_T *component,OMX_BUFFERHEADERTYPE *buff_header) 
+OMX_ERRORTYPE copy_into_buffer_and_empty(AVPacket *pkt,COMPONENT_T *component) 
 {
     OMX_ERRORTYPE r;
 
-    int buff_size = buff_header->nAllocLen;
-    int size = pkt->size;
-    uint8_t *content = pkt->data;
+#ifdef stoprendering
+	if (atomic_load(&numofnode) > 10 && !(pkt->flags & AV_PKT_FLAG_KEY))
+		return r;
+	if (atomic_load(&stoprender) && (pkt->flags & AV_PKT_FLAG_KEY))
+	{
+		printf("keyframe\n");
+		atomic_store(&stoprender, 0);
+		return r;
+	}
+
+#endif
+
+	int size = pkt->size;
+	uint8_t *content = pkt->data;
+
+
+
+	//if (atomic_load(&stoprender))
+	//{
+	//	int idrindex = -1;
+	//	if (pkt->flags & AV_PKT_FLAG_KEY)
+	//	{
+	//		atomic_store(&stoprender, 0);
+	//		for (int i = 0; i < pkt->size - 4; i++)
+	//		{
+	//			if (content[i] == 0 && content[i + 1] == 0 && content[i + 2] == 1)
+	//			{
+	//				printf("type %x", content[i + 3]);
+	//				if ((content[i + 3] & 0x1F) == 5)
+	//					idrindex = i;
+	//				printf("index %d\n", idrindex);
+
+	//			}
+
+	//		}
+	//	}
+
+	//	if (idrindex == -1)
+	//		return r;
+
+	//	size -= idrindex;
+	//	content += idrindex;
+
+	//}
+
 	
+	
+
+
+	/////RETURN HERE
+	OMX_BUFFERHEADERTYPE *buff_header = ilclient_get_input_buffer(component, 130, 1 /* block */);
+	if (buff_header == NULL)
+		return r;
+
+	int buff_size = buff_header->nAllocLen;
 
     while (size > 0) 
 	{
@@ -728,7 +781,7 @@ OMX_ERRORTYPE read_audio_into_buffer_and_empty(AVFrame *decoded_frame, COMPONENT
 }
 
 
-atomic_int numofnode = 0;
+
 
 typedef struct Node
 {
@@ -775,7 +828,6 @@ int largers(int a, int b)
 		return 0;
 }
 
-atomic_int stoprender;
 
 int idrsockport;
 
@@ -930,7 +982,7 @@ static void* addnullpacket()
 		{
 			hold = 0;
 		
-		}else if (numofpacket > 12)
+		}else if (numofpacket > 16)
 		{
 			hold = 0;
 			printf("start:%d, end:%d\n",osn,head->seqnum);
@@ -955,12 +1007,12 @@ static void* addnullpacket()
 			atomic_store(&stoprender, 1);
 
 		}
-		else if (numofpacket > 8)
+		else if (numofpacket == 12 || numofpacket == 14 || numofpacket == 16)
 		{
 			unsigned char topython[12];
 			if (sendto(fd3, topython, 12, 0, (struct sockaddr *)&addr3, addrlen) < 0)
 				perror("sendto error");
-			printf("sendidr\n");
+			printf("idr:%d\n", numofpacket);
 		}
 
 		//printf("\n");
@@ -976,6 +1028,16 @@ static void* addnullpacket()
 				perror("sendto error");
 			//printf("%d\n", osn);
 			sentseqnum = osn;
+
+			if (numofpacket == 12 || numofpacket == 14 || numofpacket == 16)
+			{
+				unsigned char topython[12];
+				if (sendto(fd3, topython, 12, 0, (struct sockaddr *)&addr3, addrlen) < 0)
+					perror("sendto error");
+				printf("idr:%d\n", numofpacket);
+			}
+
+
 			osn = 0xFFFF & (osn + 1);
 			rtppacket* nexttemp = head->next;
 			free(head->buf);
@@ -1011,7 +1073,6 @@ int main(int argc, char** argv)
 
     
 
-    OMX_BUFFERHEADERTYPE *buff_header;
 	avformat_network_init();
 
 
@@ -1097,15 +1158,7 @@ int main(int argc, char** argv)
 		if (pkt.stream_index == video_stream_idx)
 		{
 			//printf("  read video pkt %d\n", pkt.size);
-			buff_header = ilclient_get_input_buffer(decodeComponent, 130, 1 /* block */);
-			if (buff_header != NULL)
-			{
-				copy_into_buffer_and_empty(&pkt, decodeComponent, buff_header);
-			}
-			else
-			{
-				fprintf(stderr, "Couldn't get a buffer\n");
-			}
+			copy_into_buffer_and_empty(&pkt, decodeComponent);
 
 			err = ilclient_wait_for_event(decodeComponent,
 				OMX_EventPortSettingsChanged,
@@ -1270,38 +1323,8 @@ int main(int argc, char** argv)
 
 			if (renderpkt.stream_index == video_stream_idx)
 			{
-#ifdef stoprendering
-				//if (!atomic_load(&stoprender) && atomic_load(&numofnode) < 40)
-				if (atomic_load(&numofnode) > 10)
-				{
-					if (renderpkt.flags & AV_PKT_FLAG_KEY)
-					{
-						buff_header = ilclient_get_input_buffer(decodeComponent, 130, 1 /* block */);
-						if (buff_header != NULL)
-							copy_into_buffer_and_empty(&renderpkt, decodeComponent, buff_header);
-					}
-				}
-				else if (!atomic_load(&stoprender) || (atomic_load(&stoprender) && !(renderpkt.flags & AV_PKT_FLAG_KEY)))
-				{
-					buff_header = ilclient_get_input_buffer(decodeComponent, 130, 1 /* block */);
-					if (buff_header != NULL)
-						copy_into_buffer_and_empty(&renderpkt, decodeComponent, buff_header);
-				}else if (renderpkt.flags & AV_PKT_FLAG_KEY)
-				{
-					printf("keyframe\n");
-					atomic_store(&stoprender, 0);
-					//buff_header = ilclient_get_input_buffer(decodeComponent, 130, 1 /* block */);
-					//if (buff_header != NULL)
-					//	copy_into_buffer_and_empty(&renderpkt, decodeComponent, buff_header);
-				}
 
-#else
-				buff_header = ilclient_get_input_buffer(decodeComponent, 130, 1 /* block */);
-				if (buff_header != NULL)
-					copy_into_buffer_and_empty(&renderpkt, decodeComponent, buff_header);
-#endif
-
-
+				copy_into_buffer_and_empty(&renderpkt, decodeComponent);
 
 				if (ilclient_wait_for_event(decodeComponent, OMX_EventPortSettingsChanged, 131, 0, 0, 1, ILCLIENT_EVENT_ERROR | ILCLIENT_PARAMETER_CHANGED, 0) >= 0)
 				{

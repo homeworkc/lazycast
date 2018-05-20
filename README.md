@@ -35,8 +35,9 @@ The maximum resolutions supported are 1920x1080p60 and 1920x1200p30. The GPU on 
 Latency: Limited by the implementation of the rtp player used. (In VLC, latency can be reduced from 1200 to 300ms by lowering the network cache value.)  
 The on-board WiFi chip on Pi 3 only supports 2.4GHz. Therefore, devices/protocols that use 5.8GHz for P2P communication (e.g. early generations of WiDi) are not ("out of the box") supported.  
 Due to the overcrowded nature of the 2.4GHz spectrum and the use of unreliable rtp transmission, you may experience some video glitching/audio stuttering. The in-house player employs several mechanisms to conceal transmission error, but it may still be noticeable in challenging wireless environments.  
-Currently lazycast outputs sound samples to the HDMI port on Pi 3. Outputing sound samples to the 3.5mm jack is trivial but not currently integrated.  
-
+Currently lazycast outputs sound samples to the HDMI port on Pi 3. Outputing sound samples to the 3.5mm jack is trivial but not currently integrated. 
+Devices may not fully support backchannel control and some keystroke/click will behave differently in this scenario.  
+HDCP(content protection): Neither the key nor the hardware is available on Pi and therefore is not supported.  
 # Others
 Some part of the video player are modified from the codes on https://github.com/Apress/raspberry-pi-gpu-audio-video-prog. Many thanks to the author of "Raspberry Pi GPU Audio Video Programming" and, by extension, authors of omxplayer.  
 Using any part of the codes in this project in commercial products is prohibited.
