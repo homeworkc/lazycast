@@ -22,7 +22,7 @@ from threading import Thread
 import time
 from time import sleep
 ##################### Settings #####################
-player_select = 2 
+player_select = 2
 # 0: non-RPi systems. (using vlc)
 # 1: player1 has lower latency.
 # 2: player2 handles still images and sound better.
@@ -34,7 +34,7 @@ disable_1920_1080_60fps = 1
 ####################################################
 
 idrsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-idrsock_address = ('127.0.0.1', 0)	
+idrsock_address = ('127.0.0.1', 0)
 idrsock.bind(idrsock_address)
 addr, idrsockport = idrsock.getsockname()
 
@@ -233,7 +233,7 @@ while True:
 		
 		uibcstart(sock,data)
 
-		
+idrsock.close()
 sock.close()
 
 

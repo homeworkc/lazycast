@@ -10,7 +10,7 @@ Note: udhcpd is a DHCP server for Ubuntu and Debian.
 Note: Two in-house players are written for Raspberry Pi 3. You may use omxplayer or vlc on other platforms.
 
 # Preparation
-Install missing packages  
+Install missing packages.  
 Make all.sh, d2.py, player.bin, control.bin, and controlhidc.bin executable: 
 ```
 chmod +x all.sh
