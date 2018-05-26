@@ -44,7 +44,7 @@ Due to the overcrowded nature of the 2.4GHz spectrum and the use of unreliable r
 Devices may not fully support backchannel control and some keystroke/click will behave differently in this scenario.  
 HDCP(content protection): Neither the key nor the hardware is available on Pi and therefore is not supported.  
 
-# Start upon reboot
+# Start on boot
 Change the first line of code in ``all.sh`` to match the current directory of lazycast. For example, if lazycast is placed on ``~/Desktop``, change the first line to:
 ```
 cd ~/Desktop/lazycast
