@@ -9,7 +9,7 @@
 #   under the GPL along with build & install instructions.
 #
 #################################################################################
-
+cd ~/Desktop/lazycast
 ain="$(sudo wpa_cli interface)"
 echo "${ain}"
 if [ `echo "${ain}" | grep -c "p2p-wl"` -gt 0 ] 
@@ -44,7 +44,11 @@ p2pinterface=$(echo "${ain}" | grep "p2p-wl" | grep -v "interface")
 echo $p2pinterface
 
 sudo ifconfig $p2pinterface 192.168.101.1
-sed -i -e "s/\(interface \).*/\1$p2pinterface/"   udhcpd.conf
+printf "start	192.168.101.80\n">udhcpd.conf
+printf "end	192.168.101.80\n">>udhcpd.conf
+printf "interface	$p2pinterface\n">>udhcpd.conf
+printf "option subnet 255.255.255.0\n">>udhcpd.conf
+printf "option lease 60">>udhcpd.conf
 sleep 3
 sudo udhcpd ./udhcpd.conf 
 echo "The display is ready"

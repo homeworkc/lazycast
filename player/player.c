@@ -681,7 +681,7 @@ void setOutputDevice(OMX_HANDLETYPE handle, const char *name)
 	}
 }
 
-void setup_audio_renderComponent(ILCLIENT_T  *handle, char *componentName, COMPONENT_T **component)
+void setup_audio_renderComponent(ILCLIENT_T  *handle, char *componentName, COMPONENT_T **component, int dest)
 {
 	int err;
 	err = ilclient_create_component(handle, component, componentName,
@@ -704,7 +704,11 @@ void setup_audio_renderComponent(ILCLIENT_T  *handle, char *componentName, COMPO
 	// must be before we enable buffers
 	set_audio_render_input_format(*component);
 
-	setOutputDevice(ilclient_get_handle(*component), "hdmi");
+	if (dest == 1)
+		setOutputDevice(ilclient_get_handle(*component), "local");
+	else
+		setOutputDevice(ilclient_get_handle(*component), "hdmi");
+
 
 	// input port
 	ilclient_enable_port_buffers(*component, 100, NULL, NULL, NULL);
@@ -829,7 +833,7 @@ int largers(int a, int b)
 }
 
 
-int idrsockport;
+int idrsockport = -1;
 
 static void* addnullpacket()
 {
@@ -1007,7 +1011,7 @@ static void* addnullpacket()
 			atomic_store(&stoprender, 1);
 
 		}
-		else if (numofpacket == 12 || numofpacket == 14 || numofpacket == 16)
+		else if (idrsockport > 0 && (numofpacket == 12 || numofpacket == 14 || numofpacket == 16))
 		{
 			unsigned char topython[12];
 			if (sendto(fd3, topython, 12, 0, (struct sockaddr *)&addr3, addrlen) < 0)
@@ -1075,9 +1079,17 @@ int main(int argc, char** argv)
 
 	avformat_network_init();
 
-
-	idrsockport = atoi(argv[1]);
-	printf("idrsockport:%d\n", idrsockport);
+	if (argc > 1)
+	{
+		idrsockport = atoi(argv[1]);
+		printf("idrsockport:%d\n", idrsockport);
+	}
+	int audiodest = 0;
+	if (argc > 2)
+	{
+		audiodest = atoi(argv[2]);
+		printf("audiodest:%d\n", audiodest);
+	}
 
 	pthread_t npthread;
 	if (pthread_create(&npthread, NULL, addnullpacket, NULL) != 0)
@@ -1115,7 +1127,7 @@ int main(int argc, char** argv)
     ilclient_set_port_settings_callback(handle,port_settings_callback,NULL);
     ilclient_set_empty_buffer_done_callback(handle,empty_buffer_done_callback,NULL);
 
-	setup_audio_renderComponent(handle, audiorenderComponentName, &audiorenderComponent);
+	setup_audio_renderComponent(handle, audiorenderComponentName, &audiorenderComponent, audiodest);
     setup_decodeComponent(handle, decodeComponentName, &decodeComponent);
     setup_renderComponent(handle, renderComponentName, &renderComponent);
     setup_schedulerComponent(handle, schedulerComponentName, &schedulerComponent);
