@@ -45,7 +45,7 @@ Devices may not fully support backchannel control and some keystroke/click will 
 HDCP(content protection): Neither the key nor the hardware is available on Pi and therefore is not supported.  
 
 # Start upon reboot
-Change the first line of code in ``all.sh`` to match the current directory of lazycast. For example, if lazycast is placed on ~/Desktop, change the first line to:
+Change the first line of code in ``all.sh`` to match the current directory of lazycast. For example, if lazycast is placed on ``~/Desktop``, change the first line to:
 ```
 cd ~/Desktop/lazycast
 ```
@@ -55,5 +55,5 @@ Then, append this line to ``~/.config/lxsession/LXDE-pi/autostart``
 ```
 
 # Others
-Some part of the video player1 are modified from the codes on https://github.com/Apress/raspberry-pi-gpu-audio-video-prog. Many thanks to the author of "Raspberry Pi GPU Audio Video Programming" and, by extension, authors of omxplayer.  
+Some parts of the video player1 are modified from the codes on https://github.com/Apress/raspberry-pi-gpu-audio-video-prog. Many thanks to the author of "Raspberry Pi GPU Audio Video Programming" and, by extension, authors of omxplayer.  
 Using any part of the codes in this project in commercial products is prohibited.
