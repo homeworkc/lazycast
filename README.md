@@ -49,7 +49,7 @@ Append this line to ``~/.config/lxsession/LXDE-pi/autostart``:
 ```
 @lxterminal -l --working-directory=<absolute path of lazycast> -e ./all.sh
 ```
-For example, if lazycast is placed on ``home/pi/Desktop``, append the following line to the file:
+For example, if lazycast is placed on ``/home/pi/Desktop``, append the following line to the file:
 ```
 @lxterminal -l --working-directory=/home/pi/Desktop/lazycast -e ./all.sh
 ```
