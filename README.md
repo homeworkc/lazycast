@@ -11,7 +11,7 @@ Note: Two in-house players are written for Raspberry Pi 3. You may use omxplayer
 
 # Preparation
 Install missing packages.  
-Make all.sh, d2.py, player.bin, control.bin, and controlhidc.bin executable: 
+Make all.sh, d2.py, player.bin, h264.bin, control.bin, and controlhidc.bin executable: 
 ```
 chmod +x all.sh
 chmod +x d2.py
@@ -25,7 +25,7 @@ chmod +x controlhidc.bin
 ```
 # Usage
 Run `./all.sh` to initiate lazycast receiver. Wait until the "The display is ready" message.  
-Then, search for the wireless display named "lazycast" on the source device you want to cast. Use the PIN number under the "The display is ready" message if the device is asking a WPS PIN number.  
+Then, search for the wireless display named "lazycast" on the source device you want to cast. Use the PIN number under the "The display is ready" message if the device is asking for a WPS PIN number.  
 If backchannel control is supported by the source, keyboard and mouse input on Pi are redirected to the source as remote controls.  
 It is recommended to initiate the termination of the receiver on the source side. These user controls are often near the pairing controls on the source device. You can utilize the backchannel feature to remotely control the source device in order to close lazycast.  
 
@@ -34,7 +34,7 @@ The pairing process (entering PIN) is needed after every Raspberry Pi reboot. Tr
 Initial pairings after Raspberry Pi reboot may be difficault due to ARP/routing/power-saving mechanisms. Try turning off/on WiFi interfaces on the source device and re-pairing. If all else fails, reboot both the source and Pi and pair them upon starting.  
 The PIN number will be invalid after about 2 mins. Re-run all.sh in this scenario.  
 Set the resolution on the source side. lazycast advertises all possible resolutions regardless of the current rendering resolutions. Therefore, you may want to change the resolution (on the source) to match the actual resolution of the display connecting to Pi.  
-Modify parameters in the "settings" section in d2.py to change sound output port (hdmi/3.5mm) and preferable player.
+Modify parameters in the "settings" section in ``d2.py`` to change sound output port (hdmi/3.5mm) and preferable player.  
 The maximum resolutions supported are 1920x1080p60 and 1920x1200p30. The GPU on Pi may struggle to handle 1920x1080p60, which results in high latency. In this case, reduce the FPS to 1920x1080p50.  
 
 # Known issue

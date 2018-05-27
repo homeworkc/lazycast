@@ -321,7 +321,7 @@ static void* addnullpacket(rtppacket* beg)
 			sentseqnum = osn;
 
 		}
-		else if (idrsockport > 0 && (numofpacket == 12 || numofpacket == 14 || numofpacket == 16))
+		else if (idrsockport > 0 && (numofpacket == 12 || numofpacket == 16))
 		{
 			unsigned char topython[12];
 			if (sendto(fd2, topython, 12, 0, (struct sockaddr *)&addr2, addrlen) < 0)
