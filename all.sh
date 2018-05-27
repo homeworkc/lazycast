@@ -9,7 +9,6 @@
 #   under the GPL along with build & install instructions.
 #
 #################################################################################
-cd ./
 ain="$(sudo wpa_cli interface)"
 echo "${ain}"
 if [ `echo "${ain}" | grep -c "p2p-wl"` -gt 0 ] 
