@@ -414,10 +414,12 @@ static int video_decode_test(rtppacket* beg)
 	if (audioplay_create(client, &audio_render, list, 4) != 0)
 		printf("create error\n");
 
-	if (audiodest == 1)
+	if (audiodest == 0)
+		audioplay_set_dest(audio_render, "hdmi");
+	else if (audiodest == 1)
 		audioplay_set_dest(audio_render, "local");
 	else
-		audioplay_set_dest(audio_render, "hdmi");
+		audioplay_set_dest(audio_render, "alsa");
 
 	set_tunnel(tunnel, video_decode, 131, video_scheduler, 10);
 	set_tunnel(tunnel + 1, video_scheduler, 11, video_render, 90);

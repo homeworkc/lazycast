@@ -35,11 +35,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "bcm_host.h"
 #include "ilclient.h"
-
+#include <alsa/asoundlib.h>
 
 
 typedef int int32_t;
-static const char *audio_dest[] = { "local", "hdmi" };
+static uint32_t audioplay_alsapcm_init(void);
+
+snd_pcm_t *pcm_dev = NULL;
+uint8_t is_alsa = 0;
 
 
 int32_t audioplay_create(ILCLIENT_T *client, COMPONENT_T** audio_render, COMPONENT_T **list, int listindex)
@@ -52,7 +55,6 @@ int32_t audioplay_create(ILCLIENT_T *client, COMPONENT_T** audio_render, COMPONE
 	OMX_ERRORTYPE error;
 	OMX_PARAM_PORTDEFINITIONTYPE param;
 	OMX_AUDIO_PARAM_PCMMODETYPE pcm;
-	int32_t s;
 
 	ret = 0;
 
@@ -132,21 +134,25 @@ int32_t audioplay_delete(COMPONENT_T *audio_render)
 
 int32_t audioplay_play_buffer(COMPONENT_T *audio_render, uint8_t *buffer, uint32_t length)
 {
-	OMX_BUFFERHEADERTYPE *hdr = ilclient_get_input_buffer(audio_render, 100, 0);
-	int32_t ret = -1;
+	if(is_alsa) {
+		
+	}
+	else {
+		OMX_BUFFERHEADERTYPE *hdr = ilclient_get_input_buffer(audio_render, 100, 0);
+		int32_t ret = -1;
 
-	if (hdr == NULL)
-		return ret;
+		if (hdr == NULL)
+			return ret;
 
-	OMX_ERRORTYPE error;
+		OMX_ERRORTYPE error;
 
-	hdr->nOffset = 0;
-	memcpy(hdr->pBuffer, buffer, length);
-	hdr->nFilledLen = length;
+		hdr->nOffset = 0;
+		memcpy(hdr->pBuffer, buffer, length);
+		hdr->nFilledLen = length;
 
-	error = OMX_EmptyThisBuffer(ILC_GET_HANDLE(audio_render), hdr);
-	assert(error == OMX_ErrorNone);
-
+		error = OMX_EmptyThisBuffer(ILC_GET_HANDLE(audio_render), hdr);
+		assert(error == OMX_ErrorNone);
+	}
 	return 0;
 }
 
@@ -157,20 +163,111 @@ int32_t audioplay_set_dest(COMPONENT_T *audio_render, const char *name)
 
 	if (name && strlen(name) < sizeof(ar_dest.sName))
 	{
-		OMX_ERRORTYPE error;
-		memset(&ar_dest, 0, sizeof(ar_dest));
-		ar_dest.nSize = sizeof(OMX_CONFIG_BRCMAUDIODESTINATIONTYPE);
-		ar_dest.nVersion.nVersion = OMX_VERSION;
-		strcpy((char *)ar_dest.sName, name);
+		printf("set audio backend :%s\n", name);
+		if(strcmp(name, "alsa") == 0) {
+			is_alsa = 1;
 
-		error = OMX_SetConfig(ILC_GET_HANDLE(audio_render), OMX_IndexConfigBrcmAudioDestination, &ar_dest);
-		assert(error == OMX_ErrorNone);
+			audioplay_alsapcm_init();
+		}
+		else {
+			is_alsa = 0;
+
+			OMX_ERRORTYPE error;
+			memset(&ar_dest, 0, sizeof(ar_dest));
+			ar_dest.nSize = sizeof(OMX_CONFIG_BRCMAUDIODESTINATIONTYPE);
+			ar_dest.nVersion.nVersion = OMX_VERSION;
+			strcpy((char *)ar_dest.sName, name);
+
+			error = OMX_SetConfig(ILC_GET_HANDLE(audio_render), OMX_IndexConfigBrcmAudioDestination, &ar_dest);
+			assert(error == OMX_ErrorNone);
+		}
 		success = 0;
 	}
 
 	return success;
 }
 
+static uint32_t audioplay_alsapcm_init(void)
+{
+	int err, retry_times;
+	unsigned int rate;
+	snd_pcm_hw_params_t *hwp;
+	snd_pcm_uframes_t buffer_size, period_size, period_size_max;
+
+	retry_times = 0;
+reopen:
+	printf("alsa pcm init ...\n");
+	err = snd_pcm_open(&pcm_dev, "default", SND_PCM_STREAM_PLAYBACK, 0);
+	if (err < 0) {
+		if(++retry_times > 2) {
+			goto alsa_error;
+		}
+		else {
+			usleep(300);
+			goto reopen;
+		}
+	}
+	retry_times = 0;
+
+	rate = 48000;
+	buffer_size = rate / 5;
+	period_size = buffer_size / 4;
+	period_size_max = buffer_size / 3;
+
+	printf("alsa open success\n");
+	snd_pcm_hw_params_alloca(&hwp);
+	snd_pcm_hw_params_any(pcm_dev, hwp);
+	err = snd_pcm_hw_params_set_channels(pcm_dev, hwp, 2);
+	if (err)
+		goto alsa_error;
+	err = snd_pcm_hw_params_set_access(pcm_dev, hwp, SND_PCM_ACCESS_RW_INTERLEAVED);
+	if (err)
+		goto alsa_error;
+	err = snd_pcm_hw_params_set_rate_near(pcm_dev, hwp, &rate, 0);
+	if (err)
+		goto alsa_error;
+	err = snd_pcm_hw_params_set_format(pcm_dev, hwp, SND_PCM_FORMAT_S16_LE);
+	if (err)
+		goto alsa_error;
+	err = snd_pcm_hw_params_set_period_size_max(pcm_dev, hwp, &period_size_max, 0);
+	if (err)
+		goto alsa_error;
+	err = snd_pcm_hw_params_set_buffer_size_near(pcm_dev, hwp, &buffer_size);
+	if (err)
+		goto alsa_error;
+	err = snd_pcm_hw_params_set_period_size_near(pcm_dev, hwp, &period_size, 0);
+	if (err) goto alsa_error;
+	err = snd_pcm_hw_params(pcm_dev, hwp);
+	if (err)
+		goto alsa_error;
+	printf("alsa config success\n");
+
+	int dir;
+	snd_pcm_hw_params_get_rate(hwp, &rate, &dir);
+	printf("rate = %d bps\n", rate);
+
+	snd_pcm_hw_params_get_period_time(hwp, &rate, &dir);
+	printf("period time = %d us\n", rate);
+
+	snd_pcm_hw_params_get_period_size(hwp, &period_size_max, &dir);
+	printf("period size = %d frames\n", (int)period_size_max);
+
+	snd_pcm_hw_params_get_buffer_time(hwp, &rate, &dir);
+	printf("buffer time = %d us\n", rate);
+
+	snd_pcm_hw_params_get_buffer_size(hwp, (snd_pcm_uframes_t *) &buffer_size);
+	printf("buffer size = %d frames\n", buffer_size);
+
+	snd_pcm_hw_params_get_periods(hwp, &rate, &dir);
+	printf("periods per buffer = %d frames\n", rate);
+
+	return 0;
+alsa_error:
+	if (pcm_dev)
+		snd_pcm_close(pcm_dev);
+
+	return 1;
+}
 
 uint32_t audioplay_get_latency(COMPONENT_T *audio_render)
 {

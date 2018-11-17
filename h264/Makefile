@@ -6,7 +6,7 @@ OMX_INC =  -I /opt/vc/include/IL
 OMX_ILCLIENT_INC = -I/opt/vc/src/hello_pi/libs/ilclient 
 INCLUDES = $(DMX_INC) $(EGL_INC) $(OMX_INC) $(OMX_ILCLIENT_INC)
 CFLAGS+= -DOMX_SKIP64BIT $(INCLUDES)  
-LDFLAGS+= -lilclient -lavformat -lavcodec -lavutil 
+LDFLAGS+= -lilclient -lavformat -lavcodec -lavutil -lasound
 
 include ./Makefile.include
 
