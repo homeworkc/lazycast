@@ -621,12 +621,12 @@ int main(int argc, char **argv)
 	
 	rtppacket* beg = malloc(sizeof(rtppacket));
 
+	bcm_host_init();
+
 	if (pthread_create(&npthread, NULL, addnullpacket, beg) != 0)
 		exit(1);
 	if (pthread_create(&dthread, NULL, video_decode_test, beg) != 0)
 		exit(1);
-
-	bcm_host_init();
 
 	if (pthread_join(npthread, NULL) != 0)
 		exit(1);

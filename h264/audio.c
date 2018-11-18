@@ -131,11 +131,16 @@ int32_t audioplay_delete(COMPONENT_T *audio_render)
 }
 
 
-
+#include <sys/time.h>
 int32_t audioplay_play_buffer(COMPONENT_T *audio_render, uint8_t *buffer, uint32_t length)
 {
 	if(is_alsa) {
-		
+		int pcmreturn;
+
+		while ((pcmreturn = snd_pcm_writei(pcm_dev, buffer, length>>2)) < 0) {
+			snd_pcm_prepare(pcm_dev);
+			printf("--:%u----\n", length);
+		}
 	}
 	else {
 		OMX_BUFFERHEADERTYPE *hdr = ilclient_get_input_buffer(audio_render, 100, 0);
@@ -197,7 +202,7 @@ static uint32_t audioplay_alsapcm_init(void)
 	retry_times = 0;
 reopen:
 	printf("alsa pcm init ...\n");
-	err = snd_pcm_open(&pcm_dev, "default", SND_PCM_STREAM_PLAYBACK, 0);
+	err = snd_pcm_open(&pcm_dev, "default", SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK);
 	if (err < 0) {
 		if(++retry_times > 2) {
 			goto alsa_error;
@@ -214,7 +219,7 @@ reopen:
 	period_size = buffer_size / 4;
 	period_size_max = buffer_size / 3;
 
-	printf("alsa open success\n");
+	
 	snd_pcm_hw_params_alloca(&hwp);
 	snd_pcm_hw_params_any(pcm_dev, hwp);
 	err = snd_pcm_hw_params_set_channels(pcm_dev, hwp, 2);
@@ -226,7 +231,7 @@ reopen:
 	err = snd_pcm_hw_params_set_rate_near(pcm_dev, hwp, &rate, 0);
 	if (err)
 		goto alsa_error;
-	err = snd_pcm_hw_params_set_format(pcm_dev, hwp, SND_PCM_FORMAT_S16_LE);
+	err = snd_pcm_hw_params_set_format(pcm_dev, hwp, SND_PCM_FORMAT_S16_BE);
 	if (err)
 		goto alsa_error;
 	err = snd_pcm_hw_params_set_period_size_max(pcm_dev, hwp, &period_size_max, 0);
@@ -261,11 +266,16 @@ reopen:
 	snd_pcm_hw_params_get_periods(hwp, &rate, &dir);
 	printf("periods per buffer = %d frames\n", rate);
 
+	printf("alsa init success\n");
+	
 	return 0;
+
 alsa_error:
 	if (pcm_dev)
 		snd_pcm_close(pcm_dev);
-
+	
+	printf("alsa init failed\n");
+	
 	return 1;
 }
 

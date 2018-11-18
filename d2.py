@@ -26,7 +26,7 @@ player_select = 2
 # 0: non-RPi systems. (using vlc)
 # 1: player1 has lower latency.
 # 2: player2 handles still images and sound better.
-sound_output_select = 2
+sound_output_select = 0
 # 0: HDMI sound output
 # 1: 3.5mm audio jack output
 # 2: alsa
