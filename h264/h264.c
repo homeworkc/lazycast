@@ -193,7 +193,6 @@ static void* addnullpacket(rtppacket* beg)
 		return 0;
 	}
 
-	
 
 	memset((char *)&addr1, 0, sizeof(addr1));
 	addr1.sin_family = AF_INET;
@@ -220,7 +219,7 @@ static void* addnullpacket(rtppacket* beg)
 	}
 
 
-	
+
 
 
 
@@ -312,7 +311,7 @@ static void* addnullpacket(rtppacket* beg)
 			hold = 0;
 
 		}
-		else if (numofpacket > 20)
+		else if (numofpacket > 14)
 		{
 			hold = 0;
 			printf("start:%d, end:%d\n", osn, head->seqnum);
@@ -321,20 +320,20 @@ static void* addnullpacket(rtppacket* beg)
 			sentseqnum = osn;
 
 		}
-		else if (idrsockport > 0 && (numofpacket == 12 || numofpacket == 16))
+		else if (idrsockport > 0 && (numofpacket == 12))
 		{
 			unsigned char topython[12];
 			if (sendto(fd2, topython, 12, 0, (struct sockaddr *)&addr2, addrlen) < 0)
 				perror("sendto error");
 			printf("idr:%d\n", numofpacket);
 		}
-		
+
 
 		if (numofpacket > 0 && !hold && osn == head->seqnum && oldhead != NULL)
 		{
 			oldhead->next = head;
 		}
-			
+
 
 
 		while (numofpacket > 0 && !hold)
@@ -344,7 +343,7 @@ static void* addnullpacket(rtppacket* beg)
 				hold = 1;
 				break;
 			}
-			
+
 			sentseqnum = osn;
 
 			osn = 0xFFFF & (osn + 1);
@@ -545,6 +544,28 @@ static int video_decode_test(rtppacket* beg)
 							{
 								shift += 20;
 							}
+							
+							//for (int k = shift; k < 188; k = k + 2)
+							//{
+							//	
+							//	int samp = (buffer[k]<<8)+buffer[k+1];
+							//	samp = samp > 32767 ? samp - 65536 : samp;
+							//	samp = samp *2;
+							//	if (samp > 32767)
+							//	{
+							//		samp = 32767;
+							//	}else if (samp < -32768)
+							//	{
+							//		samp = -32768;
+							//	}
+
+							//
+							//	//printf("%d\n",samp);
+
+							//	buffer[k + 1] = samp >> 8;
+							//	buffer[k] = samp & 0xFF;
+							//}
+
 							if (audioplay_play_buffer(audio_render, buffer + shift, 188 - shift) < 0)
 								printf("sound error\n");
 

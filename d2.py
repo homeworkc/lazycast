@@ -21,6 +21,7 @@ import threading
 from threading import Thread
 import time
 from time import sleep
+import sys
 ##################### Settings #####################
 player_select = 2
 # 0: non-RPi systems. (using vlc)
@@ -33,15 +34,27 @@ disable_1920_1080_60fps = 1
 
 ####################################################
 
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_address = ('192.168.101.80', 7236)
+sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+
+connectcounter = 0
+while True: 
+	try:
+		sock.connect(server_address)
+	except socket.error, e:
+		connectcounter = connectcounter + 1
+		if connectcounter == 20:
+			sock.close()
+			sys.exit(1)
+	else:
+		break
+
 idrsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 idrsock_address = ('127.0.0.1', 0)
 idrsock.bind(idrsock_address)
 addr, idrsockport = idrsock.getsockname()
 
-
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_address = ('192.168.101.80', 7236)
-sock.connect(server_address)
 
 data = (sock.recv(1000))
 print data
@@ -167,7 +180,8 @@ def launchplayer(player_select):
 		os.system('./player/player.bin '+str(idrsockport)+' '+str(sound_output_select)+' &')
 	elif player_select == 2:
 		os.system('./h264/h264.bin '+str(idrsockport)+' '+str(sound_output_select)+' &')
-
+	elif player_select == 3:
+		os.system('omxplayer rtp://0.0.0.0:1028 -n -1 --live &')
 
 launchplayer(player_select)
 
@@ -175,6 +189,7 @@ fcntl.fcntl(sock, fcntl.F_SETFL, os.O_NONBLOCK)
 fcntl.fcntl(idrsock, fcntl.F_SETFL, os.O_NONBLOCK)
 
 csnum = 102
+watchdog = 0
 while True:
 	try:
 		data = (sock.recv(1000))
@@ -187,6 +202,15 @@ while True:
 				err = e.args[0]
 				if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
 					sleep(0.01)
+					watchdog = watchdog + 1
+					if watchdog == 70/0.01:
+						os.system('pkill control.bin')
+						os.system('pkill controlhidc.bin')
+						os.system('pkill vlc')
+						os.system('pkill player.bin')
+						os.system('pkill h264.bin')
+						sleep(1)
+						break
 				else:
 					sys.exit(1)
 			else:
@@ -207,6 +231,7 @@ while True:
 			sys.exit(1)
 	else:
 		print data
+		watchdog = 0
 		if len(data)==0 or 'wfd_trigger_method: TEARDOWN' in data:
 			os.system('pkill control.bin')
 			os.system('pkill controlhidc.bin')

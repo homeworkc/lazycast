@@ -16,7 +16,7 @@ then
 	echo "already on"
 
 else
-	sudo wpa_cli p2p_find
+	sudo wpa_cli p2p_find type=progessive
 	sudo wpa_cli set device_name lazycast
 	sudo wpa_cli set device_type 7-0050F204-1
 	sudo wpa_cli set p2p_go_ht40 1
@@ -51,10 +51,11 @@ printf "option lease 60">>udhcpd.conf
 sleep 3
 sudo udhcpd ./udhcpd.conf 
 echo "The display is ready"
-sudo wpa_cli -i$p2pinterface wps_pin any
-pingresult=$(ping 192.168.101.80 -I $p2pinterface -c 1 -W 1)
-while [ `echo "${pingresult}" | grep -c "bytes from"` -lt 1 ] 
+while :
 do
-    pingresult=$(ping 192.168.101.80 -I $p2pinterface -c 1 -W 1)
+	echo "PIN:"	
+	sudo wpa_cli -i$p2pinterface wps_pin any
+	echo ""
+	./d2.py
 done
-./d2.py
+

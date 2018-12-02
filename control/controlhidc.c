@@ -367,6 +367,8 @@ int main(int argc, char **argv)
 			}
 			else if (buttonnum < 6)
 			{
+				mouseinput[10] = 0;
+				mouseinput[11] = 0;
 				mouseinput[12] = buttonnum == 4 ? 1 : -1;
 			}
 			
@@ -403,6 +405,8 @@ int main(int argc, char **argv)
 			}
 			else if (buttonnum < 6)
 			{
+				mouseinput[10] = 0;
+				mouseinput[11] = 0;
 				mouseinput[12] = 0;
 			}
 #ifdef fdsend
