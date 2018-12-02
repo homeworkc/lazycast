@@ -49,12 +49,22 @@ printf "interface	$p2pinterface\n">>udhcpd.conf
 printf "option subnet 255.255.255.0\n">>udhcpd.conf
 printf "option lease 60">>udhcpd.conf
 sleep 3
-sudo udhcpd ./udhcpd.conf 
+sudo killall udhcpd
+sudo udhcpd ./udhcpd.conf
+
+
+set DISPLAY=:0.0
 echo "The display is ready"
-sudo wpa_cli -i$p2pinterface wps_pin any
+pinnum=`sudo wpa_cli -i$p2pinterface wps_pin any`
+./pinnum.py $pinnum > /tmp/pincode.txt &
+
 pingresult=$(ping 192.168.101.80 -I $p2pinterface -c 1 -W 1)
 while [ `echo "${pingresult}" | grep -c "bytes from"` -lt 1 ] 
 do
     pingresult=$(ping 192.168.101.80 -I $p2pinterface -c 1 -W 1)
 done
+
+subpid=`cat /tmp/pincode.txt`
+sudo kill -9 $subpid
+
 ./d2.py
