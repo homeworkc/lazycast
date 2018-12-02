@@ -32,11 +32,12 @@ sound_output_select = 0
 # 1: 3.5mm audio jack output
 # 2: alsa
 disable_1920_1080_60fps = 1
+enable_mouse_keyboard = 1
 
 ####################################################
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_address = ('192.168.101.80', 7236)
+server_address = ('192.168.173.80', 7236)
 sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
 connectcounter = 0
@@ -122,13 +123,13 @@ def uibcstart(sock, data):
 			uibcport = uibcport.split('=')
 			uibcport = uibcport[1]
 			print 'uibcport:'+uibcport+"\n"
-			# if 'none' not in uibcport:
-				# os.system('pkill control.bin')
-				# os.system('pkill controlhidc.bin')
-				# if('hidc_cap_list=none' not in entry):
-					# os.system('./control/controlhidc.bin '+ uibcport + ' &')
-				# elif('generic_cap_list=none' not in entry):
-					# os.system('./control/control.bin '+ uibcport + ' &')
+			if 'none' not in uibcport and enable_mouse_keyboard == 1:
+				os.system('pkill control.bin')
+				os.system('pkill controlhidc.bin')
+				if('hidc_cap_list=none' not in entry):
+					os.system('./control/controlhidc.bin '+ uibcport + ' &')
+				elif('generic_cap_list=none' not in entry):
+					os.system('./control/control.bin '+ uibcport + ' &')
 
 uibcstart(sock,data)
 

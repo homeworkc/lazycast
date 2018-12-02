@@ -196,7 +196,7 @@ static void* addnullpacket(rtppacket* beg)
 
 	memset((char *)&addr1, 0, sizeof(addr1));
 	addr1.sin_family = AF_INET;
-	addr1.sin_addr.s_addr = inet_addr("192.168.101.1");
+	addr1.sin_addr.s_addr = inet_addr("192.168.173.1");
 	addr1.sin_port = htons(1028);
 
 	if (bind(fd, (struct sockaddr *)&addr1, sizeof(addr1)) < 0)

@@ -71,7 +71,7 @@ int main(int argc, char **argv)
 
 	memset(&serveraddr, 0, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
-	serveraddr.sin_addr.s_addr = inet_addr("192.168.101.80");
+	serveraddr.sin_addr.s_addr = inet_addr("192.168.173.80");
 	serveraddr.sin_port = htons(atoi(argv[1]));
 
 	int flag = 1;

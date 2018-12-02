@@ -216,7 +216,7 @@ int main(int argc, char **argv)
 		exit(-1);
 	}
 	port = atoi(argv[1]);
-	printf("connect to 192.168.101.80:%u\n", port);
+	printf("connect to 192.168.173.80:%u\n", port);
 
 	if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
 	{
@@ -230,7 +230,7 @@ int main(int argc, char **argv)
 
 	memset(&serveraddr, 0, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
-	serveraddr.sin_addr.s_addr = inet_addr("192.168.101.80");
+	serveraddr.sin_addr.s_addr = inet_addr("192.168.173.80");
 	serveraddr.sin_port = htons(port);
 
 	int flag = 1;

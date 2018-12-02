@@ -1,6 +1,6 @@
 
-OBJS = control.o
-BIN = control.bin
+OBJS = controlhidc.o
+BIN = controlhidc.bin
 
 
 CFLAGS = -O2 -Wall

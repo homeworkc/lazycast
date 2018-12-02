@@ -42,18 +42,15 @@ fi
 p2pinterface=$(echo "${ain}" | grep "p2p-wl" | grep -v "interface")
 echo $p2pinterface
 
-sudo ifconfig $p2pinterface 192.168.101.1
-printf "start	192.168.101.80\n">udhcpd.conf
-printf "end	192.168.101.80\n">>udhcpd.conf
+sudo ifconfig $p2pinterface 192.168.173.1
+printf "start	192.168.173.80\n">udhcpd.conf
+printf "end	192.168.173.80\n">>udhcpd.conf
 printf "interface	$p2pinterface\n">>udhcpd.conf
 printf "option subnet 255.255.255.0\n">>udhcpd.conf
 printf "option lease 60">>udhcpd.conf
 sleep 3
 sudo killall udhcpd
 sudo udhcpd ./udhcpd.conf
-
-
-set DISPLAY=:0.0
 echo "The display is ready"
 while :
 do
