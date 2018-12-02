@@ -39,6 +39,7 @@ enable_mouse_keyboard = 1
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = ('192.168.173.80', 7236)
 sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 connectcounter = 0
 while True: 
