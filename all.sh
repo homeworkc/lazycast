@@ -49,7 +49,11 @@ printf "interface	$p2pinterface\n">>udhcpd.conf
 printf "option subnet 255.255.255.0\n">>udhcpd.conf
 printf "option lease 60">>udhcpd.conf
 sleep 3
-sudo udhcpd ./udhcpd.conf 
+sudo killall udhcpd
+sudo udhcpd ./udhcpd.conf
+
+
+set DISPLAY=:0.0
 echo "The display is ready"
 while :
 do

@@ -30,6 +30,7 @@ player_select = 2
 sound_output_select = 0
 # 0: HDMI sound output
 # 1: 3.5mm audio jack output
+# 2: alsa
 disable_1920_1080_60fps = 1
 
 ####################################################
@@ -52,25 +53,31 @@ while True:
 
 idrsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 idrsock_address = ('127.0.0.1', 0)
+idrsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 idrsock.bind(idrsock_address)
 addr, idrsockport = idrsock.getsockname()
 
+data = (sock.recv(1000))
+print "---M1--->\n" + data
+s_data = 'RTSP/1.0 200 OK\r\nCSeq: 1\r\n\Public: org.wfa.wfd1.0, SET_PARAMETER, GET_PARAMETER\r\n\r\n'
+print "<--------\n" + s_data
+sock.sendall(s_data)
+
+
+# M2
+s_data = 'OPTIONS * RTSP/1.0\r\nCSeq: 100\r\nRequire: org.wfa.wfd1.0\r\n\r\n'
+print "<---M2---\n" + s_data
+sock.sendall(s_data)
 
 data = (sock.recv(1000))
-print data
-
-sock.sendall('RTSP/1.0 200 OK\r\nCSeq: 1\r\n\Public: org.wfa.wfd1.0, SET_PARAMETER, GET_PARAMETER\r\n\r\n')
-sock.sendall('OPTIONS * RTSP/1.0\r\nCSeq: 100\r\nRequire: org.wfa.wfd1.0\r\n\r\n')
+print "-------->\n" + data
 
 
-data = (sock.recv(1000))
-print data
-
+# M3
 data=(sock.recv(1000))
-print data
+print "---M3--->\n" + data
 
 msg = 'wfd_client_rtp_ports: RTP/AVP/UDP;unicast 1028 0 mode=play\r\n'
-
 if player_select == 2:
 	msg = msg + 'wfd_audio_codecs: LPCM 00000002 00\r\n'
 else:
@@ -91,15 +98,17 @@ msg = msg +'wfd_3d_video_formats: none\r\n'\
 
 
 m3resp ='RTSP/1.0 200 OK\r\nCSeq: 2\r\n'+'Content-Type: text/parameters\r\nContent-Length: '+str(len(msg))+'\r\n\r\n'+msg
-print m3resp
+print "<--------\n" + m3resp
 sock.sendall(m3resp)
 
-print 'm3 success\n'
 
-
+# M4
 data=(sock.recv(1000))
-print data
-sock.sendall('RTSP/1.0 200 OK\r\nCSeq: 3\r\n\r\n')
+print "---M4--->\n" + data
+
+s_data = 'RTSP/1.0 200 OK\r\nCSeq: 3\r\n\r\n'
+print "<--------\n" + s_data
+sock.sendall(s_data)
 
 def uibcstart(sock, data):
 	#print data
@@ -112,36 +121,36 @@ def uibcstart(sock, data):
 			uibcport = uibcport[0]
 			uibcport = uibcport.split('=')
 			uibcport = uibcport[1]
-			print 'uibcport:'+uibcport
-			if 'none' not in uibcport:
-				os.system('pkill control.bin')
-				os.system('pkill controlhidc.bin')
-				if('hidc_cap_list=none' not in entry):
-					os.system('./control/controlhidc.bin '+ uibcport + ' &')
-				elif('generic_cap_list=none' not in entry):
-					os.system('./control/control.bin '+ uibcport + ' &')
+			print 'uibcport:'+uibcport+"\n"
+			# if 'none' not in uibcport:
+				# os.system('pkill control.bin')
+				# os.system('pkill controlhidc.bin')
+				# if('hidc_cap_list=none' not in entry):
+					# os.system('./control/controlhidc.bin '+ uibcport + ' &')
+				# elif('generic_cap_list=none' not in entry):
+					# os.system('./control/control.bin '+ uibcport + ' &')
 
 uibcstart(sock,data)
 
 
-
-
-print 'm4 success\n'
-
+# M5
 data=(sock.recv(1000))
-print data
-sock.sendall('RTSP/1.0 200 OK\r\nCSeq: 4\r\n\r\n')
+print "---M5--->\n" + data
 
-print 'm5 success\n'
+s_data = 'RTSP/1.0 200 OK\r\nCSeq: 4\r\n\r\n'
+print "<--------\n" + s_data
+sock.sendall(s_data)
 
+
+# M6
 m6req ='SETUP rtsp://192.168.101.80/wfd1.0/streamid=0 RTSP/1.0\r\n'\
 +'CSeq: 101\r\n'\
 +'Transport: RTP/AVP/UDP;unicast;client_port=1028\r\n\r\n'
-print m6req
-
+print "<---M6---\n" + m6req
 sock.sendall(m6req)
+
 data=(sock.recv(1000))
-print data
+print "-------->\n" + data
 
 paralist=data.split(';')
 print paralist
@@ -155,17 +164,19 @@ paralist=data.split( )
 position=paralist.index('Session:')+1
 sessionid=paralist[position]
 
-print 'm6 success\n'
 
-
+# M7
 m7req ='PLAY rtsp://192.168.101.80/wfd1.0/streamid=0 RTSP/1.0\r\n'\
 +'CSeq: 102\r\n'\
 +'Session: '+str(sessionid)+'\r\n\r\n'
-print m7req
-
+print "<---M7---\n" + m7req
 sock.sendall(m7req)
+
 data=(sock.recv(1000))
-print data
+print "-------->\n" + data
+
+print "---- Negotiation successful ----"
+
 
 if (os.uname()[-1][:4] != "armv"):
 	player_select = 0

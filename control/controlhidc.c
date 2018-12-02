@@ -209,6 +209,15 @@ int main(int argc, char **argv)
 {
 #ifdef fdsend
 	int fd;
+	short port = 0;
+	
+	if(argc != 2) {
+		printf("Usage: %s <port>\n", argv[0]);
+		exit(-1);
+	}
+	port = atoi(argv[1]);
+	printf("connect to 192.168.101.80:%u\n", port);
+
 	if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
 	{
 		printf("socket failed!");
@@ -222,7 +231,7 @@ int main(int argc, char **argv)
 	memset(&serveraddr, 0, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_addr.s_addr = inet_addr("192.168.101.80");
-	serveraddr.sin_port = htons(50000);
+	serveraddr.sin_port = htons(port);
 
 	int flag = 1;
 
@@ -230,7 +239,7 @@ int main(int argc, char **argv)
 
 	if (connect(fd, (struct sockaddr *)&serveraddr,sizeof(serveraddr)) < 0)
 	{
-		perror("connect failed!");
+		perror("connect failed !");
 		exit(1);
 	}
 #endif
