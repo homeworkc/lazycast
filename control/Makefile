@@ -1,6 +1,6 @@
 
-OBJS = controlhidc.o
-BIN = controlhidc.bin
+OBJS = controlhidc.o control.o
+BIN = controlhidc.bin control.bin
 
 
 CFLAGS = -O2 -Wall
@@ -12,5 +12,5 @@ all: $(BIN) $(LIB)
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) -g -c $< -o $@ 
 
-%.bin: $(OBJS)
-	$(CC) -o $@  $(OBJS) $(LDFLAGS) 
+%.bin: %.o
+	$(CC) -o $@ $< $(LDFLAGS)
