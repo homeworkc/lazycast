@@ -11,6 +11,7 @@ Note: Two in-house players are written for Raspberry Pi 3. You may use omxplayer
 
 # Preparation
 Install missing packages.  
+Download the latest release from https://github.com/homeworkc/lazycast/releases.  
 Make all.sh, d2.py, player.bin, h264.bin, control.bin, and controlhidc.bin executable: 
 ```
 chmod +x all.sh
@@ -30,7 +31,6 @@ If backchannel control is supported by the source, keyboard and mouse input on P
 It is recommended to initiate the termination of the receiver on the source side. These user controls are often near the pairing controls on the source device. You can utilize the backchannel feature to remotely control the source device in order to close lazycast.  
 
 # Tips
-The pairing process (entering PIN) is needed after every Raspberry Pi reboot. Try clearing the 'lazycast' information on the source device before re-pairing if you run into pairing problems.  
 Initial pairings after Raspberry Pi reboot may be difficault due to ARP/routing/power-saving mechanisms. Try turning off/on WiFi interfaces on the source device and re-pairing. If all else fails, reboot both the source and Pi and pair them upon boot.  
 The PIN number will be invalid after about 2 mins. Use the newest PIN number.  
 Set the resolution on the source side. lazycast advertises all possible resolutions regardless of the current rendering resolution. Therefore, you may want to change the resolution (on the source) to match the actual resolution of the display connecting to Pi.  
@@ -39,6 +39,7 @@ The maximum resolutions supported are 1920x1080p60 and 1920x1200p30. The GPU on 
 After Pi connects to the source, it has an IP address of ``192.168.173.1`` and this connection can be reused for other purposes like SSH or USB over IP. 
 
 # Known issues
+lazycast tries to remember the pairing credentials so that entering the PIN is only needed once for each device. However, this feature does not seem to work properly all the time with the latest wpa_supplicant version. (There are some issues with creating a persistent GO group with wpa_cli.) Therefore, re-pairing may be needed after every Raspberry Pi reboot. Try clearing the 'lazycast' information on the source device before re-pairing if you run into pairing problems.  
 Latency: Limited by the implementation of the rtp player used. (In VLC, latency can be reduced from 1200 to 300ms by lowering the network cache value.)  
 The on-board WiFi chip on Pi 3 only supports 2.4GHz. Therefore, devices/protocols that use 5.8GHz for P2P communication (e.g. early generations of WiDi) are not ("out of the box") supported.  
 Due to the overcrowded nature of the 2.4GHz spectrum and the use of unreliable rtp transmission, you may experience some video glitching/audio stuttering. The in-house players employ several mechanisms to conceal transmission error, but it may still be noticeable in challenging wireless environments.  
