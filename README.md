@@ -13,6 +13,7 @@ Note: Two in-house players are written for Raspberry Pi 3. You may use omxplayer
 Install missing packages.  
 Download the latest release from https://github.com/homeworkc/lazycast/releases.  
 Make all.sh, d2.py, player.bin, h264.bin, control.bin, and controlhidc.bin executable: 
+
 ```
 chmod +x all.sh
 chmod +x d2.py
@@ -24,6 +25,19 @@ cd ../control
 chmod +x control.bin
 chmod +x controlhidc.bin
 ```
+# Installation for [Raspbian](https://www.raspberrypi.org/downloads/raspbian/) distribution
+
+```
+sudo apt install net-tools python udhcpd
+sudo apt install libx11-dev libasound2-dev libavformat-dev libavcodec-dev
+cd /opt/vc/src/hello_pi/hello_video
+make
+cd /opt/vc/src/hello_pi/libs/ilclient/
+make
+```
+Then follow the steps from the previous section.
+
+
 # Usage
 Run `./all.sh` to initiate lazycast receiver. Wait until the "The display is ready" message.  
 Then, search for the wireless display named "lazycast" on the source device you want to cast. Use the PIN number under the "The display is ready" message if the device is asking for a WPS PIN number.  
