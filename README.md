@@ -26,7 +26,7 @@ chmod +x control.bin
 chmod +x controlhidc.bin
 ```
 # Installation for [Raspbian](https://www.raspberrypi.org/downloads/raspbian/) distribution
-
+The following steps are only required if you want to compile the binary from source.
 ```
 sudo apt install net-tools python udhcpd
 sudo apt install libx11-dev libasound2-dev libavformat-dev libavcodec-dev
