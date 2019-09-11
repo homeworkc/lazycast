@@ -42,7 +42,7 @@ else
 			ain="$(sudo wpa_cli interface)"
 			echo "$ain"
 		done
-		sleep 5
+		sleep 2
 		ain="$(sudo wpa_cli interface)"
                 echo "$ain"
 	done
