@@ -63,7 +63,7 @@ sudo udhcpd ./udhcpd.conf
 echo "The display is ready"
 while :
 do
-	echo "Your device is called "$(uname -n)"."
+	echo "Your device is called: "$(uname -n)""
 	echo "PIN:"	
 	sudo wpa_cli -i$p2pinterface wps_pin any
 	echo ""
