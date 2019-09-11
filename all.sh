@@ -17,7 +17,7 @@ then
 
 else
 	sudo wpa_cli p2p_find type=progessive
-	sudo wpa_cli set device_name lazycast
+	sudo wpa_cli set device_name "$(uname -n)"
 	sudo wpa_cli set device_type 7-0050F204-1
 	sudo wpa_cli set p2p_go_ht40 1
 	sudo wpa_cli wfd_subelem_set 0 00060151022a012c
