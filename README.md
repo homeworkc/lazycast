@@ -10,7 +10,8 @@ Note: udhcpd is a DHCP server for Ubuntu and Debian.
 Note: Two in-house players are written for Raspberry Pi 3. You may use omxplayer or vlc on other platforms.
 
 # Preparation
-Install missing packages.  
+**The wpa_supplicant installed in the latest Raspbian distribution does not seem to work properly. (See [here](https://www.reddit.com/r/linux4noobs/comments/c5qila/want_to_downgrade_wpa_supplicant/).) For Raspbian Buster, try downgrading the ``wpasupplicant`` package to the version for Raspbian Stretch.**  
+Install missing packages:  
 ```
 sudo apt install udhcpd
 ```
@@ -43,13 +44,12 @@ Then follow the steps from the previous section.
 # Usage
 Run `./all.sh` to initiate lazycast receiver. Wait until the "The display is ready" message.
 The name of your device will also be displayed on the pi.
-Then, search for the wireless display on the source device you want to cast. Use the PIN number under the "The display is ready" message if the device is asking for a WPS PIN number.  
+Then, search for the wireless display on the source device you want to cast. The default PIN number is ``31415926``.  
 If backchannel control is supported by the source, keyboard and mouse input on Pi are redirected to the source as remote controls.  
 It is recommended to initiate the termination of the receiver on the source side. These user controls are often near the pairing controls on the source device. You can utilize the backchannel feature to remotely control the source device in order to close lazycast.  
 
 # Tips
 Initial pairings after Raspberry Pi reboot may be difficault due to ARP/routing/power-saving mechanisms. Try turning off/on WiFi interfaces on the source device and re-pairing. If all else fails, reboot both the source and Pi and pair them upon boot.  
-The PIN number will be invalid after about 2 mins. Use the newest PIN number.  
 Set the resolution on the source side. lazycast advertises all possible resolutions regardless of the current rendering resolution. Therefore, you may want to change the resolution (on the source) to match the actual resolution of the display connecting to Pi.  
 Modify parameters in the "settings" section in ``d2.py`` to change the sound output port (hdmi/3.5mm) and preferred player.  
 The maximum resolutions supported are 1920x1080p60 and 1920x1200p30. The GPU on Pi may struggle to handle 1920x1080p60, which results in high latency. In this case, reduce the FPS to 1920x1080p50.  
