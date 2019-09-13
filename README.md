@@ -39,8 +39,9 @@ Then follow the steps from the previous section.
 
 
 # Usage
-Run `./all.sh` to initiate lazycast receiver. Wait until the "The display is ready" message.  
-Then, search for the wireless display named "lazycast" on the source device you want to cast. Use the PIN number under the "The display is ready" message if the device is asking for a WPS PIN number.  
+Run `./all.sh` to initiate lazycast receiver. Wait until the "The display is ready" message.
+The name of your device will also be displayed on the pi.
+Then, search for the wireless display on the source device you want to cast. Use the PIN number under the "The display is ready" message if the device is asking for a WPS PIN number.  
 If backchannel control is supported by the source, keyboard and mouse input on Pi are redirected to the source as remote controls.  
 It is recommended to initiate the termination of the receiver on the source side. These user controls are often near the pairing controls on the source device. You can utilize the backchannel feature to remotely control the source device in order to close lazycast.  
 
