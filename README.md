@@ -33,8 +33,8 @@ cd ../control
 chmod +x control.bin
 chmod +x controlhidc.bin
 ```
-# Installation for [Raspbian](https://www.raspberrypi.org/downloads/raspbian/) distribution
-The following steps are only required if you want to compile the binary from source.
+# Compile from Source
+The following steps are only required if you want to compile the binaries from source.
 ```
 sudo apt install libx11-dev libasound2-dev libavformat-dev libavcodec-dev
 cd /opt/vc/src/hello_pi/libs/ilclient/
