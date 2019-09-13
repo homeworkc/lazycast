@@ -17,7 +17,7 @@ then
 
 else
 	sudo wpa_cli p2p_find type=progessive
-	sudo wpa_cli set device_name "$(uname -n)"
+	sudo wpa_cli set device_name lazycast_on_"$(uname -n)"
 	sudo wpa_cli set device_type 7-0050F204-1
 	sudo wpa_cli set p2p_go_ht40 1
 	sudo wpa_cli wfd_subelem_set 0 00060151022a012c
@@ -42,7 +42,7 @@ else
 			ain="$(sudo wpa_cli interface)"
 			echo "$ain"
 		done
-		sleep 2
+		sleep 5
 		ain="$(sudo wpa_cli interface)"
                 echo "$ain"
 	done
@@ -61,11 +61,11 @@ printf "option lease 60">>udhcpd.conf
 sleep 3
 sudo udhcpd ./udhcpd.conf 
 echo "The display is ready"
+echo "Your device is called: lazycast_on_"$(uname -n)""
 while :
-do
-	echo "Your device is called: "$(uname -n)""
+do	
 	echo "PIN:"	
-	sudo wpa_cli -i$p2pinterface wps_pin any
+	sudo wpa_cli -i$p2pinterface wps_pin any 31415926
 	echo ""
 	./d2.py
 done

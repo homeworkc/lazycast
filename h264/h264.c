@@ -199,6 +199,14 @@ static void* addnullpacket(rtppacket* beg)
 	addr1.sin_addr.s_addr = inet_addr("192.168.173.1");
 	addr1.sin_port = htons(1028);
 
+	struct timeval tv;
+	tv.tv_sec = 10;
+	if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO,&tv,sizeof(tv)) < 0) 
+	{
+		perror("cannot set timeout\n");
+		return 0;
+	}
+
 	if (bind(fd, (struct sockaddr *)&addr1, sizeof(addr1)) < 0)
 	{
 		perror("bind failed");
@@ -253,11 +261,17 @@ static void* addnullpacket(rtppacket* beg)
 		rtppacket* p1 = malloc(sizeof(rtppacket));
 		p1->buf = malloc(2048 * sizeof(unsigned char));
 		p1->recvlen = recvfrom(fd, p1->buf, 2048, 0, (struct sockaddr *)&sourceaddr, &addrlen);
-		if (p1->recvlen <= 0)
+		if (p1->recvlen == 0)
 		{
 			free(p1->buf);
 			free(p1);
 			continue;
+		}else if(p1->recvlen < 0)
+		{
+			const char topython[] = "recv timeout";
+			if (sendto(fd2, topython, sizeof(topython), 0, (struct sockaddr *)&addr2, addrlen) < 0)
+				perror("recv timeout");
+			exit(1);
 		}
 
 		p1->seqnum = (p1->buf[2] << 8) + p1->buf[3];
@@ -322,8 +336,8 @@ static void* addnullpacket(rtppacket* beg)
 		}
 		else if (idrsockport > 0 && (numofpacket == 12))
 		{
-			unsigned char topython[12];
-			if (sendto(fd2, topython, 12, 0, (struct sockaddr *)&addr2, addrlen) < 0)
+			const char topython[] = "send idr";
+			if (sendto(fd2, topython, sizeof(topython), 0, (struct sockaddr *)&addr2, addrlen) < 0)
 				perror("sendto error");
 			printf("idr:%d\n", numofpacket);
 		}
@@ -547,26 +561,7 @@ static int video_decode_test(rtppacket* beg)
 								shift += 20;
 							}
 							
-							//for (int k = shift; k < 188; k = k + 2)
-							//{
-							//	
-							//	int samp = (buffer[k]<<8)+buffer[k+1];
-							//	samp = samp > 32767 ? samp - 65536 : samp;
-							//	samp = samp *2;
-							//	if (samp > 32767)
-							//	{
-							//		samp = 32767;
-							//	}else if (samp < -32768)
-							//	{
-							//		samp = -32768;
-							//	}
-
-							//
-							//	//printf("%d\n",samp);
-
-							//	buffer[k + 1] = samp >> 8;
-							//	buffer[k] = samp & 0xFF;
-							//}
+							
 
 							if (audioplay_play_buffer(audio_render, buffer + shift, 188 - shift) < 0)
 								printf("sound error\n");

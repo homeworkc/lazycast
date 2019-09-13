@@ -210,7 +210,7 @@ while True:
 		err = e.args[0]
 		if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
 			try:
-				dontcare = (idrsock.recv(1000))
+				datafromc = idrsock.recv(1000)
 			except socket.error, e:
 				err = e.args[0]
 				if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
@@ -227,18 +227,27 @@ while True:
 				else:
 					sys.exit(1)
 			else:
-				csnum = csnum + 1
-				msg = 'wfd-idr-request\r\n'
-				idrreq ='SET_PARAMETER rtsp://localhost/wfd1.0 RTSP/1.0\r\n'\
-				+'Content-Length: '+str(len(msg))+'\r\n'\
-				+'Content-Type: text/parameters\r\n'\
-				+'CSeq: '+str(csnum)+'\r\n\r\n'\
-				+msg
-
-
-				print idrreq
-
-				sock.sendall(idrreq)
+				print 'ags8jgajdgkajsdlfj;asdkfasdf'+datafromc
+				elemfromc = datafromc.split(' ')				
+				if elemfromc[0] == 'recv':
+					os.system('pkill control.bin')
+					os.system('pkill controlhidc.bin')
+					os.system('pkill vlc')
+					os.system('pkill player.bin')
+					os.system('pkill h264.bin')
+					sleep(1)
+					break
+				else:
+					csnum = csnum + 1
+					msg = 'wfd-idr-request\r\n'
+					idrreq ='SET_PARAMETER rtsp://localhost/wfd1.0 RTSP/1.0\r\n'\
+					+'Content-Length: '+str(len(msg))+'\r\n'\
+					+'Content-Type: text/parameters\r\n'\
+					+'CSeq: '+str(csnum)+'\r\n\r\n'\
+					+msg
+	
+					print idrreq
+					sock.sendall(idrreq)
 
 		else:
 			sys.exit(1)
