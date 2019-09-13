@@ -10,7 +10,7 @@ Note: udhcpd is a DHCP server for Ubuntu and Debian.
 Note: Two in-house players are written for Raspberry Pi 3. You may use omxplayer or vlc on other platforms.
 
 # Preparation
-**The wpa_supplicant installed in the latest Raspbian distribution does not seem to work properly. (See [here](https://www.reddit.com/r/linux4noobs/comments/c5qila/want_to_downgrade_wpa_supplicant/).) For Raspbian Buster, try downgrading the ``wpasupplicant`` package to the version for Raspbian Stretch.**  
+**The wpa_supplicant installed in the latest Raspbian distribution does not seem to work properly. (See [this](https://www.reddit.com/r/linux4noobs/comments/c5qila/want_to_downgrade_wpa_supplicant/).) For Raspbian Buster, try downgrading the ``wpasupplicant`` package to the version for Raspbian Stretch.**  
 Install missing packages:  
 ```
 sudo apt install udhcpd
