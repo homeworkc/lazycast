@@ -68,7 +68,7 @@ Devices may not fully support backchannel control and some keystrokes/clicks wil
 HDCP(content protection): Neither the key nor the hardware is available on Pi and therefore is not supported.  
 
 # Start on boot
-Append this line to ``~/.config/lxsession/LXDE-pi/autostart``:
+Append this line to ``/etc/xdg/lxsession/LXDE-pi/autostart``:
 ```
 @lxterminal -l --working-directory=<absolute path of lazycast> -e ./all.sh
 ```
