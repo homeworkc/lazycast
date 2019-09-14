@@ -261,7 +261,7 @@ reopen:
 	printf("buffer time = %d us\n", rate);
 
 	snd_pcm_hw_params_get_buffer_size(hwp, (snd_pcm_uframes_t *) &buffer_size);
-	printf("buffer size = %d frames\n", buffer_size);
+	printf("buffer size = %ld frames\n", buffer_size);
 
 	snd_pcm_hw_params_get_periods(hwp, &rate, &dir);
 	printf("periods per buffer = %d frames\n", rate);

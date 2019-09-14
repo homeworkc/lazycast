@@ -33,14 +33,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unistd.h>
 #include <string.h>
 #include <pthread.h>
-#include <stdatomic.h>
+#include <atomic>
 
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-#include "bcm_host.h"
-#include "ilclient.h"
-#include "audio.h"
+extern "C"
+{
+	#include "bcm_host.h"
+	#include "ilclient.h"
+	#include "audio.h"
+}
 
 #define here() printf("line:%d\n",__LINE__);
 
@@ -52,7 +55,7 @@ typedef struct srtppacket
 	struct srtppacket* next;
 } rtppacket;
 
-atomic_int numofnode;
+std::atomic_int numofnode;
 
 
 int largers(int a, int b)
@@ -173,7 +176,7 @@ int sendtodecoder(COMPONENT_T *video_decode, COMPONENT_T *video_scheduler, COMPO
 		if (OMX_EmptyThisBuffer(ILC_GET_HANDLE(video_decode), buf) != OMX_ErrorNone)
 			return -6;
 	}
-
+	return 0;
 }
 
 
@@ -233,7 +236,7 @@ static void* addnullpacket(rtppacket* beg)
 
 	while (1)
 	{
-		beg->buf = malloc(2048 * sizeof(unsigned char));
+		beg->buf = (unsigned char*)malloc(2048 * sizeof(unsigned char));
 		beg->recvlen = recvfrom(fd, beg->buf, 2048, 0, (struct sockaddr *)&sourceaddr, &addrlen);
 		if (beg->recvlen <= 0)
 		{
@@ -258,8 +261,8 @@ static void* addnullpacket(rtppacket* beg)
 
 	while (1)
 	{
-		rtppacket* p1 = malloc(sizeof(rtppacket));
-		p1->buf = malloc(2048 * sizeof(unsigned char));
+		rtppacket* p1 = (rtppacket*)malloc(sizeof(rtppacket));
+		p1->buf = (unsigned char*)malloc(2048 * sizeof(unsigned char));
 		p1->recvlen = recvfrom(fd, p1->buf, 2048, 0, (struct sockaddr *)&sourceaddr, &addrlen);
 		if (p1->recvlen == 0)
 		{
@@ -364,7 +367,7 @@ static void* addnullpacket(rtppacket* beg)
 			oldhead = head;
 			head = head->next;
 			numofpacket--;
-			atomic_fetch_add(&numofnode, 1);
+			std::atomic_fetch_add(&numofnode, 1);
 
 		}
 
@@ -373,7 +376,7 @@ static void* addnullpacket(rtppacket* beg)
 }
 int audiodest = 0;
 
-static int video_decode_test(rtppacket* beg)
+static void* video_decode_test(rtppacket* beg)
 {
 	OMX_VIDEO_PARAM_PORTFORMATTYPE format;
 	OMX_TIME_CONFIG_CLOCKSTATETYPE cstate;
@@ -388,27 +391,32 @@ static int video_decode_test(rtppacket* beg)
 
 
 	if ((client = ilclient_init()) == NULL)
-		return -3;
+		// return -3;
+		return NULL;
 
 	if (OMX_Init() != OMX_ErrorNone)
 	{
 		ilclient_destroy(client);
-		return -4;
+		// return -4;
+		return NULL;
 	}
 
 	// create video_decode
-	if (ilclient_create_component(client, &video_decode, "video_decode", ILCLIENT_DISABLE_ALL_PORTS | ILCLIENT_ENABLE_INPUT_BUFFERS) != 0)
-		status = -14;
+	if (ilclient_create_component(client, &video_decode, "video_decode", (ILCLIENT_CREATE_FLAGS_T)(ILCLIENT_DISABLE_ALL_PORTS | ILCLIENT_ENABLE_INPUT_BUFFERS)) != 0)
+		// status = -14;
+		return NULL;
 	list[0] = video_decode;
 
 	// create video_render
 	if (status == 0 && ilclient_create_component(client, &video_render, "video_render", ILCLIENT_DISABLE_ALL_PORTS) != 0)
-		status = -14;
+		// status = -14;
+		return NULL;
 	list[1] = video_render;
 
 	// create clock
 	if (status == 0 && ilclient_create_component(client, &clock, "clock", ILCLIENT_DISABLE_ALL_PORTS) != 0)
-		status = -14;
+		// status = -14;
+		return NULL;
 	list[2] = clock;
 
 	memset(&cstate, 0, sizeof(cstate));
@@ -417,14 +425,16 @@ static int video_decode_test(rtppacket* beg)
 	cstate.eState = OMX_TIME_ClockStateWaitingForStartTime;
 	cstate.nWaitMask = 1;
 	if (clock != NULL && OMX_SetParameter(ILC_GET_HANDLE(clock), OMX_IndexConfigTimeClockState, &cstate) != OMX_ErrorNone)
-		status = -13;
+		// status = -13;
+		return NULL;
 
 	// create video_scheduler
 	if (status == 0 && ilclient_create_component(client, &video_scheduler, "video_scheduler", ILCLIENT_DISABLE_ALL_PORTS) != 0)
-		status = -14;
+		// status = -14;
+		return NULL;
 	list[3] = video_scheduler;
 
-	if (audioplay_create(client, &audio_render, list, 4) != 0)
+	if (audioplay_create(client, audio_render, list, 4) != 0)
 		printf("create error\n");
 
 	if (audiodest == 0)
@@ -440,7 +450,8 @@ static int video_decode_test(rtppacket* beg)
 
 	// setup clock tunnel first
 	if (status == 0 && ilclient_setup_tunnel(tunnel + 2, 0, 0) != 0)
-		status = -15;
+		// status = -15;
+		return NULL;
 	else
 		ilclient_change_component_state(clock, OMX_StateExecuting);
 
@@ -471,7 +482,7 @@ static int video_decode_test(rtppacket* beg)
 		ilclient_enable_port_buffers(video_decode, 130, NULL, NULL, NULL) == 0
 		)
 	{
-		OMX_BUFFERHEADERTYPE *buf;
+		OMX_BUFFERHEADERTYPE *buf = NULL;
 		int port_settings_changed = 0;
 
 		ilclient_change_component_state(video_decode, OMX_StateExecuting);
@@ -480,13 +491,11 @@ static int video_decode_test(rtppacket* beg)
 		int oldcc = 0;
 		int peserror = 1;
 		int first = 1;
-		int peslen = -100, actuallen = 0;
-		unsigned char* oldlen = NULL;
 
 		rtppacket*scan = beg;
 		while (1)
 		{
-			int non = atomic_load(&numofnode);
+			int non = std::atomic_load(&numofnode);
 			if (non < 2)
 			{
 				usleep(10);
@@ -505,7 +514,6 @@ static int video_decode_test(rtppacket* beg)
 				unsigned char sync = buffer[0];
 				if (sync == 0x47)
 				{
-					int startindicator = buffer[1] & 0x40;
 					short pid = ((0x1F & buffer[1]) << 8) + buffer[2];
 
 					if (pid == 0x1011)
@@ -580,7 +588,7 @@ static int video_decode_test(rtppacket* beg)
 				}
 				
 			}
-			atomic_fetch_sub(&numofnode, 1);
+			std::atomic_fetch_sub(&numofnode, 1);
 			scan = scan->next;
 		}
 
@@ -588,7 +596,8 @@ static int video_decode_test(rtppacket* beg)
 		buf->nFlags = OMX_BUFFERFLAG_TIME_UNKNOWN | OMX_BUFFERFLAG_EOS;
 
 		if (OMX_EmptyThisBuffer(ILC_GET_HANDLE(video_decode), buf) != OMX_ErrorNone)
-			status = -20;
+			// status = -20;
+			return NULL;
 
 		// wait for EOS from render
 		ilclient_wait_for_event(video_render, OMX_EventBufferFlag, 90, 0, OMX_BUFFERFLAG_EOS, 0,
@@ -614,7 +623,8 @@ static int video_decode_test(rtppacket* beg)
 	OMX_Deinit();
 
 	ilclient_destroy(client);
-	return status;
+	// return status;
+	return NULL;
 }
 
 int main(int argc, char **argv)
@@ -630,18 +640,18 @@ int main(int argc, char **argv)
 		printf("audiodest:%d\n", audiodest);
 	}
 
-	atomic_store(&numofnode, 0);
+	std::atomic_store(&numofnode, 0);
 
 	pthread_t npthread;
 	pthread_t dthread;
 	
-	rtppacket* beg = malloc(sizeof(rtppacket));
+	rtppacket* beg = (rtppacket*)malloc(sizeof(rtppacket));
 
 	bcm_host_init();
 
-	if (pthread_create(&npthread, NULL, addnullpacket, beg) != 0)
+	if (pthread_create(&npthread, NULL, (void* (*)(void*))addnullpacket, beg) != 0)
 		exit(1);
-	if (pthread_create(&dthread, NULL, video_decode_test, beg) != 0)
+	if (pthread_create(&dthread, NULL, (void* (*)(void*))video_decode_test, beg) != 0)
 		exit(1);
 
 	if (pthread_join(npthread, NULL) != 0)

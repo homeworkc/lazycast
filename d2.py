@@ -227,7 +227,7 @@ while True:
 				else:
 					sys.exit(1)
 			else:
-				print 'ags8jgajdgkajsdlfj;asdkfasdf'+datafromc
+				print datafromc
 				elemfromc = datafromc.split(' ')				
 				if elemfromc[0] == 'recv':
 					os.system('pkill control.bin')
