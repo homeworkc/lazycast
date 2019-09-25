@@ -33,6 +33,8 @@ sound_output_select = 0
 # 2: alsa
 disable_1920_1080_60fps = 1
 enable_mouse_keyboard = 1
+#Put the display in sleep mode when not in use by lazycast.
+display_power_management = True
 
 ####################################################
 
