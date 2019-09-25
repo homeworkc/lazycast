@@ -196,6 +196,8 @@ if (os.uname()[-1][:4] != "armv"):
 
 def launchplayer(player_select):
 	killall(False)
+        if display_power_management == True:
+                os.system('tvservice -p')
 	if player_select == 0:
 		os.system('vlc --fullscreen rtp://0.0.0.0:1028/wfd1.0/streamid=0 &')
 	elif player_select == 1:
