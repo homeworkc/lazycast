@@ -195,9 +195,7 @@ if (os.uname()[-1][:4] != "armv"):
 	player_select = 0
 
 def launchplayer(player_select):
-	os.system('pkill vlc')
-	os.system('pkill player.bin')
-	os.system('pkill h264.bin')
+	killall(False)
 	if player_select == 0:
 		os.system('vlc --fullscreen rtp://0.0.0.0:1028/wfd1.0/streamid=0 &')
 	elif player_select == 1:
@@ -228,11 +226,7 @@ while True:
 					sleep(0.01)
 					watchdog = watchdog + 1
 					if watchdog == 70/0.01:
-						os.system('pkill control.bin')
-						os.system('pkill controlhidc.bin')
-						os.system('pkill vlc')
-						os.system('pkill player.bin')
-						os.system('pkill h264.bin')
+						killall(True)
 						sleep(1)
 						break
 				else:
@@ -241,11 +235,7 @@ while True:
 				print datafromc
 				elemfromc = datafromc.split(' ')				
 				if elemfromc[0] == 'recv':
-					os.system('pkill control.bin')
-					os.system('pkill controlhidc.bin')
-					os.system('pkill vlc')
-					os.system('pkill player.bin')
-					os.system('pkill h264.bin')
+					killall(True)
 					sleep(1)
 					break
 				else:
@@ -266,11 +256,7 @@ while True:
 		print data
 		watchdog = 0
 		if len(data)==0 or 'wfd_trigger_method: TEARDOWN' in data:
-			os.system('pkill control.bin')
-			os.system('pkill controlhidc.bin')
-			os.system('pkill vlc')
-			os.system('pkill player.bin')
-			os.system('pkill h264.bin')
+			killall(True)
 			sleep(1)
 			break
 		elif 'wfd_video_formats' in data:
