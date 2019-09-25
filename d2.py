@@ -134,6 +134,15 @@ def uibcstart(sock, data):
 
 uibcstart(sock,data)
 
+def killall(control):
+        os.system('pkill vlc')
+        os.system('pkill player.bin')
+        os.system('pkill h264.bin')
+        if display_power_management == True:
+                os.system('tvservice -o')
+        if control == True:
+                os.system('pkill control.bin')
+                os.system('pkill controlhidc.bin')
 
 # M5
 data=(sock.recv(1000))
