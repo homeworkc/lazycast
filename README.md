@@ -59,7 +59,7 @@ You can run lazycast when booting your Pi using the [systemd unit](lazycast.serv
 ```bash
 git clone https://github.com/homeworkc/lazycast.git
 mkdir -p ~/.config/systemd/user
-cp lazycast.service ~/.config/systemd/user/
+cp lazycast/lazycast.service ~/.config/systemd/user/
 systemctl --user enable lazycast.service
 systemctl --user start lazycast.service
 ```
