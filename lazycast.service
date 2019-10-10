@@ -6,4 +6,5 @@ ExecStart=/home/pi/lazycast/all.sh
 WorkingDirectory=/home/pi/lazycast
 
 [Install]
-WantedBy=graphical.target
+WantedBy=default.target
+WantedBy=lightdm.service

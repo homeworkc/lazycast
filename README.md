@@ -62,6 +62,7 @@ mkdir -p ~/.config/systemd/user
 cp lazycast/lazycast.service ~/.config/systemd/user/
 systemctl --user enable lazycast.service
 systemctl --user start lazycast.service
+sudo loginctl enable-linger pi
 ```
 
 NOTE: The systemd unit expects lazycast to be located under `/home/pi/lazycast`, adjust the WorkingDirectory if this is not the correct path.
