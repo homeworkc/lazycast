@@ -33,6 +33,8 @@ sound_output_select = 0
 # 2: alsa
 disable_1920_1080_60fps = 1
 enable_mouse_keyboard = 1
+#Put the display in sleep mode when not in use by lazycast.
+display_power_management = True
 
 ####################################################
 
@@ -134,6 +136,15 @@ def uibcstart(sock, data):
 
 uibcstart(sock,data)
 
+def killall(control):
+        os.system('pkill vlc')
+        os.system('pkill player.bin')
+        os.system('pkill h264.bin')
+        if display_power_management == True:
+                os.system('tvservice -o')
+        if control == True:
+                os.system('pkill control.bin')
+                os.system('pkill controlhidc.bin')
 
 # M5
 data=(sock.recv(1000))
@@ -184,9 +195,9 @@ if (os.uname()[-1][:4] != "armv"):
 	player_select = 0
 
 def launchplayer(player_select):
-	os.system('pkill vlc')
-	os.system('pkill player.bin')
-	os.system('pkill h264.bin')
+	killall(False)
+        if display_power_management == True:
+                os.system('tvservice -p')
 	if player_select == 0:
 		os.system('vlc --fullscreen rtp://0.0.0.0:1028/wfd1.0/streamid=0 &')
 	elif player_select == 1:
@@ -217,11 +228,7 @@ while True:
 					sleep(0.01)
 					watchdog = watchdog + 1
 					if watchdog == 70/0.01:
-						os.system('pkill control.bin')
-						os.system('pkill controlhidc.bin')
-						os.system('pkill vlc')
-						os.system('pkill player.bin')
-						os.system('pkill h264.bin')
+						killall(True)
 						sleep(1)
 						break
 				else:
@@ -230,11 +237,7 @@ while True:
 				print datafromc
 				elemfromc = datafromc.split(' ')				
 				if elemfromc[0] == 'recv':
-					os.system('pkill control.bin')
-					os.system('pkill controlhidc.bin')
-					os.system('pkill vlc')
-					os.system('pkill player.bin')
-					os.system('pkill h264.bin')
+					killall(True)
 					sleep(1)
 					break
 				else:
@@ -255,11 +258,7 @@ while True:
 		print data
 		watchdog = 0
 		if len(data)==0 or 'wfd_trigger_method: TEARDOWN' in data:
-			os.system('pkill control.bin')
-			os.system('pkill controlhidc.bin')
-			os.system('pkill vlc')
-			os.system('pkill player.bin')
-			os.system('pkill h264.bin')
+			killall(True)
 			sleep(1)
 			break
 		elif 'wfd_video_formats' in data:
