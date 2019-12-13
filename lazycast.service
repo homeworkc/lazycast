@@ -1,0 +1,10 @@
+[Unit]
+Description=lazycast server
+
+[Service]
+ExecStart=/home/pi/lazycast/all.sh
+WorkingDirectory=/home/pi/lazycast
+
+[Install]
+WantedBy=default.target
+WantedBy=lightdm.service

@@ -52,6 +52,22 @@ Then, search for the wireless display on the source device you want to cast. The
 If backchannel control is supported by the source, keyboard and mouse input on Pi are redirected to the source as remote controls.  
 It is recommended to initiate the termination of the receiver on the source side. These user controls are often near the pairing controls on the source device. You can utilize the backchannel feature to remotely control the source device in order to close lazycast.  
 
+## Automatic startup / SystemD
+
+You can run lazycast when booting your Pi using the [systemd unit](lazycast.service). To install, log into your Pi and run:
+
+```bash
+git clone https://github.com/homeworkc/lazycast.git
+mkdir -p ~/.config/systemd/user
+cp lazycast/lazycast.service ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable lazycast.service
+systemctl --user start lazycast.service
+sudo loginctl enable-linger pi
+```
+
+NOTE: The systemd unit expects lazycast to be located under `/home/pi/lazycast`, adjust the WorkingDirectory if this is not the correct path.
+
 # Tips
 Initial pairings after Raspberry Pi reboot may be difficault due to ARP/routing/power-saving mechanisms. Try turning off/on WiFi interfaces on the source device and re-pairing. If all else fails, reboot both the source and Pi and pair them upon boot.  
 Set the resolution on the source side. lazycast advertises all possible resolutions regardless of the current rendering resolution. Therefore, you may want to change the resolution (on the source) to match the actual resolution of the display connecting to Pi.  
