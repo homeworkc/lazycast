@@ -33,8 +33,9 @@ sound_output_select = 0
 # 2: alsa
 disable_1920_1080_60fps = 1
 enable_mouse_keyboard = 1
-#Put the display in sleep mode when not in use by lazycast.
-display_power_management = True
+
+display_power_management = 0
+# 1: (For projectors) Put the display in sleep mode when not in use by lazycast 
 
 ####################################################
 
@@ -140,9 +141,9 @@ def killall(control):
         os.system('pkill vlc')
         os.system('pkill player.bin')
         os.system('pkill h264.bin')
-        if display_power_management == True:
+        if display_power_management == 1:
                 os.system('vcgencmd display_power 0')
-        if control == True:
+        if control:
                 os.system('pkill control.bin')
                 os.system('pkill controlhidc.bin')
 
@@ -196,7 +197,7 @@ if (os.uname()[-1][:4] != "armv"):
 
 def launchplayer(player_select):
 	killall(False)
-        if display_power_management == True:
+        if display_power_management == 1:
                 os.system('vcgencmd display_power 1')
 	if player_select == 0:
 		os.system('vlc --fullscreen rtp://0.0.0.0:1028/wfd1.0/streamid=0 &')
