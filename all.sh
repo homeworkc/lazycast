@@ -23,7 +23,7 @@ else
 	sudo wpa_cli wfd_subelem_set 0 00060151022a012c
 	sudo wpa_cli wfd_subelem_set 1 0006000000000000
 	sudo wpa_cli wfd_subelem_set 6 000700000000000000
-	perentry="$(wpa_cli list_networks | grep "\[DISABLED\]\[P2P-PERSISTENT\]" | tail -1)"
+	perentry="$(sudo wpa_cli list_networks | grep "\[DISABLED\]\[P2P-PERSISTENT\]" | tail -1)"
 	echo "${perentry}"
 	if [ `echo "${perentry}" | grep -c "P2P-PERSISTENT"`  -gt 0 ] 
 	then
@@ -57,7 +57,7 @@ printf "start	192.168.173.80\n">udhcpd.conf
 printf "end	192.168.173.80\n">>udhcpd.conf
 printf "interface	$p2pinterface\n">>udhcpd.conf
 printf "option subnet 255.255.255.0\n">>udhcpd.conf
-printf "option lease 60">>udhcpd.conf
+printf "option lease 10">>udhcpd.conf
 sleep 3
 sudo udhcpd ./udhcpd.conf 
 echo "The display is ready"
