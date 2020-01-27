@@ -59,7 +59,7 @@ printf "interface	$p2pinterface\n">>udhcpd.conf
 printf "option subnet 255.255.255.0\n">>udhcpd.conf
 printf "option lease 10">>udhcpd.conf
 sleep 3
-sudo udhcpd ./udhcpd.conf 
+sudo busybox udhcpd ./udhcpd.conf 
 echo "The display is ready"
 echo "Your device is called: lazycast_on_"$(uname -n)""
 while :
