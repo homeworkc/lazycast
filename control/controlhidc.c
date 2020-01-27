@@ -452,14 +452,14 @@ int main(int argc, char **argv)
 			else if (xdiff < -128)
 				mouseinput[10] = -128;
 			else
-				mouseinput[10] = (xdiff >> 1);
+				mouseinput[10] = xdiff;
 
 			if (ydiff > 127)
 				mouseinput[11] = 127;
 			else if (ydiff < -128)
 				mouseinput[11] = -128;
 			else
-				mouseinput[11] = (ydiff >> 1);
+				mouseinput[11] = ydiff;
 			//printf("xdiff:%d,ydiff:%d\n", xdiff, ydiff);
 			//for (int i = 0; i < sizeof(mouseinput); i++)
 				//printf("%d,",mouseinput[i]);
