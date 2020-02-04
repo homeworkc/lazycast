@@ -89,9 +89,9 @@ else:
 	msg = msg + 'wfd_audio_codecs: AAC 00000001 00\r\n'
 
 if disable_1920_1080_60fps == 1:
-	msg = msg + 'wfd_video_formats: 00 00 02 04 0001FEFF 3FFFFFFF 00000FFF 00 0000 0000 00 none none\r\n'
+	msg = msg + 'wfd_video_formats: 00 00 02 10 0001FEFF 3FFFFFFF 00000FFF 00 0000 0000 00 none none\r\n'
 else:
-	msg = msg + 'wfd_video_formats: 00 00 02 04 0001FFFF 3FFFFFFF 00000FFF 00 0000 0000 00 none none\r\n'
+	msg = msg + 'wfd_video_formats: 00 00 02 10 0001FFFF 3FFFFFFF 00000FFF 00 0000 0000 00 none none\r\n'
 
 msg = msg +'wfd_3d_video_formats: none\r\n'\
 	+'wfd_coupled_sink: none\r\n'\
