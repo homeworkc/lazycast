@@ -19,9 +19,12 @@ sudo apt purge openresolv dhcpcd5
 ```
 Then reboot.
 
-Install packages and compile libraries on Pi:
+Install packages used to compile the players:
 ```
 sudo apt install libx11-dev libasound2-dev libavformat-dev libavcodec-dev
+```
+Compile libraries on Pi:
+```
 cd /opt/vc/src/hello_pi/libs/ilclient/
 make
 cd /opt/vc/src/hello_pi/hello_video
