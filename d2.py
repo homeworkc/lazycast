@@ -192,7 +192,7 @@ print "-------->\n" + data
 print "---- Negotiation successful ----"
 
 
-if (os.uname()[-1][:4] != "armv"):
+if (os.uname()[-1][:4] not in ["armv","aarch64"]):
 	player_select = 0
 
 def launchplayer(player_select):
