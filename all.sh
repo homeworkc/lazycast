@@ -20,7 +20,7 @@ else
 	sudo wpa_cli set device_name lazycast_on_"$(uname -n)"
 	sudo wpa_cli set device_type 7-0050F204-1
 	sudo wpa_cli set p2p_go_ht40 1
-	sudo wpa_cli wfd_subelem_set 0 00060151022a012c
+	sudo wpa_cli wfd_subelem_set 0 000600111c44012c
 	sudo wpa_cli wfd_subelem_set 1 0006000000000000
 	sudo wpa_cli wfd_subelem_set 6 000700000000000000
 	perentry="$(sudo wpa_cli list_networks | grep "\[DISABLED\]\[P2P-PERSISTENT\]" | tail -1)"
