@@ -10,19 +10,17 @@ sudo apt-get update
 sudo apt-get upgrade
 ```
 **Modify the /etc/dhcpcd.conf file to include "wpa_supplicant" line in the wifi adapter to work with WPA_SUPPLICANT and exclude others using "nohook wpa_supplicant" **
+In /etc/dhcpcd.conf you can specified the ip address to other adapters 
 
-Example to use a external dongle wlan1:
+Example to use a external dongle wlan1 to P2P wifi direct and wlan0 to HOSTAP:
 ```
 interface wlan0
 	static ip_address=192.168.42.1/24
-	#static routers=192.168.42.1
-	#static domain_name_servers=8.8.8.8 8.8.4.4
+	static routers=192.168.42.1
+	static domain_name_servers=8.8.8.8 8.8.4.4
 	nohook wpa_supplicant
 
 interface wlan1
-        #static ip_address=192.168.173.1/24
-        #static routers=192.168.42.1
-        #static domain_name_servers=8.8.8.8 8.8.4.4
         wpa_supplicant
 
 ```  
