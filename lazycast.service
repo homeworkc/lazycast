@@ -1,9 +1,18 @@
 [Unit]
 Description=lazycast server
+After=network.target
 
 [Service]
-ExecStart=/home/pi/lazycast/all.sh
-WorkingDirectory=/home/pi/lazycast
+User=root
+Type=simple
+PIDFile=/var/run/lazycast.pid
+ExecStart=sudo /opt/lazycast/all.sh
+WorkingDirectory=/opt/lazycast/
+Restart=always
+RestartSec=2s
+StandardOutput=syslog
+StandardError=syslog
+KillSignal=SIGINT
 
 [Install]
 WantedBy=default.target
