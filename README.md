@@ -1,23 +1,32 @@
 lazycast: A Simple Wireless Display Receiver
 
 # Description
-lazycast is a simple wifi display receiver. It was originally targeted Raspberry Pi (as display) and Windows 8.1/10 (as source), but it **might** work with other Linux distros and Miracast sources, too. In general, lazycast does not require re-compilation of wpa_supplicant to provide p2p capability, and should work on an "out of the box" Raspberry Pi.
+lazycast is a simple wifi display receiver. It was originally targeted Raspberry Pi (as display) and Windows 8.1/10 or Android (as source) , but it **might** work with other Linux distros and Miracast sources, too. In general, lazycast does not require re-compilation of wpa_supplicant to provide p2p capability, and should work on an "out of the box" Raspberry Pi.
 
 # Preparation
-**The wpa_supplicant installed on the latest Raspbian distribution does not seem to work properly. (See [this](https://www.reddit.com/r/linux4noobs/comments/c5qila/want_to_downgrade_wpa_supplicant/).) For Raspbian Buster, try downgrading the ``wpasupplicant`` package to the version for Raspbian Stretch. Here is one solution:**
+**Working with wpa_supplicant v2.8-devel and dhcpcd 8.1.2 For Raspbian Buster**
 ```
-wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.4-1+deb9u4_armhf.deb
-sudo apt --allow-downgrades install ./wpasupplicant_2.4-1+deb9u4_armhf.deb
+sudo apt-get update
+sudo apt-get upgrade
+```
+**Modify the /etc/dhcpcd.conf file to include wifi adapter to work with WPA_SUPPLICANT and exclude others**
+Example to use a external dongle wlan1:
+```
+interface wlan0
+	static ip_address=192.168.42.1/24
+	#static routers=192.168.42.1
+	#static domain_name_servers=8.8.8.8 8.8.4.4
+	nohook wpa_supplicant
+
+interface wlan1
+        #static ip_address=192.168.173.1/24
+        #static routers=192.168.42.1
+        #static domain_name_servers=8.8.8.8 8.8.4.4
+        wpa_supplicant
+
 ```  
-**It is also highly recommended to replace the "Wireless & Wired Network" in Raspbian with NetworkManager, which can maintain much more stable p2p connection. Here is one solution (adopted from [here](https://raspberrypi.stackexchange.com/questions/29783/how-to-setup-network-manager-on-raspbian)):**
-```
-sudo apt install network-manager network-manager-gnome openvpn openvpn-systemd-resolved network-manager-openvpn network-manager-openvpn-gnome
-```
-And,
-```
-sudo apt purge openresolv dhcpcd5
-```
-Then reboot.
+
+**It is also highly recommended use a external dongle, raspberry 3 use a common wifi/bluethooth BCM43438**
 
 Install packages used to compile the players:
 ```
@@ -30,6 +39,8 @@ make
 cd /opt/vc/src/hello_pi/hello_video
 make
 ```
+Then reboot.
+
 Clone this repo (to a desired directory):
 ```
 cd ~/
@@ -41,10 +52,21 @@ cd lazycast
 make
 ```
 
+# Customize
+Change the pin code and  ip address, modify all.sh and change the pin code.
+You can change the ip address for p2p connection or leave it as it is .
+```
+# define options
+ain="$(sudo wpa_cli interface)"
+pin="69696969"
+ip_neighbor="192.168.173.2"
+ip_interface="192.168.173.1"
+mask="255.255.255.252"
+```
 # Usage
 Run `./all.sh` to initiate lazycast receiver. Wait until the "The display is ready" message.
-The name of your device will also be displayed on the pi.
-Then, search for the wireless display on the source device you want to cast. The default PIN number is ``31415926``.  
+The name of your device will also be displayed on the pi and the wifi adapter used.
+Then, search for the wireless display on the source device you want to cast. The default PIN number is ``69696969``.  
 If backchannel control is supported by the source, keyboard and mouse input on Pi are redirected to the source as remote controls.  
 It is recommended to initiate the termination of the receiver on the source side. These user controls are often near the pairing controls on the source device. You can utilize the backchannel feature to remotely control the source device in order to close lazycast.  
 
