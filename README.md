@@ -9,7 +9,7 @@ lazycast is a simple wifi display receiver. It was originally targeted Raspberry
 sudo apt-get update
 sudo apt-get upgrade
 ```
-**Modify the /etc/dhcpcd.conf file to include "wpa_supplicant" line in the wifi adapter to work with WPA_SUPPLICANT and exclude others using "nohook wpa_supplicant" **
+**Modify the /etc/dhcpcd.conf file to include "wpa_supplicant" line in the wifi adapter to work with WPA_SUPPLICANT and exclude others with line "nohook wpa_supplicant" **
 In /etc/dhcpcd.conf you can specified the ip address to other adapters 
 
 Example to use a external dongle wlan1 to P2P wifi direct and wlan0 to HOSTAP:
@@ -24,6 +24,7 @@ interface wlan1
         wpa_supplicant
 
 ```  
+**Make sure no other DHCP servers are running in the raspbian as  dnsmasq " **
 
 **It is also highly recommended use a external dongle, raspberry 3 use a common wifi/bluethooth BCM43438**
 
