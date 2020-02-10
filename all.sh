@@ -9,22 +9,42 @@
 #   under the GPL along with build & install instructions.
 #
 #################################################################################
+# define options
 ain="$(sudo wpa_cli interface)"
+pin="69696969"
+ip_neighbor="192.168.173.2"
+ip_interface="192.168.173.1"
+mask="255.255.255.252"
+
+################################################
+#interface select
 echo "${ain}"
-if [ `echo "${ain}" | grep -c "p2p-wl"` -gt 0 ] 
+interface=$(echo "${ain}" | grep "wl" | grep -v "interface")
+
+#interfaces type is now configured to  P2P?
+type="$(iw dev "$interface" info | grep type)"
+
+if [ `echo "${type}" | grep -c "P2P"` -gt 0 ] 
 then
 	echo "already on"
 
 else
+# if not
+#config wpa_supplicant to P2P connection 
+	sudo wpa_cli set p2p_go_ht40 1
 	sudo wpa_cli p2p_find type=progessive
-	sudo wpa_cli set device_name lazycast_on_"$(uname -n)"
+	sudo wpa_cli set device_name DIRECT-"$(uname -n)"
 	sudo wpa_cli set device_type 7-0050F204-1
 	sudo wpa_cli set p2p_go_ht40 1
 	sudo wpa_cli wfd_subelem_set 0 000600111c44012c
 	sudo wpa_cli wfd_subelem_set 1 0006000000000000
 	sudo wpa_cli wfd_subelem_set 6 000700000000000000
-	perentry="$(sudo wpa_cli list_networks | grep "\[DISABLED\]\[P2P-PERSISTENT\]" | tail -1)"
+	
+	perentry="$(wpa_cli list_networks | grep "\[DISABLED\]\[P2P-PERSISTENT\]" | tail -1)"
 	echo "${perentry}"
+
+# check if the interface was used to P2P connection before
+# and select de ID 
 	if [ `echo "${perentry}" | grep -c "P2P-PERSISTENT"`  -gt 0 ] 
 	then
 		networkid=${perentry%%D*}
@@ -32,40 +52,51 @@ else
 	else
 		perstr=""
 	fi
+	
+
+#check if  iw dev can put in p2p-go
 	echo "${perstr}"
-	while [ `echo "${ain}" | grep -c "p2p-wl"`  -lt 1 ] 
+	interface=$(echo "${ain}" | grep "wl" | grep -v "interface")
+	type="$(iw dev "$interface" info | grep type)"
+	
+
+	while [ `echo "${type}" | grep -c "P2P"`  -lt 1 ] 
 	do
-		while [ `echo "${ain}" | grep -c "p2p-wl"`  -lt 1 ]
+		while [ `echo "${type}" | grep -c "P2P"`  -lt 1 ]
         	do
-			sudo wpa_cli p2p_group_add persistent$perstr
+			sudo wpa_cli p2p_group_add persistent$perstr 
+			#sudo wpa_cli p2p_group_add persistent$perstr ht40
 			sleep 2
 			ain="$(sudo wpa_cli interface)"
 			echo "$ain"
+		        interface=$(echo "${ain}" | grep "wl" | grep -v "interface")
+		        type="$(iw dev "$interface" info | grep type)"
+
 		done
-		sleep 5
 		ain="$(sudo wpa_cli interface)"
                 echo "$ain"
+	        interface=$(echo "${ain}" | grep "wl" | grep -v "interface")
+	        type="$(iw dev "$interface" info | grep type)"
 	done
 
 fi
 
-p2pinterface=$(echo "${ain}" | grep "p2p-wl" | grep -v "interface")
+p2pinterface=$(echo "${ain}" | grep "wl" | grep -v "interface")
 echo $p2pinterface
 
-sudo ifconfig $p2pinterface 192.168.173.1
-printf "start	192.168.173.80\n">udhcpd.conf
-printf "end	192.168.173.80\n">>udhcpd.conf
-printf "interface	$p2pinterface\n">>udhcpd.conf
-printf "option subnet 255.255.255.0\n">>udhcpd.conf
-printf "option lease 10">>udhcpd.conf
-sleep 3
-sudo busybox udhcpd ./udhcpd.conf 
+sudo ifconfig $p2pinterface $ip_interface
+sudo ifconfig $p2pinterface netmask $mask
+
 echo "The display is ready"
-echo "Your device is called: lazycast_on_"$(uname -n)""
-while :
-do	
-	echo "PIN:"	
-	sudo wpa_cli -i$p2pinterface wps_pin any 31415926
-	echo ""
-	./d2.py
-done
+echo "Your device is called: DIRECT-"$(uname -n)""
+echo "PIN-->"     
+sudo wpa_cli -i$p2pinterface wps_pin any $pin
+echo "<--PIN"
+
+echo "Waiting connection"
+./d2.py -i$ip_interface -m$mask -p$ip_neighbor   -d$p2pinterface
+
+#clear p2p connection and arp entry
+echo "Byebye"
+sudo wpa_cli p2p_flush
+sudo ip neigh flush  $ip_neighbor
