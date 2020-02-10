@@ -560,10 +560,11 @@ static int video_decode_test(rtppacket* beg)
 							{
 								shift += 20;
 							}
+							
+							
 
-                                                        audioplay_play_buffer(audio_render, buffer + shift, 188 - shift);
-							//if (audioplay_play_buffer(audio_render, buffer + shift, 188 - shift) < 0)
-								//printf("sound error\n");
+							if (audioplay_play_buffer(audio_render, buffer + shift, 188 - shift) < 0)
+								printf("sound error\n");
 
 
 
