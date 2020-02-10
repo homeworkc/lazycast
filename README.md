@@ -142,16 +142,12 @@ You can run lazycast when booting your Pi using the [systemd unit](lazycast.serv
 
 ```bash
 git clone https://github.com/homeworkc/lazycast.git
-mkdir -p ~/.config/systemd/user
-cp lazycast/lazycast.service ~/.config/systemd/user/
-systemctl --user daemon-reload
-systemctl --user enable lazycast.service
-systemctl --user start lazycast.service
-sudo loginctl enable-linger pi
+sudo -sE
+cp lazycast/lazycast.service /etc/systemd/system/
+systemctl daemon-reload
+systemctl  enable lazycast.service
+systemctl  start lazycast.service
 ```
-
-NOTE: In this method, the systemd unit expects lazycast to be located under `/home/pi/lazycast`, adjust the WorkingDirectory if this is not the correct path.
-
 
 # Others
 Some parts of the video player1 are modified from the codes on https://github.com/Apress/raspberry-pi-gpu-audio-video-prog. Many thanks to the author of "Raspberry Pi GPU Audio Video Programming" and, by extension, authors of omxplayer.  
