@@ -10,7 +10,6 @@
 #
 #################################################################################
 # define options
-ain="$(sudo wpa_cli interface)"
 pin="69696969"
 ip_neighbor="192.168.173.2"
 ip_interface="192.168.173.1"
@@ -18,6 +17,7 @@ mask="255.255.255.252"
 
 ################################################
 #interface select
+ain="$(sudo wpa_cli interface)"
 echo "${ain}"
 interface=$(echo "${ain}" | grep "wl" | grep -v "interface")
 
