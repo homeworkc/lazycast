@@ -167,12 +167,12 @@ all.sh:
 
 D2.py:
 - Add overload parameters  :
-interface ip address
-interface mask
-interface name
-neighbor peer address
+	interface ip address
+	interface mask
+	interface name
+	neighbor peer address
 
-invoke  ( d2.py -i <self_ip_address> -m <mask> -d <device> -p <ip_peer_address>)
+use  ( d2.py -i <self_ip_address> -m <mask> -d <device> -p <ip_peer_address>)
 This fix some problems, sometimes the connection tried to establish through another network card, now when the sock is created the interface name is passed to ensure the connection is open to the correct interface 
 
 - Timeouts and payloads modified in the socket objects
@@ -201,7 +201,7 @@ Restart=always
 RestartSec=2s
 lazycast.service was modified to intergrate the daemon  in the main systemctl.
 
-- h264.c
+h264.c :
 Was suppressed the message "sound error " when only video is transmitter.
 
 
