@@ -212,6 +212,7 @@ lazycast.service was modified to intergrate the daemon  in the main systemctl.
 
 
 h264.c :
+
 -Was suppressed the message "sound error " when only video is transmitter.
 
 
