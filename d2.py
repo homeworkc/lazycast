@@ -311,7 +311,6 @@ def main (argv):
                                 sys_logger.error( "ERROR distint errno.EAGAIN errno.EWOULDBLOCK, (watchdog)="+ (watchdog))
                                 break
                         else:
-                            sys_logger.debug( 'ags8jgajdgkajsdlfj;asdkfasdf'+datafromc)
                             elemfromc = datafromc.split(' ')                
                             if elemfromc[0] == 'recv':
                                 sys_logger.error( "ERROR  data receiver = recv")

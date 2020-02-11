@@ -39,8 +39,6 @@ nano /etc/wpa_supplicant/wpa_supplicant.conf
 ```
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
-device_name=DIRECT-SOUND-CARD
-device_type=7-0050F204-1
 p2p_go_ht40=1
 country=ES
 
@@ -90,7 +88,7 @@ Change the pin code and  ip address, modify all.sh and change the pin code.
 You can change the ip address for p2p connection or leave it as it is .
 ```
 # define options
-pin="69696969"
+pin="31415926"
 ip_neighbor="192.168.173.2"
 ip_interface="192.168.173.1"
 mask="255.255.255.252"
@@ -98,7 +96,7 @@ mask="255.255.255.252"
 # Usage
 Run `sudo ./all.sh` to initiate lazycast receiver. Wait until the "The display is ready" message.
 The name of your device will also be displayed on the pi and the wifi adapter used.
-Then, search for the wireless display on the source device you want to cast. The default PIN number is ``69696969``.  
+Then, search for the wireless display on the source device you want to cast. The default PIN number is ``31415926``.  
 If backchannel control is supported by the source, keyboard and mouse input on Pi are redirected to the source as remote controls.  
 It is recommended to initiate the termination of the receiver on the source side. These user controls are often near the pairing controls on the source device. You can utilize the backchannel feature to remotely control the source device in order to close lazycast.  
 
