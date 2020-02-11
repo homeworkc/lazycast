@@ -17,9 +17,9 @@ sudo apt-get upgrade
 **DEFINE THE INTERFACE**
 - Modify the /etc/dhcpcd.conf file to include "wpa_supplicant" line in the wifi adapter to work with WPA_SUPPLICANT and exclude others with line "nohook wpa_supplicant" **
 - In /etc/dhcpcd.conf you can specified the ip address to other adapters 
+- For example to use a external dongle wlan1 for P2P wifi direct and wlan0 managemed by HOSTAP:
 
-- For example to use a external dongle wlan1 to P2P wifi direct and wlan0 to HOSTAP:
-
+- if use a external dogle wlan1 add:
 nano /etc/dhcpcd.conf
 ```
 interface wlan0
@@ -30,11 +30,23 @@ interface wlan0
 
 interface wlan1
         wpa_supplicant
+```
 
+- if use internal wifi add:
+nano /etc/dhcpcd.conf
+```
+interface wlan0
+	wpa_supplicant
+
+interface p2p-wlan0-0
+	wpa_supplicant
+		
 ``` 
+More details:https://manpages.debian.org/buster/dhcpcd5/dhcpcd.conf.5.en.html
+
 **CONFIG WPA_SUPPLICANT**
 - Add this config to /etc/wpa_supplicant/wpa_supplicant.conf
-- You can change the device_name=<Your_device_name> and  country=<Your_contry_code>, the contry code sould be same as the country define in raspi-conf
+- You can change the country=<Your_contry_code>, the contry code sould be same as the country define in raspi-conf
 nano /etc/wpa_supplicant/wpa_supplicant.conf
 ```
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
