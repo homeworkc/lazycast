@@ -106,6 +106,7 @@ ip_interface="192.168.173.1"
 mask="255.255.255.252"
 ```
 # Usage
+Add execute privilege `sudo chmod +x all.sh
 Run `sudo ./all.sh` to initiate lazycast receiver. Wait until the "The display is ready" message.
 The name of your device will also be displayed on the pi and the wifi adapter used.
 Then, search for the wireless display on the source device you want to cast. The default PIN number is ``31415926``.  
@@ -118,7 +119,7 @@ It is recommended to initiate the termination of the receiver on the source side
 Set the resolution on the source side. lazycast advertises all possible resolutions regardless of the current rendering resolution. Therefore, you may want to change the resolution (on the source) to match the actual resolution of the display connecting to Pi.  
 Modify parameters in the "settings" section in ``d2.py`` to change the sound output port (hdmi/3.5mm) and preferred player.  
 The maximum resolutions supported are 1920x1080p60 and 1920x1200p30. The GPU on Pi may struggle to handle 1920x1080p60, which results in high latency. In this case, reduce the FPS to 1920x1080p50.  
-To change the default PIN number, replace the string ``69696969`` in ``all.sh`` to another 8-digit number.  
+To change the default PIN number, replace the string ``31415926`` in ``all.sh`` to another 8-digit number.  
 To eneble debuging output  change level_name='info' to level_name='debug'in ``all.sh`` also you can define the file save the output
 After Pi connects to the source, it has an IP address of ``192.168.173.1`` and this connection can be reused for other purposes like SSH. On the other hand, since they are under the same subnet, precautions should be taken to prevent unauthorized access to Pi by anyone who knows the PIN number.    
 Two in-house players are written for Raspberry Pi 3. Omxplayer or vlc can be used instead on other platforms. 
