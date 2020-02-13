@@ -169,8 +169,8 @@ The dhcp server was based on the proyect https://github.com/pypxe/PyPXE
 This version fix the next issues 
 
 all.sh:
--	Now detect other wireless cards that are manager by wpa_supplicant.
- using a external dongle and when the wireless card is put in p2p mode the interface name is not change it, but we can use "iw dev type" to identify the mode.
+-	Now detect external wireless cards that are manager by wpa_supplicant.
+ using a external dongle and card is put in p2p mode the interface name is not change it, but we can use "iw dev type" to identify the mode.
 
 D2.py:
 - Add overload parameters  :
@@ -182,36 +182,28 @@ D2.py:
 
 use  ( d2.py -i <self_ip_address> -m <mask> -d <device> -p <ip_peer_address>)
 
-interface ip address
-interface mask
-interface name
-neighbor peer address
+This fix some problems, sometimes the connection tried to establish through another network card, now when the sock is created the interface name is passed to ensure the connection is open in the correct interface 
 
-use  ( d2.py -i <self_ip_address> -m <mask> -d <device> -p <ip_peer_address>)
-
-This fix some problems, sometimes the connection tried to establish through another network card, now when the sock is created the interface name is passed to ensure the connection is open to the correct interface 
-
-- Timeouts and payloads modified in the socket objects
-The sockets has delimiter the timeout and the payload size these changes permit optimize the load and quality in the connection. Also when you press Ctr+^C or the System send a signal to close the proccess to shutdown the program can ear it and exit in correct order.
+- Timeouts and payloads has been modified in the socket objects
+The sockets has been modify to delimit the timeout and the payload size these changes permit optimizer the load and quality in the connection. Also when you press Ctr+^C or the System send a signal  the proccess exit  in correct order.
 
 - Integrated DHCP server.
-Now is not need use a external DHCP to assign Ip address to a peer neighbor. The code has integrate "dhcpserver.py" this is a modified version of "PyPXE" proyect.
+Now is not need use a external DHCP to assign Ip address to a peer neighbor. The code has a dhcp server integrated "dhcpserver.py" this is a  partial modified code of "PyPXE" proyect.
 https://github.com/pypxe/PyPXE
 The original code was modified to assignen P2P addres "/30" and asing always the same address to diferents neigbors. 
-This permit a exact control of address assigned and permit renew the leased time of dhcp servers.
+This permit a exact control of address assigned and permit renew the dhcp leased time.
 
 The dhcpserver.py is controller by threading in main program.
 
 
--Catch exceptions
-Now the code has a complete Catch exceptions and will finish right if a exception is detected. All sockets will be close and the all subprocess will be end
+- Exceptions control:
+Now the code has a complete exceptions control code and is finished right if a exception is detected. All sockets and proccess will be closed in corect order.
 
 -Debug
 level_name='info'
-Implemented python logging. Now you can define the information level to debug the code, or put in "info" level to normal use.
+Implemented python logging library . Now you can define the information level to debug the code, or put the level "info" to normal use.
 
 -lazycast.service
-As now the main program only management one connection per launch. 
 The lazycast service restart the application when detect a exit code.
 Restart=always
 RestartSec=2s
@@ -221,5 +213,3 @@ lazycast.service was modified to intergrate the daemon  in the main systemctl.
 h264.c :
 
 -Was suppressed the message "sound error " when only video is transmitter.
-
-
