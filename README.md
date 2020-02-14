@@ -37,9 +37,6 @@ nano /etc/dhcpcd.conf
 ```
 interface wlan0
 	wpa_supplicant
-
-interface p2p-wlan0-0
-	wpa_supplicant
 		
 ``` 
 More details:https://manpages.debian.org/buster/dhcpcd5/dhcpcd.conf.5.en.html
