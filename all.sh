@@ -20,8 +20,7 @@ if [ "$EUID" -ne 0 ]
   then echo "Please run as root"
   exit
 fi
-#Main LOOP
-while true; do
+#Main
 		#wpa status
                 if [[ "$(wpa_cli status)" !=  *"wpa_state=COMPLETED"* ]]; then
                     echo "configuring WPA_supplicant"
@@ -89,4 +88,4 @@ while true; do
 		echo "Reconnecting"
 		sudo wpa_cli p2p_flush
 		sudo ip neigh flush  $ip_neighbor
-done
+
