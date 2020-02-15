@@ -30,23 +30,24 @@ cd /opt/lazycast
 make
 
 #Menu
-clear
 opt=""
 while [[ $opt != "End" ]]; do
+	clear
 	echo '####################  Menu Config options  ####################'
 	PS3='Config options: '
-	options=("Audio" "Wireless card" "Pincode" "End")
+	options=("Audio" "Wireless card" "Pincode" "Bluetooth" "End")
 	select opt in "${options[@]}"
 	do
 	    case $opt in
 		"Audio")
 		    #select audio output
+                        echo -e "-------Audio config-------\n"
 			AudioOuput="auto,headphones,hdmi"
 			oldIFS=$IFS
 			IFS=$','
 			choices=($AudioOuput)
 			IFS=$oldIFS
-			PS3="Select your audio output "
+			PS3="Select your audio output :"
 			select answer in "${choices[@]}"; do
 			    for item in "${choices[@]}"; do
 			       if [[ $item == $answer ]]; then
@@ -74,12 +75,13 @@ while [[ $opt != "End" ]]; do
 		    ;;
 		"Wireless card")
 			#select wlan
+			echo -e "-------Wireless card config-------\n"
 		    	listcard=$(iw dev | grep wlan  | cut -d" " -f2 )
 			oldIFS=$IFS
 			IFS=$'\n'
 			choices=($listcard)
 			IFS=$oldIFS
-			PS3="Select your wireless card "
+			PS3="Select your wireless card: "
 			select answer in "${choices[@]}"; do
 			  for item in "${choices[@]}"; do
 			    if [[ $item == $answer ]]; then
@@ -91,11 +93,10 @@ while [[ $opt != "End" ]]; do
 			echo "Adapter select:"$wcard
 			sed -i 's/select_interface="wlan0"/'select_interface="\"$wcard"\"'/g' /opt/lazycast/all.sh
 			#update /etc/dhcpcd.conf
-			if  grep -q $wcard "/etc/dhcpcd.conf" ; then 
-				sed -i "s/$wcard/$wcard \n    wpa_supplicant/g" "/etc/dhcpcd.conf"
-			else
-				
-			 	echo '     wpa_supplicant' >> /etc/dhcpcd.conf
+			if  grep -q $wcard "/etc/dhcpcd.conf" ; then
+                                sed -i "s/$wcard/$wcard \n    wpa_supplicant/g" /etc/dhcpcd.conf
+                        else
+                                echo -e "interface  "$wcard"\n     wpa_supplicant" >> /etc/dhcpcd.conf
 			fi 
 
 
@@ -128,7 +129,8 @@ while [[ $opt != "End" ]]; do
 		    break
 		    ;;
 		"Pincode")
-			#config pincode            
+			#config pincode
+                        echo -e "-------Pincode config-------\n"            
 			pincode=""
 			chrlen=${#pincode}
 			while [[ $chrlen -ne 8 ]]
@@ -144,13 +146,14 @@ while [[ $opt != "End" ]]; do
 		    ;;
 
 		"Bluetooth")
-			#config bluetooth            
+			#config bluetooth
+                        echo -e "-------Bluetooth config-------\n"            
 			btopt="disable,enable,go back"
 			oldIFS=$IFS
 			IFS=$','
 			choices=($btopt)
 			IFS=$oldIFS
-			PS3="Select your option "
+			PS3="Select your option :"
 			select answer in "${choices[@]}"; do
 			    for item in "${choices[@]}"; do
 			       if [[ $item == $answer ]]; then
