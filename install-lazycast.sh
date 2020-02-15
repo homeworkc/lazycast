@@ -38,7 +38,7 @@ make
 #Menu
 opt=""
 while [[ $opt != "End" ]]; do
-	clear
+	#clear
 	echo '####################  Menu Config options  ####################'
 	PS3='Config options: '
 	options=("Audio" "Wireless card" "Pincode" "Bluetooth" "End")
