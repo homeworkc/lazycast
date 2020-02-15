@@ -10,11 +10,11 @@
 #
 #################################################################################
 # define options
-pin="69696969"
+pin="31415926"
 ip_neighbor="192.168.173.2"
 ip_interface="192.168.173.1"
 mask="255.255.255.252"
-select_interface="wlan1"
+select_interface="wlan0"
 ################################################
 if [ "$EUID" -ne 0 ]
   then echo "Please run as root"
