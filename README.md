@@ -13,6 +13,17 @@ lazycast is a simple wifi display receiver. It was originally targeted Raspberry
 sudo apt-get update
 sudo apt-get upgrade
 ```
+**Install**
+```
+wget https://raw.githubusercontent.com/amerinoj/lazycast/master/install-lazycast.sh
+chmod +x chmod +x install-lazycast.sh
+./chmod +x install-lazycast.sh
+```
+Complete the menus into the install script to customize the install.
+
+install-lazycast.sh do all config but if you want customized the install more. continue reading:
+
+**INSTALL MANUALLY**
 
 **DEFINE THE INTERFACE**
 - Modify the /etc/dhcpcd.conf file to include "wpa_supplicant" line in the wifi adapter to work with WPA_SUPPLICANT and exclude others with line "nohook wpa_supplicant" **
@@ -65,10 +76,7 @@ no-dhcp-interface=wlan1
 interface=wlan0
 dhcp-range=interface:wlan0,192.168.42.10,192.168.42.50,255.255.255.0,24h
 ```
-
-
-**INSTALL**
-- Install packages used to compile the players:
+**INSTALL DEPENDENCIES**
 ```
 sudo apt install libx11-dev libasound2-dev libavformat-dev libavcodec-dev
 ```
@@ -79,7 +87,6 @@ make
 cd /opt/vc/src/hello_pi/hello_video
 make
 ```
-Then reboot.
 
 Clone this repo (to a desired directory):
 ```
@@ -91,6 +98,7 @@ Go to the ``lazycast`` directory then ``make``:
 cd lazycast
 make
 ```
+Then reboot.
 
 # Customize
 Change the pin code and  ip address, modify all.sh and change the pin code.
