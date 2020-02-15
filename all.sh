@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash +x
 #################################################################################
 # Run script for lazycast
 # Licensed under GNU General Public License v3.0 GPL-3 (in short)
@@ -10,17 +10,20 @@
 #
 #################################################################################
 # define options
-pin="31415926"
+pin=69696969
 ip_neighbor="192.168.173.2"
 ip_interface="192.168.173.1"
 mask="255.255.255.252"
-
+interface="wlan0"
 ################################################
 #Main LOOP
 while true; do
 		#interface select
-		ain="$(sudo wpa_cli interface)"
-		echo "${ain}"
+		#
+                wpa_cli interface $interface
+                #ain="$(sudo wpa_cli $interface)"
+                ain="$(sudo wpa_cli interface)"
+                echo "${ain}"
 		interface=$(echo "${ain}" | grep "wl" | grep -v "interface")
 
 		#interfaces type is now configured to  P2P?
