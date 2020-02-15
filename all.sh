@@ -14,92 +14,76 @@ pin=69696969
 ip_neighbor="192.168.173.2"
 ip_interface="192.168.173.1"
 mask="255.255.255.252"
-interface="wlan0"
+select_interface="wlan0"
 ################################################
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit
+fi
 #Main LOOP
 while true; do
+		#wpa status
+                if [[ "$(wpa_cli status)" !=  *"wpa_state=COMPLETED"* ]]; then
+                    echo "configuring WPA_supplicant"
+                    wpa_cli set p2p_go_ht40 1
+                    wpa_cli p2p_find type=progessive
+                    wpa_cli set device_name DIRECT-"$(uname -n)"
+                    wpa_cli set device_type 7-0050F204-1
+                    wpa_cli set p2p_go_ht40 1
+                    wpa_cli wfd_subelem_set 0 000600111c44012c
+                    wpa_cli wfd_subelem_set 1 0006000000000000
+                    wpa_cli wfd_subelem_set 6 00070000000000000
+                    wpa_cli p2p_group_add persistent$perstr
+                fi
+
 		#interface select
 		#
-                wpa_cli interface $interface
-                #ain="$(sudo wpa_cli $interface)"
-                ain="$(sudo wpa_cli interface)"
+                ain="$(wpa_cli interface $select_interface)"
                 echo "${ain}"
-		interface=$(echo "${ain}" | grep "wl" | grep -v "interface")
+		select=$(echo "${ain}" | grep "Selected")
+                interface=$(echo $select | cut -d"'" -f2)
 
-		#interfaces type is now configured to  P2P?
-		type="$(iw dev "$interface" info | grep type)"
+                # check if the interface was used to P2P connection before
+                perentry="$(wpa_cli list_networks | grep "\[DISABLED\]\[P2P-PERSISTENT\]" | tail -1)"
+                echo "${perentry}"
+                if [ `echo "${perentry}" | grep -c "P2P-PERSISTENT"`  -gt 0 ] 
+                then
+                        networkid=${perentry%%D*}
+                        perstr="=${networkid}"
+                else
+                        perstr=""
+                fi
 
-		if [ `echo "${type}" | grep -c "P2P"` -gt 0 ] 
-		then
-			echo "already on"
+		#check if the interface exist
+		if [[  "$(iw dev $interface info 2>&1)" ==  *"No such device"*  ]]; then
+                   wpa_cli p2p_group_add persistent$perstr
+		   if [[ "$(iw dev $interface info 2>&1)" ==  *"No such device"* ]]; then
+			echo Device error:$interface
+			break
+          	   else
+		        if [[ "$(iw dev $interface info 2>&1 | grep type)" ==  *"P2P"* ]]; then
+                            echo "Interface UP:"$interface " in P2P mode"
 
-		else
-		# if not
-		#config wpa_supplicant to P2P connection 
-			sudo wpa_cli set p2p_go_ht40 1
-			sudo wpa_cli p2p_find type=progessive
-			sudo wpa_cli set device_name DIRECT-"$(uname -n)"
-			sudo wpa_cli set device_type 7-0050F204-1
-			sudo wpa_cli set p2p_go_ht40 1
-			sudo wpa_cli wfd_subelem_set 0 000600111c44012c
-			sudo wpa_cli wfd_subelem_set 1 0006000000000000
-			sudo wpa_cli wfd_subelem_set 6 000700000000000000
-			
-			perentry="$(wpa_cli list_networks | grep "\[DISABLED\]\[P2P-PERSISTENT\]" | tail -1)"
-			echo "${perentry}"
-
-		# check if the interface was used to P2P connection before
-		# and select de ID 
-			if [ `echo "${perentry}" | grep -c "P2P-PERSISTENT"`  -gt 0 ] 
-			then
-				networkid=${perentry%%D*}
-				perstr="=${networkid}"
 			else
-				perstr=""
+			    echo "Interface UP:"$interface "but not in P2P mode"
 			fi
-			
-
-		#check if  iw dev can put in p2p-go
-			echo "${perstr}"
-			interface=$(echo "${ain}" | grep "wl" | grep -v "interface")
-			type="$(iw dev "$interface" info | grep type)"
-			
-
-			while [ `echo "${type}" | grep -c "P2P"`  -lt 1 ] 
-			do
-				while [ `echo "${type}" | grep -c "P2P"`  -lt 1 ]
-					do
-					sudo wpa_cli p2p_group_add persistent$perstr 
-					#sudo wpa_cli p2p_group_add persistent$perstr ht40
-					sleep 2
-					ain="$(sudo wpa_cli interface)"
-					echo "$ain"
-						interface=$(echo "${ain}" | grep "wl" | grep -v "interface")
-						type="$(iw dev "$interface" info | grep type)"
-
-				done
-				ain="$(sudo wpa_cli interface)"
-						echo "$ain"
-					interface=$(echo "${ain}" | grep "wl" | grep -v "interface")
-					type="$(iw dev "$interface" info | grep type)"
-			done
-
+		   fi
 		fi
-
-		p2pinterface=$(echo "${ain}" | grep "wl" | grep -v "interface")
-		echo $p2pinterface
-
-		sudo ifconfig $p2pinterface $ip_interface
-		sudo ifconfig $p2pinterface netmask $mask
+		echo "WPA config in P2P mode"
+		p2pinterface=$(echo "${ain}" | grep "wl" | grep "interface")
+		echo $interface
+		
+		sudo ifconfig $interface $ip_interface
+		sudo ifconfig $interface netmask $mask
 
 		echo "The display is ready"
 		echo "Your device is called: DIRECT-"$(uname -n)""
 		echo "PIN-->"     
-		sudo wpa_cli -i$p2pinterface wps_pin any $pin
+		sudo wpa_cli -i$interface wps_pin any $pin
 		echo "<--PIN"
 
 		echo "Waiting connection"
-		./d2.py -i$ip_interface -m$mask -p$ip_neighbor   -d$p2pinterface
+		./d2.py -i$ip_interface -m$mask -p$ip_neighbor   -d$interface
 
 		#clear p2p connection and arp entry
 		echo "Reconnecting"
