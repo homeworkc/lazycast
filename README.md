@@ -17,7 +17,7 @@ sudo apt-get upgrade
 ```
 wget https://raw.githubusercontent.com/amerinoj/lazycast/master/install-lazycast.sh
 chmod +x chmod +x install-lazycast.sh
-./chmod +x install-lazycast.sh
+./install-lazycast.sh
 ```
 Complete the menus into the install script to customize the install.
 
