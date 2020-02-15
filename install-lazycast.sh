@@ -2,7 +2,13 @@
 set -e
 
 # This script has been tested with the "2020-02-05-raspbian-buster-lite" image.
+#test super user
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit
+fi
 
+#install
 echo "Installing dependencies..."
 apt-get update
 apt-get install  git wpasupplicant libx11-dev libasound2-dev libavformat-dev libavcodec-dev python2
