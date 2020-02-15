@@ -189,7 +189,6 @@ done
 cp -n /opt/lazycast/lazycast.service /etc/systemd/system/lazycast.service
 systemctl daemon-reload
 systemctl  enable lazycast.service
-systemctl  start lazycast.service
 
 # Finished
 echo
