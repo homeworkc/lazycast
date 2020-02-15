@@ -99,12 +99,21 @@ while [[ $opt != "End" ]]; do
 			echo "Adapter select:"$wcard
 			sed -i 's/select_interface="wlan0"/'select_interface="\"$wcard"\"'/g' /opt/lazycast/all.sh
 			#update /etc/dhcpcd.conf
-			if  grep -q $wcard "/etc/dhcpcd.conf" ; then
-                                sed -i "s/$wcard/$wcard \n    wpa_supplicant/g" /etc/dhcpcd.conf
-                        else
-                                echo -e "interface  "$wcard"\n     wpa_supplicant" >> /etc/dhcpcd.conf
-			fi 
-
+			for item in "${choices[@]}"; do
+		  	  if [[ $item == $wcard ]]; then
+				if  grep -q $wcard "/etc/dhcpcd.conf" ; then
+                     		    sed -i "s/$wcard/$wcard \n    wpa_supplicant/g" /etc/dhcpcd.conf
+                  		else
+                     		   echo -e "interface  "$wcard"\n     wpa_supplicant" >> /etc/dhcpcd.conf
+				fi 
+			  else
+				if  grep -q $item "/etc/dhcpcd.conf" ; then
+                     		    sed -i "s/$item/$item \n    nohook wpa_supplicant/g" /etc/dhcpcd.conf
+                		else
+                     		    echo -e "interface  "$item"\n     nohook wpa_supplicant" >> /etc/dhcpcd.conf
+				fi
+			  fi
+			done
 
 			Local=$(locale | grep LANG= | cut -d"_" -f2)
 			echo Your system locale is:$Local
