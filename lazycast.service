@@ -5,15 +5,15 @@ After=network.target
 [Service]
 User=root
 Type=simple
-PIDFile=/var/run/lazycast.pid
 ExecStart=/opt/lazycast/all.sh
 WorkingDirectory=/opt/lazycast/
 Restart=always
-RestartSec=2s
+RestartSec=1s
+StartSec=1sec
 StandardOutput=syslog
 StandardError=syslog
 KillSignal=SIGINT
 
 [Install]
-WantedBy=default.target
+WantedBy=network.target
 WantedBy=lightdm.service

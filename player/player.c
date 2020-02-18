@@ -989,7 +989,7 @@ static void* addnullpacket()
 		}else if (numofpacket > 16)
 		{
 			hold = 0;
-			printf("start:%d, end:%d\n",osn,head->seqnum);
+			//printf("start:%d, end:%d\n",osn,head->seqnum);
 			
 #ifdef insertpacket
 			while (osn != head->seqnum)
@@ -1016,7 +1016,7 @@ static void* addnullpacket()
 			unsigned char topython[12];
 			if (sendto(fd3, topython, 12, 0, (struct sockaddr *)&addr3, addrlen) < 0)
 				perror("sendto error");
-			printf("idr:%d\n", numofpacket);
+			//printf("idr:%d\n", numofpacket);
 		}
 
 		//printf("\n");
@@ -1038,7 +1038,7 @@ static void* addnullpacket()
 				unsigned char topython[12];
 				if (sendto(fd3, topython, 12, 0, (struct sockaddr *)&addr3, addrlen) < 0)
 					perror("sendto error");
-				printf("idr:%d\n", numofpacket);
+				//printf("idr:%d\n", numofpacket);
 			}
 
 

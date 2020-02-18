@@ -328,7 +328,7 @@ static void* addnullpacket(rtppacket* beg)
 		else if (numofpacket > 14)
 		{
 			hold = 0;
-			printf("start:%d, end:%d\n", osn, head->seqnum);
+			//printf("start:%d, end:%d\n", osn, head->seqnum);
 
 			osn = head->seqnum;
 			sentseqnum = osn;
@@ -339,7 +339,7 @@ static void* addnullpacket(rtppacket* beg)
 			const char topython[] = "send idr";
 			if (sendto(fd2, topython, sizeof(topython), 0, (struct sockaddr *)&addr2, addrlen) < 0)
 				perror("sendto error");
-			printf("idr:%d\n", numofpacket);
+			//printf("idr:%d\n", numofpacket);
 		}
 
 
@@ -514,7 +514,7 @@ static int video_decode_test(rtppacket* beg)
 						int cc = buffer[3] & 0x0F;
 						if (cc != oldcc)
 						{
-							printf("oldcc %d cc %d\n", oldcc, cc);
+							//printf("oldcc %d cc %d\n", oldcc, cc);
 							oldcc = cc;
 							peserror = 1;
 						}

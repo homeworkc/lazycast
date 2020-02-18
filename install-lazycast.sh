@@ -97,7 +97,7 @@ while [[ $opt != "End" ]]; do
 			done
 			wcard=$answer
 			echo "Adapter select:"$wcard
-			sed -i 's/select_interface="wlan0"/'select_interface="\"$wcard"\"'/g' /opt/lazycast/all.sh
+			sed -i '/select_interface=/c\'select_interface="\"$wcard"\"'' /opt/lazycast/all.sh
 			#update /etc/dhcpcd.conf
 			for item in "${choices[@]}"; do
 		  	  if [[ $item == $wcard ]]; then
