@@ -9,16 +9,6 @@ lazycast is a simple wifi display receiver. It was originally targeted Raspberry
 wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.4-1+deb9u4_armhf.deb
 sudo apt --allow-downgrades install ./wpasupplicant_2.4-1+deb9u4_armhf.deb
 ```  
-**It is also highly recommended to replace the "Wireless & Wired Network" in Raspbian with NetworkManager, which can maintain much more stable p2p connection. Here is one solution (adopted from [here](https://raspberrypi.stackexchange.com/questions/29783/how-to-setup-network-manager-on-raspbian)):**
-```
-sudo apt install network-manager network-manager-gnome openvpn openvpn-systemd-resolved network-manager-openvpn network-manager-openvpn-gnome
-```
-And,
-```
-sudo apt purge openresolv dhcpcd5
-```
-Then reboot.
-
 Install packages used to compile the players:
 ```
 sudo apt install libx11-dev libasound2-dev libavformat-dev libavcodec-dev
