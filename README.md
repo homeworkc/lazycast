@@ -13,6 +13,11 @@ lazycast is a simple wifi display receiver. It was originally targeted Raspberry
 sudo apt-get update
 sudo apt-get upgrade
 ```
+The wpa_supplicant installed on the latest Raspbian distribution does not seem to work properly. (See this.) For Raspbian Buster, try downgrading the wpasupplicant package to the version for Raspbian Stretch. Here is one solution:
+```
+wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.4-1+deb9u4_armhf.deb
+sudo apt --allow-downgrades install ./wpasupplicant_2.4-1+deb9u4_armhf.deb
+```
 **Install**
 ```
 wget https://raw.githubusercontent.com/amerinoj/lazycast/master/install-lazycast.sh
