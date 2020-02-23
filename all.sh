@@ -1,4 +1,6 @@
 #!/bin/bash +x
+# uncomment next line to debug
+#set -x
 #################################################################################
 # Run script for lazycast
 # Licensed under GNU General Public License v3.0 GPL-3 (in short)
@@ -10,7 +12,7 @@
 #
 #################################################################################
 # define options
-pin="31415926"
+pin="69696969"
 ip_neighbor="192.168.173.2"
 ip_interface="192.168.173.1"
 mask="255.255.255.252"
@@ -22,7 +24,6 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 #Main
-#wpa status
 
 #select interfaces
 wpa_cli interface $select_interface
@@ -35,8 +36,8 @@ net_id=""
 if [[ $wpa_status !=  *"mode=P2P GO"*"wpa_state=COMPLETED"* ]]; then
                 wpa_cli set device_name DIRECT-$Device_name
                 wpa_cli set device_type 7-0050F204-1
-                wpa_cli set p2p_go_ht40 1
-
+                #wpa_cli set p2p_go_ht40 1
+                wpa_cli set p2p_ssid_postfix  p2p-$Device_name
 
                 echo "configuring WPA_supplicant"
 		
@@ -44,44 +45,48 @@ if [[ $wpa_status !=  *"mode=P2P GO"*"wpa_state=COMPLETED"* ]]; then
                 match_addr="$(echo "${previous_nets}" | grep "\[DISABLED\]\[P2P-PERSISTENT\]" | grep $mac_p2p)"
                 
                 #check if exist a previous network define with mac-address interfaces 
-                if [[ $match_addr == *"P2P-PERSISTENT"* ]] ;then
+                if [[ $match_addr == *"DIRECT"*p2p-$Device_name*  ]] ;then
                       echo "Previous net_id Found..."
-                      net_id=$(echo "${previous_net}" | cut -d$'\t' -f1)
+                      net_id=$(echo "${match_addr}" | cut -d$'\t' -f1 | head -n 1)
+                      echo "Previous net_id Found: "$net_id
+                      wpa_cli p2p_group_add persistent=$net_id
+
                 else
-                # id no found with mac address interfaces
-                    # look a P2P network profile
+                # id no found with mac address interface
+                    # searching old P2P network profile
                    any_net="$(echo "${previous_nets}" | grep "\[DISABLED\]\[P2P-PERSISTENT\]" | grep "DIRECT" )"
-                   if [[ $any_net == *"DIRECT"* ]] ;then
-                        echo "Reusing old net_id ..."
+                   if [[ $any_net == *"DIRECT"*p2p-$Device_name*  ]] ;then
                         net_id=$(echo "${any_net}" | cut -d$'\t' -f1 | head -n 1)
-                        #wpa_cli set_network $net_id bssid $mac_p2p
-                        #wpa_cli save_config
+                        echo "Reusing old net_id":$net_id
+                       
+                        delete_nets=$(echo "${any_net}" | cut -d$'\t' -f1 | tail -n +2)
+            
+                        for old_net in $delete_nets
+                        do
+                           echo "Removing others network id: "$old_net
+                           wpa_cli remove_network $old_net
+                        done
+                       	
+                        wpa_cli save_config
+                        wpa_cli p2p_group_add persistent=$net_id
+                        sleep 1
                    else
                         # No P2P network found in wpa_supplicant.conf
                         echo "No found P2P network "
                         echo "Creating new ..."
-                        net_id="*"
+                        wpa_cli p2p_group_add persistent
                    fi
 
                 fi
 
-                
-                if [[ $net_id != "*" ]] ;then
-                    wpa_cli p2p_group_add persistent=$net_id
-                    #wpa_cli p2p_group_remove $( wpa_cli status | grep "Selected interface" | cut -d"'" -f2 )
-                    #wpa_cli p2p_group_add persistent=$net_id
-
-                else  
-                    wpa_cli p2p_group_add persistent
-                    
-                fi
-		sleep 2
                 wpa_cli wfd_subelem_set 0 000600111c44012c
                 wpa_cli wfd_subelem_set 1 0006000000000000
                 wpa_cli wfd_subelem_set 6 000700000000000000
-                
+
+
                 
 fi
+              
 
 # get real interfaces name
 interface=$( wpa_cli status | grep "Selected interface" | cut -d"'" -f2 )
@@ -116,6 +121,5 @@ echo "Waiting connection"
 
 #clear p2p connection and arp entry
 echo "Connection Finished"
-wpa_cli p2p_flush
 ip neigh flush  $ip_neighbor
 
