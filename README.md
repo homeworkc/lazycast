@@ -9,7 +9,7 @@ lazycast is a simple wifi display receiver. It was originally targeted Raspberry
 wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.4-1+deb9u4_armhf.deb
 sudo apt --allow-downgrades install ./wpasupplicant_2.4-1+deb9u4_armhf.deb
 ```  
-Then reboot.
+Then reboot.  
 Install packages used to compile the players:
 ```
 sudo apt install libx11-dev libasound2-dev libavformat-dev libavcodec-dev
@@ -26,7 +26,7 @@ Clone this repo (to a desired directory):
 cd ~/
 git clone https://github.com/homeworkc/lazycast
 ```
-Go to the ``lazycast`` directory then ``make``:
+Go to the ``lazycast`` directory and then ``make``:
 ```
 cd lazycast
 make
