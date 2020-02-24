@@ -1,4 +1,5 @@
 control/*.bin
 h264/h264.bin
 player/player.bin
-
+*.pyc
+__pycache__
