@@ -17,7 +17,7 @@ sudo apt-get upgrade
 **Install**
 ```
 sudo -i
-bash <(curl -s https://raw.githubusercontent.com/amerinoj/lazycast/master/install.sh)   
+bash <(curl -s https://raw.githubusercontent.com/amerinoj/lazycast/master/install-lazycast.sh)   
 ```
 Complete the menus into the install script to customize the install.
 
