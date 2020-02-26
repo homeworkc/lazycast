@@ -38,7 +38,7 @@ if [[ $wpa_status !=  *"mode=P2P GO"*"wpa_state=COMPLETED"* ]]; then
                 wpa_cli set device_type 7-0050F204-1
                 #wpa_cli set p2p_go_ht40 1
                 wpa_cli set p2p_ssid_postfix  p2p-$Device_name
-
+                wpa_cli save_config
                 echo "configuring WPA_supplicant"
 		
                 previous_nets="$(wpa_cli list_networks)"
