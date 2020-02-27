@@ -11,7 +11,7 @@ fi
 #install
 echo "Installing dependencies..."
 apt-get update
-apt-get install  git wpasupplicant libx11-dev libasound2-dev libavformat-dev libavcodec-dev python2
+apt-get --yes install  git wpasupplicant libx11-dev libasound2-dev libavformat-dev libavcodec-dev python2
 echo "done."
 
 # Download lazycast  to /opt (or update if already present)
