@@ -10,8 +10,8 @@ WorkingDirectory=/opt/lazycast/
 Restart=always
 RestartSec=1s
 StartSec=1sec
-StandardOutput=syslog
-StandardError=syslog
+#StandardOutput=syslog
+#StandardError=syslog
 KillSignal=SIGINT
 
 [Install]
