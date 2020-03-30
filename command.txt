@@ -1,0 +1,9 @@
+wget https://w1.fi/releases/wpa_supplicant-2.9.tar.gz
+tar -xvf wpa_supplicant-2.9.tar.gz
+
+sudo apt install libdbus-1-dev libnl-3-dev libnl-genl-3-dev libssl-dev
+
+cp defconfig .config
+cd wpa_supplicant-2.9/wpa_supplicant
+sudo cp wpa_cli wpa_supplicant /usr/local/bin
+sudo reboot

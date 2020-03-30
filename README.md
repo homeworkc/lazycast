@@ -17,7 +17,7 @@ And,
 ```
 sudo apt purge dhcpcd5
 ```
-Additionally, ``systemd-resolved`` should be disabled since it does not seem to work well with NetworkManager, which causes DNS problems. (It may take a while for the problems to show).
+Additionally, ``systemd-resolved`` should be disabled since it does not seem to work well with NetworkManager, which causes DNS problems. (See [here](https://unix.stackexchange.com/questions/518266/ping-displays-name-or-service-not-known) for details.) (It may take a while for the problems to show).
 ```
 sudo systemctl disable systemd-resolved
 ```
