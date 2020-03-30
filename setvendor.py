@@ -19,8 +19,8 @@ ipmessage = '2005'+'{:04X}'.format(len(iphex)/2)+iphex
 
 
 
-capandhostmessage = '0001372001000105' + hostnamemessage + ipmessage
-# capandhostmessage = '0001372001000107' + hostnamemessage
+#capandhostmessage = '0001372001000105' + hostnamemessage + ipmessage
+capandhostmessage = '0001372001000107' + hostnamemessage
 
 
 wscmessage = '0050F204'+'1049'+'{:04X}'.format(len(capandhostmessage)/2) + capandhostmessage
