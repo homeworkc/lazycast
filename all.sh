@@ -40,6 +40,7 @@ do
 			while [ `echo "${ain}" | grep -c "p2p-wl"`  -lt 1 ]
 			do
 				sudo wpa_cli p2p_group_add persistent$perstr
+				#sudo wpa_cli p2p_group_add persistent$perstr freq=2
 				sleep 2
 				ain="$(sudo wpa_cli interface)"
 				echo "$ain"
