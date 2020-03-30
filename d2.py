@@ -49,10 +49,10 @@ while True:
 	try:
 		sock.connect(server_address)
 	except socket.error, e:
-		connectcounter = connectcounter + 1
-		if connectcounter == 20:
-			sock.close()
-			sys.exit(1)
+		#connectcounter = connectcounter + 1
+		#if connectcounter == 3:
+		sock.close()
+		sys.exit(1)
 	else:
 		break
 
