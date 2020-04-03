@@ -6,5 +6,7 @@ sudo apt install libdbus-1-dev libnl-3-dev libnl-genl-3-dev libssl-dev
 cd wpa_supplicant-2.9/wpa_supplicant
 cp defconfig .config
 make
+sudo mv /usr/local/bin/wpa_supplicant /usr/local/bin/wpa_supplicant_old
 sudo cp wpa_cli wpa_supplicant /usr/local/bin
+sudo rm /usr/local/bin/wpa_supplicant_old
 sudo reboot
