@@ -200,7 +200,7 @@ def launchplayer(player_select):
         if display_power_management == 1:
                 os.system('vcgencmd display_power 1')
 	if player_select == 0:
-		os.system('vlc --fullscreen rtp://0.0.0.0:1028/wfd1.0/streamid=0 --intf dummy &')
+		os.system('vlc --fullscreen rtp://0.0.0.0:1028/wfd1.0/streamid=0 --intf dummy  --no-ts-trust-pcr --ts-seek-percent &')
 	elif player_select == 1:
 		os.system('./player/player.bin '+str(idrsockport)+' '+str(sound_output_select)+' &')
 	elif player_select == 2:
