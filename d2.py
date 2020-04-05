@@ -22,11 +22,13 @@ from threading import Thread
 import time
 from time import sleep
 import sys
+import subprocess
 ##################### Settings #####################
 player_select = 2
 # 0: non-RPi systems. (using vlc or gstreamer)
 # 1: player1 has lower latency.
 # 2: player2 handles still images and sound better.
+# 3: omxplayer
 sound_output_select = 0
 # 0: HDMI sound output
 # 1: 3.5mm audio jack output
@@ -76,6 +78,7 @@ sock.sendall(s_data)
 
 data = (sock.recv(1000))
 print "-------->\n" + data
+m2data = data
 
 
 # M3
@@ -215,7 +218,16 @@ def launchplayer(player_select):
 	elif player_select == 2:
 		os.system('./h264/h264.bin '+str(idrsockport)+' '+str(sound_output_select)+' &')
 	elif player_select == 3:
-		os.system('omxplayer rtp://0.0.0.0:1028 -n -1 --live &')
+		#if 'MSMiracastSource' in m2data:
+		#	os.system('omxplayer rtp://0.0.0.0:1028 -n -1 --live &') # For Windows 10 when no sound is playing
+		#else:
+		#	os.system('omxplayer rtp://0.0.0.0:1028 --live &')
+		#os.system('omxplayer rtp://0.0.0.0:1028 -i')
+		omxplayerinfo = subprocess.Popen('omxplayer rtp://0.0.0.0:1028 -i'.split(),stderr=subprocess.PIPE).communicate()
+		if '0 channels' in omxplayerinfo[1]:
+			os.system('omxplayer rtp://0.0.0.0:1028 -n -1 --live &') # For Windows 10 when no sound is playing
+		else:
+			os.system('omxplayer rtp://0.0.0.0:1028 --live &')
 
 launchplayer(player_select)
 
