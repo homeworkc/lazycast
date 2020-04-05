@@ -6,7 +6,7 @@ import socket
 import uuid
 
 
-hostname = socket.gethostname()
+hostname = socket.gethostname().upper()
 
 # hostname = 'Dummy1-Kabylake'
 hostnamehex = hostname.encode('hex')
@@ -29,9 +29,9 @@ wscmessage = '0050F204'+'1049'+'{:04X}'.format(len(capandhostmessage)/2) + capan
 message = 'DD' + '{:02X}'.format(len(wscmessage)/2) + wscmessage
 print message
 
-# os.system('sudo wpa_cli VENDOR_ELEM_ADD 1 '+message)
-# os.system('sudo wpa_cli VENDOR_ELEM_ADD 2 '+message)
-# os.system('sudo wpa_cli VENDOR_ELEM_ADD 3 '+message)
+os.system('sudo wpa_cli VENDOR_ELEM_ADD 1 '+message)
+os.system('sudo wpa_cli VENDOR_ELEM_ADD 2 '+message)
+os.system('sudo wpa_cli VENDOR_ELEM_ADD 3 '+message)
 
 
 if os.path.exists('uuid.txt'):
