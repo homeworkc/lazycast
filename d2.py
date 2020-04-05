@@ -24,7 +24,7 @@ from time import sleep
 import sys
 ##################### Settings #####################
 player_select = 2
-# 0: non-RPi systems. (using vlc)
+# 0: non-RPi systems. (using vlc or gstreamer)
 # 1: player1 has lower latency.
 # 2: player2 handles still images and sound better.
 sound_output_select = 0
@@ -139,6 +139,8 @@ uibcstart(sock,data)
 
 def killall(control):
         os.system('pkill vlc')
+        os.system('pkill cvlc')
+        os.system('pkill gst-launch-1.0')
         os.system('pkill player.bin')
         os.system('pkill h264.bin')
         if display_power_management == 1:
@@ -157,7 +159,7 @@ sock.sendall(s_data)
 
 
 # M6
-m6req ='SETUP rtsp://192.168.101.80/wfd1.0/streamid=0 RTSP/1.0\r\n'\
+m6req ='SETUP rtsp://192.168.173.80/wfd1.0/streamid=0 RTSP/1.0\r\n'\
 +'CSeq: 101\r\n'\
 +'Transport: RTP/AVP/UDP;unicast;client_port=1028\r\n\r\n'
 print "<---M6---\n" + m6req
@@ -180,7 +182,7 @@ sessionid=paralist[position]
 
 
 # M7
-m7req ='PLAY rtsp://192.168.101.80/wfd1.0/streamid=0 RTSP/1.0\r\n'\
+m7req ='PLAY rtsp://192.168.173.80/wfd1.0/streamid=0 RTSP/1.0\r\n'\
 +'CSeq: 102\r\n'\
 +'Session: '+str(sessionid)+'\r\n\r\n'
 print "<---M7---\n" + m7req
@@ -200,7 +202,14 @@ def launchplayer(player_select):
         if display_power_management == 1:
                 os.system('vcgencmd display_power 1')
 	if player_select == 0:
-		os.system('vlc --fullscreen rtp://0.0.0.0:1028/wfd1.0/streamid=0 --intf dummy --no-ts-trust-pcr --ts-seek-percent --network-caching=300 --no-mouse-events & ')
+		# os.system('gst-launch-1.0 -v udpsrc port=1028 ! application/x-rtp,media=video,encoding-name=H264 ! queue ! rtph264depay ! avdec_h264 ! autovideosink &')
+		# os.system('gst-launch-1.0 -v udpsrc port=1028 ! video/mpegts ! tsdemux !  h264parse ! queue ! avdec_h264 ! ximagesink sync=false &')
+		# os.system('gst-launch-1.0  -v  playbin   uri=udp://0.0.0.0:1028/wfd1.0/streamid=0  video-sink=ximagesink audio-sink=alsasink sync=false &')
+		# os.system('gst-launch-1.0  -v  playbin   uri=udp://0.0.0.0:1028/wfd1.0/streamid=0  video-sink=xvimagesink audio-sink=alsasink sync=false &')
+		if False: # Change False to True if you want to use gstreamer
+			os.system('gst-launch-1.0  -v  playbin   uri=udp://0.0.0.0:1028/wfd1.0/streamid=0  video-sink=autovideosink audio-sink=alsasink sync=false &')
+		else:
+			os.system('vlc --fullscreen rtp://0.0.0.0:1028/wfd1.0/streamid=0 --intf dummy --no-ts-trust-pcr --ts-seek-percent --network-caching=300 --no-mouse-events & ')
 	elif player_select == 1:
 		os.system('./player/player.bin '+str(idrsockport)+' '+str(sound_output_select)+' &')
 	elif player_select == 2:
