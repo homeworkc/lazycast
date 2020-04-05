@@ -9,15 +9,15 @@
 #   under the GPL along with build & install instructions.
 #
 #################################################################################
-ain="$(sudo wpa_cli interface)"
-echo "${ain}"
-if [ `echo "${ain}" | grep -c "p2p-wl"` -gt 0 ] 
-then
-	p2pinterface=$(echo "${ain}" | grep "p2p-wl" | grep -v "interface")
+# ain="$(sudo wpa_cli interface)"
+# echo "${ain}"
+# if [ `echo "${ain}" | grep -c "p2p-wl"` -gt 0 ] 
+# then
+# 	p2pinterface=$(echo "${ain}" | grep "p2p-wl" | grep -v "interface")
 
-	sudo wpa_cli p2p_group_remove $p2pinterface
-fi
-sleep 10
+# 	sudo wpa_cli p2p_group_remove $p2pinterface
+# fi
+# sleep 10
 sudo wpa_cli p2p_find type=progessive
 sudo wpa_cli set device_name "$(uname -n)"
 sudo wpa_cli set device_type 7-0050F204-1
