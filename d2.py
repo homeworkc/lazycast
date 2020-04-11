@@ -251,11 +251,12 @@ while True:
 					if player_select == 2 and 'h264.bin' not in processrunning:
 						launchplayer(player_select)						
 						sleep(0.01)
-					#watchdog = watchdog + 1
-					#if watchdog == 70/0.01:
-					#	killall(True)
-					#	sleep(1)
-					#	break
+					else:
+						watchdog = watchdog + 1
+						if watchdog == 70/0.01:
+							killall(True)
+							sleep(1)
+							break
 				else:
 					sys.exit(1)
 			else:

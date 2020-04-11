@@ -47,7 +47,7 @@ do
 			done
 			sleep 5
 			ain="$(sudo wpa_cli interface)"
-		        echo "$ain"
+		    echo "$ain"
 		done
 
 	fi
@@ -71,10 +71,28 @@ do
 		sudo wpa_cli -i$p2pinterface wps_pin any 31415926
 		echo ""
 		./d2.py
-		ain="$(sudo wpa_cli interface)"
-		if [ `echo "${ain}" | grep -c "p2p-wl"` == 0 ] 
+		if [ `sudo wpa_cli interface | grep -c "p2p-wl"` == 0 ] 
 		then
 			break
 		fi
+		wlaninterface=$(sudo wpa_cli interface | grep -Ev "p2p|interfaces")
+		wlanfreq=$(sudo wpa_cli -i$wlaninterface status | grep "freq")
+		p2pfreq=$(sudo wpa_cli -i$p2pinterface status | grep "freq")
+		if [ "$wlanfreq" != "$p2pfreq" ] 
+		then
+			echo "The display is disconnected since "$wlaninterface" changes from "$p2pfreq" to "$wlanfreq
+			echo "To disable WLAN roaming, run: sudo killall -STOP NetworkManager"
+			echo "You can re-enable roaming afterwards by running: sudo killall -CONT NetworkManager"
+			sudo wpa_cli -i$p2pinterface p2p_group_remove $p2pinterface
+			while :
+			do
+				if [ `sudo wpa_cli interface | grep -c "p2p-wl"` == 0 ] 
+				then
+					break
+				fi
+			done
+			break
+		fi
+
 	done
 done
