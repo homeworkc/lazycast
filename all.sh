@@ -9,6 +9,7 @@
 #   under the GPL along with build & install instructions.
 #
 #################################################################################
+managefrequency=1
 while :
 do
 	p2pdevinterface=$(sudo wpa_cli interface | grep -E "p2p-dev" | tail -1)
@@ -41,6 +42,10 @@ do
 		echo "${perstr}"
 		echo "${p2pdevinterface}"
 		wlanfreq=$(sudo wpa_cli -i$wlaninterface status | grep "freq")
+		if [ "$managefrequency" == "0" ]
+		then
+			wlanfreq=""
+		fi
 		if [ "$wlanfreq" != "" ]
 		then	
 			echo $wlaninterface": "$wlanfreq
@@ -50,8 +55,13 @@ do
 		do
 			while [ `echo "${ain}" | grep -c "p2p-wl"`  -lt 1 ]
 			do
-				sudo wpa_cli p2p_group_add -i$p2pdevinterface persistent$perstr $wlanfreq
 				#sudo wpa_cli p2p_group_add -i$p2pdevinterface persistent$perstr freq=2
+				result=$(sudo wpa_cli p2p_group_add -i$p2pdevinterface persistent$perstr $wlanfreq)
+				if [ "$result" == "FAIL" ]					
+				then
+					wlanfreq=""
+					managefrequency=0
+				fi
 				sleep 2
 				ain="$(sudo wpa_cli interface)"
 				echo "$ain"
@@ -89,6 +99,10 @@ do
 		
 		wlanfreq=$(sudo wpa_cli -i$wlaninterface status | grep "freq")
 		p2pfreq=$(sudo wpa_cli -i$p2pinterface status | grep "freq")
+		if [ "$managefrequency" == "0" ]
+		then
+			wlanfreq=""
+		fi
 		if [ "$wlanfreq" != "" ]
 		then		
 			if [ "$wlanfreq" != "$p2pfreq" ] 
