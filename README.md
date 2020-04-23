@@ -27,7 +27,7 @@ Then reboot:
 ```
 sudo reboot
 ```
-## Compile Source
+## Build Binaries
 Install packages used to compile the players:
 ```
 sudo apt install libx11-dev libasound2-dev libavformat-dev libavcodec-dev
