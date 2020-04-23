@@ -4,11 +4,13 @@ lazycast: A Simple Wireless Display Receiver
 lazycast is a simple wifi display receiver. It was originally targeted Raspberry Pi (as display) and Windows 8.1/10 (as source), but it **might** also work on other Linux platforms and Miracast sources. (For other Linux systems, skip the preparation section.) In general, lazycast does not require re-compilation of wpa_supplicant to provide p2p capability, and should work on an "out of the box" Raspberry Pi.
 
 # Preparation
+## Downgrading wpa_supplicant
 **The wpa_supplicant installed on the latest Raspbian distribution does not seem to work properly. (See [this](https://www.reddit.com/r/linux4noobs/comments/c5qila/want_to_downgrade_wpa_supplicant/).) For Raspbian Buster, try downgrading the ``wpasupplicant`` package to the version for Raspbian Stretch. Here is one solution:**
 ```
 wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.4-1+deb9u4_armhf.deb
 sudo apt --allow-downgrades install ./wpasupplicant_2.4-1+deb9u4_armhf.deb
 ```  
+## Installing NetworkManager
 **It is also highly recommended to replace the "Wireless & Wired Network" in Raspbian with NetworkManager, which can maintain much more stable p2p connection. Here is one solution (adopted from [here](https://raspberrypi.stackexchange.com/questions/29783/how-to-setup-network-manager-on-raspbian)):**
 ```
 sudo apt install network-manager network-manager-gnome openvpn openvpn-systemd-resolved network-manager-openvpn network-manager-openvpn-gnome
@@ -25,6 +27,7 @@ Then reboot:
 ```
 sudo reboot
 ```
+## Compile Source
 Install packages used to compile the players:
 ```
 sudo apt install libx11-dev libasound2-dev libavformat-dev libavcodec-dev
@@ -109,10 +112,32 @@ Currently, this feature is tested to be working with a Windows 10 PC and a Pi co
 
 This feature is not fully compatible with ``all.sh``. If ``all.sh`` has been running since booting, first run ``./removep2p`` before running the scripts. (It might be possible to run traditional method and MICE simultaneously if ``all.sh`` launches later than the script of MICE.)
 ## Preparation
+Install NetworkManager.
 Install avahi-utils:
-``
+```
 sudo apt install avahi-utils
-``
+```
+The device discovery phase requires a recompiled (with the default configuration) version of wpa_supplicant. First, install required packages:
+```
+sudo apt install libdbus-1-dev libnl-3-dev libnl-genl-3-dev libssl-dev
+Then, download the source of wpa_supplicant:
+```
+cd ~/
+wget https://w1.fi/releases/wpa_supplicant-2.9.tar.gz
+tar -xvf wpa_supplicant-2.9.tar.gz
+Compile wpa_supplicant:
+```
+cd wpa_supplicant-2.9/wpa_supplicant
+cp defconfig .config
+make
+```
+Finally copy the new binaries to /usr/local/bin and reboot:
+```
+sudo mv /usr/local/bin/wpa_supplicant /usr/local/bin/wpa_supplicant_old
+sudo cp wpa_cli wpa_supplicant /usr/local/bin
+sudo rm /usr/local/bin/wpa_supplicant_old
+sudo reboot
+```
 ## Usage
 Make sure there is no p2p interface that has already been created. (If that is not the case, run ``./removep2p`` or simply reboot.)  
 Run ``./mice.py``.  
