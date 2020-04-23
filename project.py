@@ -17,6 +17,8 @@
 import socket
 from time import sleep
 import os
+import uuid
+
 
 commands = {}
 commands['01'] = 'SOURCE_READY'
@@ -35,7 +37,25 @@ types['05'] = 'SECURITY_OPTIONS'
 types['06'] = 'PIN_CHALLENGE'
 types['07'] = 'PIN_RESPONSE_REASON'
 
+if os.path.exists('uuid.txt'):
+	uuidfile = open('uuid.txt','r')
+	lines = uuidfile.readlines()
+	uuidfile.close()
+	uuidstr = lines[0]
+else:
+	uuidstr = str(uuid.uuid4()).upper()
+	uuidfile = open('uuid.txt','w')
+	uuidfile.write(uuidstr)
+	uuidfile.close()
 
+hostname = socket.gethostname() 
+print 'The hostname of this machine is: '+hostname
+
+print uuidstr
+
+dnsstr = 'avahi-publish-service '+hostname+' _display._tcp 7250 container_id={'+uuidstr+'}'
+print dnsstr
+os.system(dnsstr+' &')
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.bind(('',7250))

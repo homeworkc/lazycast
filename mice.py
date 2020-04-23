@@ -26,21 +26,21 @@ import socket
 from dbus.mainloop.glib import DBusGMainLoop
 from time import sleep
 from threading import Event
-import uuid
+
+# If ./mice.py and ./project.py do not run on the same machine, 
+# hostname should be set to the hostname of the machine running ./project.py
+hostname = socket.gethostname() 
+# hostname = 'raspberrypi'
 
 event = Event()
-
 def groupStarted(properties):
 
 	print "groupStarted: " + str(properties)
 	g_obj = dbus.SystemBus().get_object('fi.w1.wpa_supplicant1',properties['group_object'])
 	res = g_obj.GetAll('fi.w1.wpa_supplicant1.Group', dbus_interface=dbus.PROPERTIES_IFACE, byte_arrays=True)
 	print "Group properties: " + str(res)
-
-
-	hostname = socket.gethostname()
+	
 	hostnamehex = hostname.encode('hex')
-
 	hostnamemessage = '2002'+'{:04X}'.format(len(hostname))+hostnamehex
 	capandhostmessage = '0001372001000105' + hostnamemessage
 
@@ -128,9 +128,6 @@ class P2P_Group_Add (threading.Thread):
 
 	def setarguments(self):
 
-		hostname = socket.gethostname()
-
-
 		props = self.interface_object.GetAll(self.wpas_dbus_interfaces_p2pdevice,dbus_interface=dbus.PROPERTIES_IFACE)
 		print(props)
 		print ''	
@@ -145,15 +142,16 @@ class P2P_Group_Add (threading.Thread):
 		print(props)
 		print ''	
 
-
 	def run(self):
 
 		groupadddict = {'persistent':False}
 		try:
 			self.interfacep2pdevice.GroupAdd(groupadddict)
 		except:
-			print("Error:\n  Could not preform group add")
-			os._exit(0)
+			print('Error:\n  Could not preform group add')
+			print 'If existing beacon does not function properly, run ./removep2p.sh first.'
+			print 'Now running ./project.py'
+			event.set()
 
 		gobject.MainLoop().get_context().iteration(True)
 		gobject.threads_init()
@@ -178,23 +176,6 @@ if __name__ == "__main__":
 
 	event.wait()
 
-	if os.path.exists('uuid.txt'):
-		uuidfile = open('uuid.txt','r')
-		lines = uuidfile.readlines()
-		uuidfile.close()
-		uuidstr = lines[0]
-	else:
-		uuidstr = str(uuid.uuid4()).upper()
-		uuidfile = open('uuid.txt','w')
-		uuidfile.write(uuidstr)
-		uuidfile.close()
-
-	print uuidstr
-
-	hostname = socket.gethostname()
-	dnsstr = 'avahi-publish-service '+hostname+' _display._tcp 7250 container_id={'+uuidstr+'}'
-	print dnsstr
-	os.system(dnsstr+' &')
 	execfile('project.py')
 
 	# print("Error:\n  Group formation timed out")
