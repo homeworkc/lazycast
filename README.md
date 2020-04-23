@@ -106,9 +106,9 @@ sudo loginctl enable-linger pi
 NOTE: In this method, the systemd unit expects lazycast to be located under `/home/pi/lazycast`, adjust the WorkingDirectory if this is not the correct path.
 
 # Miracast over Infrastructure
-For Windows 10 source, Miracast over Infrastructure (MICE) is a feature that allows transmission of screen data over Ethernet or secure wifi networks. The spec of Miracast over Infrastructure (MICE) is available [here](https://winprotocoldoc.blob.core.windows.net/productionwindowsarchives/MS-MICE/%5bMS-MICE%5d.pdf). Compared to wifi p2p, it allows more stable connection and lower latency. Although MICE almost entirely relies on Ethernet or secure wifi network, in the device discovery phase, it still requires a wifi p2p device to broadcast beacon and probe response frames to the source. (However, it might be possible to use two Pis so that one of the two does not need to have wifi hardware or be physically close to the source. One Pi would be used to trasmit the beacon while the other (that runs ``./project.py``) is used to project. For such setting to work using the current script, however, two Pis must have the same hostname. In the future, it might be possible to emulate a wifi card by HW/SW on the source so that wifi p2p will not be necessary.)  
+For Windows 10 sources, Miracast over Infrastructure (MICE) is a feature that allows transmission of screen data over Ethernet or secure wifi networks. The spec of Miracast over Infrastructure (MICE) is available [here](https://winprotocoldoc.blob.core.windows.net/productionwindowsarchives/MS-MICE/%5bMS-MICE%5d.pdf). Compared to wifi p2p, it allows more stable connection and lower latency. Although MICE relies on Ethernet or secure wifi network almost entirely, in the device discovery phase, it still requires a wifi p2p device to broadcast beacon and probe response frames to the source. (However, it might be possible to use two Pis so that one of the two does not need to have wifi hardware or be physically close to the source. One Pi would be used to trasmit the beacon while the other (that runs ``./project.py``) is used to project. For such setting to work using the current script, however, the variable ``hostname`` in ``mice.py`` must set to the hostname of the machine running ``project.py``. In the future, it might be possible to emulate a wifi card by HW/SW on the source so that wifi p2p will not be necessary.)  
 
-Currently, this feature is tested to be working with a Windows 10 PC and a Pi connected via Ethernet. More testings might be needed. Also, the encryption feature is not implemented yet so it should only be used on trusted network and it should not be used for sensitive data.
+Currently, this feature is tested to be working with a Windows 10 PC and a Pi connected via Ethernet. More testings might be needed. Also, the encryption feature is not implemented yet so it should only be used over trusted networks and it should not be used for sensitive data.
 
 This feature is not fully compatible with ``all.sh``. If ``all.sh`` has been running since booting, first run ``./removep2p`` before running the scripts. (It might be possible to run traditional method and MICE simultaneously if ``all.sh`` launches later than the script of MICE.)
 ## Preparation
@@ -117,12 +117,12 @@ Install avahi-utils:
 ```
 sudo apt install avahi-utils
 ```
-Make sure the Windows 10 PC is on the same network as the Pi.  
+Make sure the Windows 10 PC is on the same network as the Pi. You can try pinging the Pi from the PC.  
 ## Usage
 Make sure there is no p2p interface that has already been created. (If this is not the case, run ``./removep2p`` or simply reboot.)  
 Run ``./mice.py``.  
-Use the "Connect" tab in Windows 10 and try to connect to <the hostname of Pi> (e.g., raspberrypi). Windows may try to connect using the traditional method first and therefore may ask for PIN. In that case, simply cancel the connection process and try again. Since no encryption is implemented at the moment, the prompt for PIN should not appear using MICE.  
-Since some of the message exchanges have not been implemented, instead of its hostname, sometimes the Pi will appear as "Device".
+Use the "Connect" tab in Windows 10 and try to connect to <the hostname of Pi> (e.g., raspberrypi). Windows may try to connect using the traditional method first and therefore may ask for PIN. In that case, simply cancel the connection process and try again. You can also try relaunching ``mice.py`` and see if it helps. Since no encryption is implemented at the moment, the prompt for PIN should not appear using MICE.  
+Since some of the message exchanges have not been implemented, instead of its hostname, sometimes the Pi will appear as "Device" on the PC.
 
 # Others
 Some parts of the video player1 are modified from the codes on https://github.com/Apress/raspberry-pi-gpu-audio-video-prog. Many thanks to the author of "Raspberry Pi GPU Audio Video Programming" and, by extension, authors of omxplayer.  
