@@ -102,38 +102,23 @@ sudo loginctl enable-linger pi
 
 NOTE: In this method, the systemd unit expects lazycast to be located under `/home/pi/lazycast`, adjust the WorkingDirectory if this is not the correct path.
 
-# Miracast over Infrastructure (Under Development)
-The spec of Miracast over Infrastructure (MICE) is available [here](https://winprotocoldoc.blob.core.windows.net/productionwindowsarchives/MS-MICE/%5bMS-MICE%5d.pdf). A reference connection can be established by two Windows 10 computers. The simpliest setting would be connecting via Ethernet (with static IP assignments). To further simplify the situation, WiFi should be enabled but the two computers should be disconnected from APs. Then, one computer should run the "Connect" app while the other tries to connect to this computer as a "wireless" display. Once connected, run task manager and see whether the majority of the traffic goes through Ethernet (as opposed to WiFi Direct.) The network trace (e.g., using Wireshark) collected from the reference system would be useful for implementing MICE on Pi.  
+# Miracast over Infrastructure
+For Windows 10 source, Miracast over Infrastructure (MICE) is a feature that allows transmission of screen data over Ethernet or secure wifi networks. The spec of Miracast over Infrastructure (MICE) is available [here](https://winprotocoldoc.blob.core.windows.net/productionwindowsarchives/MS-MICE/%5bMS-MICE%5d.pdf). Compared to wifi p2p, it allows more stable connection and lower latency. Although MICE almost entirely relies on Ethernet or secure wifi network, in the device discovery phase, it still requires a wifi p2p device to broadcast beacon and probe response frames to the source. (However, it might be possible to use two Pis so that one of the two does not need to have wifi hardware or be physically close to the source. One Pi would be used to trasmit the beacon while the other (that runs ``./project.py``) is used to project. For such setting to work using the current script, however, two Pis must have the same hostname. In the future, it might be possible to emulate a wifi card by HW/SW on the source so that wifi p2p will not be necessary.)  
 
-At this stage, the implementation of device discovery phase, as depicted in Figure 2 in the spec, is completed. Specifically, the Vendor Extension Attribute can be successfully added to the Beacon and Probe Response frames, as described in Section 2.2.8 and Section 4.1 in the spec. What we should do next is implementing the host name resolution phase, since using the IP Address Attribute does not seem to work. Specifically, we need to implement Section 3.1.3 in the spec so that a TCP connection on port 7250 can be established successfully.    
+Currently, this feature is tested to be working with a Windows 10 PC and a Pi connected via Ethernet. More testings might be needed. Also, the encryption feature is not implemented yet so it should only be used on trusted network and it should not be used for sensitive data.
 
-The device discovery phase requires a recompiled (with the default configuration) version of wpa_supplicant.
-First, install required packages:
-```
-sudo apt install libdbus-1-dev libnl-3-dev libnl-genl-3-dev libssl-dev
-```
-Then, download the source of wpa_supplicant:
-```
-cd ~/
-wget https://w1.fi/releases/wpa_supplicant-2.9.tar.gz
-tar -xvf wpa_supplicant-2.9.tar.gz
-```
-Compile wpa_supplicant:
-```
-cd wpa_supplicant-2.9/wpa_supplicant
-cp defconfig .config
-make
-```
-Finally copy the new binaries to ``/usr/local/bin`` and reboot:
-```
-sudo mv /usr/local/bin/wpa_supplicant /usr/local/bin/wpa_supplicant_old
-sudo cp wpa_cli wpa_supplicant /usr/local/bin
-sudo rm /usr/local/bin/wpa_supplicant_old
-sudo reboot
-```
-After reboot, make sure ``./all.sh`` is not running and has not been running. To double check, if you run ``sudo wpa_cli interface``, it should say ``Selected interface 'p2p-dev-wlan0'`` and not ``Selected interface 'p2p-wlan0-0'``.
-Then, run ``./mice.sh``, which will set the Vendor Extension Attributes as described in Section 2.2.8 and Section 4.1. Note that the name of the display is the hostname of Pi (e.g., raspberrypi) since other names do not seem to work for Windows 10 computers. If you want to check whether the Vendor Extension Attributes are set properly, you can run ``python scan.py`` on a separate Pi or analyze the beacon frames using Wireshark on Linux computers (with WiFi) and see whether it shows outputs similar to the example hexdump in Section 4.1. The last line of ``mice.sh`` awaits a connection request on TCP port 7250, which is the beginning of the projection phase. Now you can try various mDNS and DNS settings and see whether you can successfully establish the connection.
-
+This feature is not fully compatible with ``all.sh``. If ``all.sh`` has been running since booting, first run ``./removep2p`` before running the scripts. (It might be possible to run traditional method and MICE simultaneously if ``all.sh`` launches later than the script of MICE.)
+## Preparation
+Install avahi-utils:
+``
+sudo apt install avahi-utils
+``
+## Usage
+Make sure there is no p2p interface that has already been created. (If that is not the case, run ``./removep2p`` or simply reboot.)  
+Run ``./mice.py``.  
+Make sure the targeted source is on the same network as the Pi.  
+Use the "Connect" tab in Windows 10 and try to connect to <the hostname of Pi> (e.g., raspberrypi). Windows may try to connect using the traditional method first and therefore may be asking for PIN. In that case, simply cancel the connection process and try again. Since no encryption is implemented at the moment, the prompt for PIN should not appear using MICE.  
+Since some of the message exchanges have not been implemented, instead of its hostname, sometimes the Pi will appear as "Device".
 
 # Others
 Some parts of the video player1 are modified from the codes on https://github.com/Apress/raspberry-pi-gpu-audio-video-prog. Many thanks to the author of "Raspberry Pi GPU Audio Video Programming" and, by extension, authors of omxplayer.  

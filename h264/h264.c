@@ -178,6 +178,7 @@ int sendtodecoder(COMPONENT_T *video_decode, COMPONENT_T *video_scheduler, COMPO
 
 
 int idrsockport = -1;
+char* sinkip = "192.168.173.1";
 static void* addnullpacket(rtppacket* beg)
 {
 	struct sockaddr_in addr1, addr2;
@@ -196,7 +197,7 @@ static void* addnullpacket(rtppacket* beg)
 
 	memset((char *)&addr1, 0, sizeof(addr1));
 	addr1.sin_family = AF_INET;
-	addr1.sin_addr.s_addr = inet_addr("192.168.173.1");
+	addr1.sin_addr.s_addr = inet_addr(sinkip);
 	addr1.sin_port = htons(1028);
 
 	struct timeval tv;
@@ -628,6 +629,11 @@ int main(int argc, char **argv)
 	{
 		audiodest = atoi(argv[2]);
 		printf("audiodest:%d\n", audiodest);
+	}
+	if (argc > 3)
+	{
+		sinkip = argv[3];
+		printf("sinkip:%s\n", sinkip);
 	}
 
 	atomic_store(&numofnode, 0);

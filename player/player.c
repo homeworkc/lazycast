@@ -834,7 +834,7 @@ int largers(int a, int b)
 
 
 int idrsockport = -1;
-
+char* sourceip;
 static void* addnullpacket()
 {
 	struct sockaddr_in addr1, addr2, addr3;
@@ -862,7 +862,7 @@ static void* addnullpacket()
 
 	memset((char *)&addr1, 0, sizeof(addr1));
 	addr1.sin_family = AF_INET;
-	addr1.sin_addr.s_addr = inet_addr("192.168.173.1");
+	addr1.sin_addr.s_addr = inet_addr(sourceip);
 	addr1.sin_port = htons(1028);
 
 	memset((char *)&addr2, 0, sizeof(addr2));
@@ -1090,6 +1090,14 @@ int main(int argc, char** argv)
 		audiodest = atoi(argv[2]);
 		printf("audiodest:%d\n", audiodest);
 	}
+
+	sourceip = "192.168.173.1";
+	if (argc > 3)
+	{
+		sourceip = argv[3];
+	}
+	printf("argv3:%s\n", argv[3]);
+	printf("sourceip:%s\n", sourceip);
 
 	pthread_t npthread;
 	if (pthread_create(&npthread, NULL, addnullpacket, NULL) != 0)

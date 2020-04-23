@@ -211,12 +211,21 @@ int main(int argc, char **argv)
 	int fd;
 	short port = 0;
 	
-	if(argc != 2) {
-		printf("Usage: %s <port>\n", argv[0]);
+	if(argc < 2) 
+	{
+		printf("missing port number");
 		exit(-1);
 	}
 	port = atoi(argv[1]);
-	printf("connect to 192.168.173.80:%u\n", port);
+	printf("port:%u\n", port);
+
+	char* sourceip = "192.168.173.80";
+	if(argc>2)
+	{
+		sourceip = argv[2];
+	}
+	printf("sourceip:%u\n", sourceip);
+	
 
 	if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
 	{
@@ -225,12 +234,9 @@ int main(int argc, char **argv)
 	}
 
 	struct sockaddr_in serveraddr;
-
-
-
 	memset(&serveraddr, 0, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
-	serveraddr.sin_addr.s_addr = inet_addr("192.168.173.80");
+	serveraddr.sin_addr.s_addr = inet_addr(sourceip);
 	serveraddr.sin_port = htons(port);
 
 	int flag = 1;

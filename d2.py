@@ -23,6 +23,7 @@ import time
 from time import sleep
 import sys
 import subprocess
+import argparse
 ##################### Settings #####################
 player_select = 2
 # 0: non-RPi systems. (using vlc or gstreamer)
@@ -41,8 +42,13 @@ display_power_management = 0
 
 ####################################################
 
+parser = argparse.ArgumentParser()
+parser.add_argument('arg1', nargs='?', default='192.168.173.80')
+args = parser.parse_args()
+sourceip = vars(args)['arg1']
+
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_address = ('192.168.173.80', 7236)
+server_address = (sourceip, 7236)
 sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
@@ -134,7 +140,7 @@ def uibcstart(sock, data):
 				os.system('pkill control.bin')
 				os.system('pkill controlhidc.bin')
 				if('hidc_cap_list=none' not in entry):
-					os.system('./control/controlhidc.bin '+ uibcport + ' &')
+					os.system('./control/controlhidc.bin '+ uibcport + ' ' + sourceip + ' &')
 				elif('generic_cap_list=none' not in entry):
 					os.system('./control/control.bin '+ uibcport + ' &')
 
@@ -162,7 +168,7 @@ sock.sendall(s_data)
 
 
 # M6
-m6req ='SETUP rtsp://192.168.173.80/wfd1.0/streamid=0 RTSP/1.0\r\n'\
+m6req ='SETUP rtsp://'+sourceip+'/wfd1.0/streamid=0 RTSP/1.0\r\n'\
 +'CSeq: 101\r\n'\
 +'Transport: RTP/AVP/UDP;unicast;client_port=1028\r\n\r\n'
 print "<---M6---\n" + m6req
@@ -185,7 +191,7 @@ sessionid=paralist[position]
 
 
 # M7
-m7req ='PLAY rtsp://192.168.173.80/wfd1.0/streamid=0 RTSP/1.0\r\n'\
+m7req ='PLAY rtsp://'+sourceip+'/wfd1.0/streamid=0 RTSP/1.0\r\n'\
 +'CSeq: 102\r\n'\
 +'Session: '+str(sessionid)+'\r\n\r\n'
 print "<---M7---\n" + m7req
@@ -216,7 +222,10 @@ def launchplayer(player_select):
 	elif player_select == 1:
 		os.system('./player/player.bin '+str(idrsockport)+' '+str(sound_output_select)+' &')
 	elif player_select == 2:
-		os.system('./h264/h264.bin '+str(idrsockport)+' '+str(sound_output_select)+' &')
+		sinkip = sock.getsockname()[0]
+		print sinkip
+		print('./h264/h264.bin '+str(idrsockport)+' '+str(sound_output_select)+' '+sinkip+' &')
+		os.system('./h264/h264.bin '+str(idrsockport)+' '+str(sound_output_select)+' '+sinkip+' &')
 	elif player_select == 3:
 		#if 'MSMiracastSource' in m2data:
 		#	os.system('omxplayer rtp://0.0.0.0:1028 -n -1 --live &') # For Windows 10 when no sound is playing
