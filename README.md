@@ -112,7 +112,7 @@ Currently, this feature is tested to be working with a Windows 10 PC and a Pi co
 
 This feature is not fully compatible with ``all.sh``. If ``all.sh`` has been running since booting, first run ``./removep2p`` before running the scripts. (It might be possible to run traditional method and MICE simultaneously if ``all.sh`` launches later than the script of MICE.)
 ## Preparation
-Install NetworkManager.
+Install NetworkManager.  
 Install avahi-utils:
 ```
 sudo apt install avahi-utils
@@ -120,11 +120,13 @@ sudo apt install avahi-utils
 The device discovery phase requires a recompiled (with the default configuration) version of wpa_supplicant. First, install required packages:
 ```
 sudo apt install libdbus-1-dev libnl-3-dev libnl-genl-3-dev libssl-dev
+```
 Then, download the source of wpa_supplicant:
 ```
 cd ~/
 wget https://w1.fi/releases/wpa_supplicant-2.9.tar.gz
 tar -xvf wpa_supplicant-2.9.tar.gz
+```
 Compile wpa_supplicant:
 ```
 cd wpa_supplicant-2.9/wpa_supplicant
@@ -139,10 +141,10 @@ sudo rm /usr/local/bin/wpa_supplicant_old
 sudo reboot
 ```
 ## Usage
-Make sure there is no p2p interface that has already been created. (If that is not the case, run ``./removep2p`` or simply reboot.)  
+Make sure there is no p2p interface that has already been created. (If this is not the case, run ``./removep2p`` or simply reboot.)  
 Run ``./mice.py``.  
 Make sure the targeted source is on the same network as the Pi.  
-Use the "Connect" tab in Windows 10 and try to connect to <the hostname of Pi> (e.g., raspberrypi). Windows may try to connect using the traditional method first and therefore may be asking for PIN. In that case, simply cancel the connection process and try again. Since no encryption is implemented at the moment, the prompt for PIN should not appear using MICE.  
+Use the "Connect" tab in Windows 10 and try to connect to <the hostname of Pi> (e.g., raspberrypi). Windows may try to connect using the traditional method first and therefore may ask for PIN. In that case, simply cancel the connection process and try again. Since no encryption is implemented at the moment, the prompt for PIN should not appear using MICE.  
 Since some of the message exchanges have not been implemented, instead of its hostname, sometimes the Pi will appear as "Device".
 
 # Others
