@@ -112,7 +112,7 @@ Currently, this feature is tested to be working with a Windows 10 PC and a Pi co
 
 This feature is not fully compatible with ``all.sh``. If ``all.sh`` has been running since booting, first run ``./removep2p`` before running the scripts. (It might be possible to run traditional method and MICE simultaneously if ``all.sh`` launches later than the script of MICE.)
 ## Preparation
-Install NetworkManager, as described in the previous preparation section. It is required for MICE.   
+Follow the steps in the previous preparation section. Note that NetworkManager is required for MICE.   
 Install avahi-utils:
 ```
 sudo apt install avahi-utils
