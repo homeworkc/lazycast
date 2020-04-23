@@ -5,7 +5,7 @@
 	Modified from the p2p_group_add example of wpa_supplicant
 	# Tests p2p_group_add
 	######### MAY NEED TO RUN AS SUDO #############
-	Using any part of the code in commercial products is prohibited
+	Using any part of the code in commercial products is prohibited.
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -154,6 +154,15 @@ class P2P_Group_Add (threading.Thread):
 		except:
 			print("Error:\n  Could not preform group add")
 			os._exit(0)
+
+		gobject.MainLoop().get_context().iteration(True)
+		gobject.threads_init()
+		gobject.MainLoop().run()
+
+
+
+		
+
 
 
 if __name__ == "__main__":

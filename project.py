@@ -2,7 +2,7 @@
 """
 	This software is part of lazycast, a simple wireless display receiver for Raspberry Pi
 	Copyright (C) 2020 Hsun-Wei Cho
-	Using any part of the code in commercial products is prohibited
+	Using any part of the code in commercial products is prohibited.
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
