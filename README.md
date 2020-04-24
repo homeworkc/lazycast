@@ -51,10 +51,8 @@ make
 ```
 
 # Usage
-Run `./all.sh` to initiate lazycast receiver. Wait until the "The display is ready" message.
-The name of your device will also be displayed on the pi.
-Then, search for the wireless display on the source device you want to cast. The default PIN number is ``31415926``.  
-If backchannel control is supported by the source, keyboard and mouse input on Pi are redirected to the source as remote controls.  
+Run `./all.sh` to initiate lazycast receiver. Wait until the "The display is ready" message. The name of the display will appear after this message. Then, search for this name on the source device you want to cast. The default PIN number is ``31415926``. If backchannel control is supported by the source, keyboard and mouse input on Pi are redirected to the source as remote controls.  
+
 It is recommended to initiate the termination of the receiver on the source side. These user controls are often near the pairing controls on the source device. You can utilize the backchannel feature to remotely control the source device in order to close lazycast.  
 
 
@@ -108,7 +106,7 @@ NOTE: In this method, the systemd unit expects lazycast to be located under `/ho
 # Miracast over Infrastructure
 For Windows 10 sources, Miracast over Infrastructure (MICE) is a feature that allows transmission of screen data over Ethernet or secure wifi networks. The spec of Miracast over Infrastructure (MICE) is available [here](https://winprotocoldoc.blob.core.windows.net/productionwindowsarchives/MS-MICE/%5bMS-MICE%5d.pdf). Compared to wifi p2p, it allows more stable connection and lower latency. Although MICE relies on Ethernet or secure wifi network almost entirely, in the device discovery phase, it still requires a wifi p2p device to broadcast beacon and probe response frames to the source. (However, it might be possible to use two Pis so that one of the two does not need to have wifi hardware or be physically close to the source. One Pi would be used to trasmit the beacon while the other (that runs ``./project.py``) is used to project. For such setting to work, the variable ``hostname`` in ``mice.py`` must be set to the hostname of the machine running ``project.py``. In the future, it might be possible to emulate a wifi card by HW/SW on the source so that wifi p2p will not be necessary.)  
 
-Currently, this feature is tested to be working with a Windows 10 PC and a Pi (with manually assigned IPs) connected via Ethernet. More tests might be needed, especially for different DHCP, DNS and firewall configurations. Ports used includes but are not limited to UDP 53 (DNS), UDP 5353 (mDNS), TCP 7236 and TCP 7250. Also, the encryption feature is not implemented yet so it should only be used over trusted networks and it should not be used for sensitive data.
+Currently, this feature is tested to be working with a Windows 10 PC and a Pi (with manually assigned IPs) connected via Ethernet. More tests might be needed, especially for different DHCP, DNS and firewall configurations. Ports used include but are not limited to UDP 53 (DNS), UDP 5353 (mDNS), TCP 7236 and TCP 7250. Also, the encryption feature is not implemented yet so it should only be used over trusted networks and it should not be used for sensitive data.   
 
 This feature is not fully compatible with ``all.sh``. If ``all.sh`` has been running since booting, first run ``./removep2p`` before running the scripts. (It might be possible to run traditional method and MICE simultaneously if ``all.sh`` launches later than the script of MICE.)
 ## Preparation
