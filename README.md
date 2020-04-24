@@ -119,7 +119,7 @@ Make sure the Windows 10 PC is on the same network as the Pi. You can try pingin
 ## Usage
 Make sure there is no p2p interface that has already been created. (If this is not the case, run ``./removep2p`` or simply reboot.)  
 Run ``./mice.py``.  
-Use the "Connect" tab in Windows 10 and try to connect to <the hostname of Pi> (e.g., raspberrypi). Windows may try to connect using the traditional method first and therefore may ask for PIN. In that case, simply cancel the connection process and try again. You can also try relaunching ``mice.py`` and see if it helps. Since no encryption is implemented at the moment, the prompt for PIN should not appear using MICE.  
+Use the "Connect" tab in Windows 10 and try to connect to the hostname of Pi (e.g., raspberrypi). Windows may try to connect using the traditional method first and therefore may ask for PIN. In that case, simply cancel the connection process and try again. You can also try relaunching ``mice.py`` and see if it helps. Since no encryption is implemented at the moment, the prompt for PIN should not appear using MICE.  
 Windows 10 assigns the name of the display differently when using MICE. If the monitor connected to the Pi is successfully detected by the PC, the name of the display (e.g., raspberrypi) will be changed to the name of the monitor. If the detection fails, the name of the display will be changed to "Device". After disconnection, the name of the display will be changed back to the hostname of Pi (e.g., raspberrypi).
 
 # Others
