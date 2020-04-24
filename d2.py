@@ -108,7 +108,6 @@ else:
 
 msg = msg +'wfd_3d_video_formats: none\r\n'\
 	+'wfd_coupled_sink: none\r\n'\
-	+'wfd_display_edid: none\r\n'\
 	+'wfd_connector_type: 05\r\n'\
 	+'wfd_uibc_capability: input_category_list=GENERIC, HIDC;generic_cap_list=Keyboard, Mouse;hidc_cap_list=Keyboard/USB, Mouse/USB;port=none\r\n'\
 	+'wfd_standby_resume_capability: none\r\n'\
@@ -117,7 +116,7 @@ msg = msg +'wfd_3d_video_formats: none\r\n'\
 
 if runonpi and not os.path.exists('edid.txt'):
 		os.system('tvservice -d edid.txt')
-		
+
 edidlen = 0
 if os.path.exists('edid.txt'):
 	edidfile = open('edid.txt','r')
@@ -130,6 +129,12 @@ if os.path.exists('edid.txt'):
 
 if 'wfd_display_edid' in data and edidlen != 0:
 	msg = msg + 'wfd_display_edid: ' + '{:04X}'.format(edidlen/256) + ' ' + str(edidstr.encode('hex'))+'\r\n'
+
+if 'microsoft_latency_management_capability' in data:
+	msg = msg + 'microsoft-latency-management-capability: supported\r\n'
+if 'microsoft_format_change_capability' in data:
+	msg = msg + 'microsoft_format_change_capability: supported\r\n'
+
 # if 'intel_friendly_name' in data:
 # 	msg = msg + 'intel_friendly_name: raspberrypi\r\n'
 
