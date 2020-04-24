@@ -64,6 +64,10 @@ while True:
 	else:
 		break
 
+cpuinfo = os.popen('grep Hardware /proc/cpuinfo')
+runonpi = 'BCM2835' in cpuinfo.read()
+cpuinfo.close()
+
 idrsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 idrsock_address = ('127.0.0.1', 0)
 idrsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -109,6 +113,25 @@ msg = msg +'wfd_3d_video_formats: none\r\n'\
 	+'wfd_uibc_capability: input_category_list=GENERIC, HIDC;generic_cap_list=Keyboard, Mouse;hidc_cap_list=Keyboard/USB, Mouse/USB;port=none\r\n'\
 	+'wfd_standby_resume_capability: none\r\n'\
 	+'wfd_content_protection: none\r\n'
+
+
+if runonpi and not os.path.exists('edid.txt'):
+		os.system('tvservice -d edid.txt')
+		
+edidlen = 0
+if os.path.exists('edid.txt'):
+	edidfile = open('edid.txt','r')
+	lines = edidfile.readlines()
+	edidfile.close()
+	edidstr =''
+	for line in lines:
+		edidstr = edidstr + line
+	edidlen = len(edidstr)
+
+if 'wfd_display_edid' in data and edidlen != 0:
+	msg = msg + 'wfd_display_edid: ' + '{:04X}'.format(edidlen/256) + ' ' + str(edidstr.encode('hex'))+'\r\n'
+# if 'intel_friendly_name' in data:
+# 	msg = msg + 'intel_friendly_name: raspberrypi\r\n'
 
 
 m3resp ='RTSP/1.0 200 OK\r\nCSeq: 2\r\n'+'Content-Type: text/parameters\r\nContent-Length: '+str(len(msg))+'\r\n\r\n'+msg
@@ -203,7 +226,7 @@ print "-------->\n" + data
 print "---- Negotiation successful ----"
 
 
-if (os.uname()[-1][:4] not in ["armv","aarch64"]):
+if not runonpi:
 	player_select = 0
 
 def launchplayer(player_select):
