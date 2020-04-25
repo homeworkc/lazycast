@@ -59,19 +59,26 @@ It is recommended to initiate the termination of the receiver on the source side
 
 # Tips
 Set the resolution on the source side. lazycast advertises all possible resolutions regardless of the current rendering resolution. Therefore, you may want to change the resolution (on the source) to match the actual resolution of the display connecting to Pi.  
-Modify parameters in the "settings" section in ``d2.py`` to change the sound output port (hdmi/3.5mm) and preferred player.  
-The maximum resolutions supported are 1920x1080p60 and 1920x1200p30. The GPU on Pi may struggle to handle 1920x1080p60, which results in high latency. In this case, reduce the FPS to 1920x1080p50.  
-To change the default PIN number, replace the string ``31415926`` in ``all.sh`` to another 8-digit number.  
-After Pi connects to the source, it has an IP address of ``192.168.173.1`` and this connection can be reused for other purposes like SSH. On the other hand, since they are under the same subnet, precautions should be taken to prevent unauthorized access to Pi by anyone who knows the PIN number.    
-Two in-house players are written for Raspberry Pi 3. VLC, omxplayer or gstreamer can be used instead on other platforms. (See [here](https://gstreamer.freedesktop.org/documentation/installing/on-linux.html) for details of installing gstreamer.) 
 
+Modify parameters in the "settings" section in ``d2.py`` to change the sound output port (hdmi/3.5mm) and preferred player.  
+
+The maximum resolutions supported are 1920x1080p60 and 1920x1200p30. The GPU on Pi may struggle to handle 1920x1080p60, which results in high latency. In this case, reduce the FPS to 1920x1080p50.  
+
+To change the default PIN number, replace the string ``31415926`` in ``all.sh`` to another 8-digit number.  
+
+After Pi connects to the source, it has an IP address of ``192.168.173.1`` and this connection can be reused for other purposes like SSH. On the other hand, since they are under the same subnet, precautions should be taken to prevent unauthorized access to Pi by anyone who knows the PIN number.    
+
+Two in-house players are written for Raspberry Pi 3. VLC, omxplayer or gstreamer can be used instead on other platforms. (See [here](https://gstreamer.freedesktop.org/documentation/installing/on-linux.html) for details of installing gstreamer.) 
 
 # Known issues
 lazycast tries to remember the pairing credentials so that entering the PIN is only needed once for each device. However, this feature does not seem to work properly all the time with recent Raspbian images. (Using the latest Raspbian is still recommended from the security perspective. However, recent Raspbians randomize the MAC address of the ``p2p-dev-wlan0`` interface upon reboot, while old Raspbians ([example](https://downloads.raspberrypi.org/raspbian/images/raspbian-2017-09-08/)) do not. **Any insights or suggestions on this issue are appreciated**, and could make this important feature work again.) Therefore, re-pairing may be needed after every Raspberry Pi reboot. Try clearing the 'lazycast' information on the source device before re-pairing if you run into pairing problems.  
+
 Latency: Limited by the implementation of the rtp player used. (In VLC, latency can be reduced from 1200 to 300ms by lowering the network cache value.)  
-The on-board WiFi chip on Pi 3 only supports 2.4GHz. Therefore, devices/protocols that use 5.8GHz for P2P communication (e.g. early generations of WiDi) are not ("out of the box") supported.  
+
 Due to the overcrowded nature of the wifi spectrum and the use of unreliable rtp transmission, you may experience some video glitching/audio stuttering. The in-house players employ several mechanisms to conceal transmission error, but it may still be noticeable in challenging wireless environments. Interference from other devices may cause disconnections.  
+
 Devices may not fully support backchannel control and some keystrokes/clicks will behave differently in this case. The left Windows key is not captured and when it is pressed, it makes the current window to be out-of-focus and thus disables the backchannel controls. If it is pressed again the window will be in-focus.   
+
 HDCP(content protection): Neither the key nor the hardware is available on Pi and therefore is not supported.  
 
 # Start on boot
@@ -118,8 +125,11 @@ Make sure the Windows 10 PC is on the same network as the Pi. You can try pingin
 ## Usage
 Make sure there is no p2p interface that has already been created and ``all.sh`` is not running. (You can disable ``all.sh`` to start on boot and then simply reboot.)  
 Run ``./mice.py``.  
+
 Use the "Connect" tab in Windows 10 and try to connect to the hostname of Pi (e.g., raspberrypi). Windows may try to connect using the traditional method first and therefore may ask for PIN. In that case, simply cancel the connecting process and try again. You can also try relaunching ``mice.py`` and see if it helps. Since no encryption is implemented at the moment, the prompt for PIN should not appear using MICE.  
-Windows 10 assigns the name of the display differently when using MICE. If the monitor connected to the Pi is successfully detected by the PC, the name of the display (e.g., raspberrypi) will be changed to the name of the monitor. If the detection fails, the name of the display will be changed to "Device". After disconnection, the name of the display will be changed back to the hostname of Pi (e.g., raspberrypi).
+
+Windows 10 assigns the name of the display differently when using MICE. If the monitor connected to the Pi is successfully detected by the PC, the name of the display (e.g., raspberrypi) will be changed to the name of the monitor. If the detection fails, the name of the display will be changed to "Device". After disconnection, the name of the display will be changed back to the hostname of Pi (e.g., raspberrypi).  
+
 If you wish to run MICE and wifi p2p simultaneously, set the parameter ``concurrent`` to ``1`` in ``mice.py`` and only uses ``mice.py``.  
 # Others
 Some parts of the video player1 are modified from the codes on https://github.com/Apress/raspberry-pi-gpu-audio-video-prog. Many thanks to the author of "Raspberry Pi GPU Audio Video Programming" and, by extension, authors of omxplayer.  
