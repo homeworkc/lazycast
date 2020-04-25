@@ -29,7 +29,7 @@ player_select = 2
 # 0: non-RPi systems. (using vlc or gstreamer)
 # 1: player1 has lower latency.
 # 2: player2 handles still images and sound better.
-# 3: omxplayer
+# 3: omxplayer # Using this option for video playback on Android
 sound_output_select = 0
 # 0: HDMI sound output
 # 1: 3.5mm audio jack output
@@ -130,10 +130,10 @@ if os.path.exists('edid.txt'):
 if 'wfd_display_edid' in data and edidlen != 0:
 	msg = msg + 'wfd_display_edid: ' + '{:04X}'.format(edidlen/256) + ' ' + str(edidstr.encode('hex'))+'\r\n'
 
-if 'microsoft_latency_management_capability' in data:
-	msg = msg + 'microsoft-latency-management-capability: supported\r\n'
-if 'microsoft_format_change_capability' in data:
-	msg = msg + 'microsoft_format_change_capability: supported\r\n'
+# if 'microsoft_latency_management_capability' in data:
+# 	msg = msg + 'microsoft-latency-management-capability: supported\r\n'
+# if 'microsoft_format_change_capability' in data:
+# 	msg = msg + 'microsoft_format_change_capability: supported\r\n'
 
 # if 'intel_friendly_name' in data:
 # 	msg = msg + 'intel_friendly_name: raspberrypi\r\n'

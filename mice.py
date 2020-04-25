@@ -27,10 +27,14 @@ from dbus.mainloop.glib import DBusGMainLoop
 from time import sleep
 from threading import Event
 
-# If ./mice.py and ./project.py do not run on the same machine, 
-# hostname should be set to the hostname of the machine running ./project.py
+##################### Settings #####################
 hostname = socket.gethostname() 
 # hostname = 'raspberrypi'
+# If ./mice.py and ./project.py do not run on the same machine, 
+# hostname should be set to the hostname of the machine running ./project.py
+concurrent = 0
+# 0: Accept MICE connection only
+# 1: Accept MICE and wifi p2p connections
 
 event = Event()
 def groupStarted(properties):
@@ -175,6 +179,9 @@ if __name__ == "__main__":
 
 
 	event.wait()
+
+	if concurrent == 1:
+		os.system('./all.sh &')
 
 	execfile('project.py')
 

@@ -24,7 +24,7 @@ do
 
 	else
 		sudo wpa_cli -i$p2pdevinterface p2p_find type=progessive
-		sudo wpa_cli -i$p2pdevinterface set device_name lazycast_on_"$(uname -n)"
+		sudo wpa_cli -i$p2pdevinterface set device_name "$(uname -n)"
 		sudo wpa_cli -i$p2pdevinterface set device_type 7-0050F204-1
 		sudo wpa_cli -i$p2pdevinterface set p2p_go_ht40 1
 		sudo wpa_cli -i$p2pdevinterface wfd_subelem_set 0 000600111c44012c
@@ -85,7 +85,7 @@ do
 	sleep 3
 	sudo busybox udhcpd ./udhcpd.conf 
 	echo "The display is ready"
-	echo "Your device is called: lazycast_on_"$(uname -n)""
+	echo "Your device is called: "$(uname -n)""
 	while :
 	do	
 		echo "PIN:"	
