@@ -124,6 +124,7 @@ sudo apt install avahi-utils
 Make sure the Windows 10 PC is on the same network as the Pi. You can try pinging the Pi from the PC.  
 ## Usage
 Make sure there is no p2p interface that has already been created and ``all.sh`` is not running. (You can disable ``all.sh`` to start on boot and then simply reboot.)  
+
 Run ``./mice.py``.  
 
 Use the "Connect" tab in Windows 10 and try to connect to the hostname of Pi (e.g., raspberrypi). Windows may try to connect using the traditional method first and therefore may ask for PIN. In that case, simply cancel the connecting process and try again. You can also try relaunching ``mice.py`` and see if it helps. Since no encryption is implemented at the moment, the prompt for PIN should not appear using MICE.  
