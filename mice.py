@@ -27,16 +27,35 @@ from dbus.mainloop.glib import DBusGMainLoop
 from time import sleep
 from threading import Event
 
+
+
 ##################### Settings #####################
 hostname = socket.gethostname() 
 # hostname = 'raspberrypi'
 # If ./mice.py and ./project.py do not run on the same machine, 
-# hostname should be set to the hostname of the machine running ./project.py
+# hostname and ipstr should be the those of the machine running ./project.py
+ipstr = ''
+# ipstr = '192.168.1.5'
 concurrent = 0
 # 0: Accept MICE connection only
 # 1: Accept MICE and wifi p2p connections
 
 event = Event()
+ippipe = os.popen('hostname -I')
+ipstrs = ippipe.read()
+ippipe.close()
+ipstrs = ipstrs[:ipstrs.find(' \n')]
+ipelems = ipstrs.split(' ')
+if len(ipelems)>1 and ipstr == '':
+	print('Warning:')
+	print('This machine has multiple IP addresses:')
+	for ipelem in ipelems:
+		print(ipelem)
+	ipstr = ipelems[0]
+	print('A PC will try to connect to '+ipstr+' directly if mDNS fails')
+	print('Set the variable "ipstr" in mice.py to another IP manually if '+ipstr+' does not work')
+
+
 def groupStarted(properties):
 
 	print "groupStarted: " + str(properties)
@@ -46,7 +65,15 @@ def groupStarted(properties):
 	
 	hostnamehex = hostname.encode('hex')
 	hostnamemessage = '2002'+'{:04X}'.format(len(hostname))+hostnamehex
-	capandhostmessage = '0001372001000105' + hostnamemessage
+
+	ipmessage = ''
+	
+	if ipstr != '':
+		# The spec supportes multiple ip attributes. However, Windows will only try the first one
+		iphex = ipstr.encode('hex')
+		ipmessage = '2005'+'{:04X}'.format(len(iphex)/2)+iphex
+
+	capandhostmessage = '0001372001000105' + hostnamemessage + ipmessage
 
 	innerarray = []
 	for c in capandhostmessage.decode('hex'):
@@ -152,7 +179,7 @@ class P2P_Group_Add (threading.Thread):
 		try:
 			self.interfacep2pdevice.GroupAdd(groupadddict)
 		except:
-			print('Error:\n  Could not preform group add')
+			print('Warning:\n  Could not preform group add')
 			print 'If existing beacon does not function properly, run ./removep2p.sh first.'
 			print 'Now running ./project.py'
 			event.set()

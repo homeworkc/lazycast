@@ -76,7 +76,7 @@ addr, idrsockport = idrsock.getsockname()
 
 data = (sock.recv(1000))
 print "---M1--->\n" + data
-s_data = 'RTSP/1.0 200 OK\r\nCSeq: 1\r\n\Public: org.wfa.wfd1.0, SET_PARAMETER, GET_PARAMETER\r\n\r\n'
+s_data = 'RTSP/1.0 200 OK\r\nCSeq: 1\r\nPublic: org.wfa.wfd1.0, SET_PARAMETER, GET_PARAMETER\r\n\r\n'
 print "<--------\n" + s_data
 sock.sendall(s_data)
 
@@ -135,8 +135,18 @@ if 'wfd_display_edid' in data and edidlen != 0:
 # if 'microsoft_format_change_capability' in data:
 # 	msg = msg + 'microsoft_format_change_capability: supported\r\n'
 
-# if 'intel_friendly_name' in data:
-# 	msg = msg + 'intel_friendly_name: raspberrypi\r\n'
+if 'intel_friendly_name' in data:
+	msg = msg + 'intel_friendly_name: raspberrypi\r\n'
+if 'intel_sink_manufacturer_name' in data:
+	msg = msg + 'intel_sink_manufacturer_name: lazycast\r\n'
+if 'intel_sink_model_name' in data:
+	msg = msg + 'intel_sink_model_name: lazycast\r\n'
+if 'intel_sink_version' in data:
+	msg = msg + 'intel_sink_version: 20.4.26\r\n'
+if 'intel_sink_device_URL' in data:
+	msg = msg + 'intel_sink_device_URL: https://github.com/homeworkc/lazycast\r\n'
+
+
 
 
 m3resp ='RTSP/1.0 200 OK\r\nCSeq: 2\r\n'+'Content-Type: text/parameters\r\nContent-Length: '+str(len(msg))+'\r\n\r\n'+msg
