@@ -11,8 +11,8 @@ wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.4-1+deb9u4_
 sudo apt --allow-downgrades install ./wpasupplicant_2.4-1+deb9u4_armhf.deb
 ```  
 ## Install NetworkManager
-**It is also highly recommended to replace the "Wireless & Wired Network" in Raspbian with NetworkManager, which can maintain much more stable p2p connection.**  
-**Note that installing NetworkManager will reset the network and causes Pi to be disconnected from existing network. Therefore, these steps should be done locally and not over SSH. After the installation, you can connect to the network once again using the NetworkManager Interface.**
+**It is highly recommended to replace the "Wireless & Wired Network" in Raspbian with NetworkManager, which can maintain much more stable p2p connection.**  
+**Note that installing NetworkManager will reset the network and causes Pi to be disconnected from existing network. Therefore, these steps should be done locally and not over SSH. After the installation, you can connect to the network once again using the NetworkManager Interface.**  
 Here is one solution (adopted from [here](https://raspberrypi.stackexchange.com/questions/29783/how-to-setup-network-manager-on-raspbian)):
 ```
 sudo apt install network-manager network-manager-gnome openvpn openvpn-systemd-resolved network-manager-openvpn network-manager-openvpn-gnome
@@ -118,7 +118,7 @@ For Windows 10 sources, Miracast over Infrastructure (MICE) is a feature that al
 Currently, this feature is tested to be working with a Windows 10 PC and a Pi (with manually assigned IPs) connected via Ethernet. More tests might be needed, especially for different DHCP, DNS and firewall configurations. Ports used include but are not limited to UDP 53 (DNS), UDP 5353 (mDNS), TCP 7236 and TCP 7250. Also, the encryption feature is not implemented yet so it should only be used over trusted networks and it should not be used for sensitive data. MICE works in ipv6 networks but currently only ipv4 is implemented.  
 
 ## Preparation
-Follow the steps in the previous preparation section. Note that NetworkManager is required for MICE.   
+Follow the steps in the previous preparation section. Note that installing NetworkManager is required for MICE.   
 Install avahi-utils:
 ```
 sudo apt install avahi-utils
