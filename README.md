@@ -11,7 +11,9 @@ wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.4-1+deb9u4_
 sudo apt --allow-downgrades install ./wpasupplicant_2.4-1+deb9u4_armhf.deb
 ```  
 ## Install NetworkManager
-**It is also highly recommended to replace the "Wireless & Wired Network" in Raspbian with NetworkManager, which can maintain much more stable p2p connection. Here is one solution (adopted from [here](https://raspberrypi.stackexchange.com/questions/29783/how-to-setup-network-manager-on-raspbian)):**
+**It is also highly recommended to replace the "Wireless & Wired Network" in Raspbian with NetworkManager, which can maintain much more stable p2p connection.**  
+**Note that installing NetworkManager will reset the network and causes Pi to be disconnected from existing network. Therefore, these steps should be done locally and not over SSH. After the installation, you can connect to the network once again using the NetworkManager Interface.**
+Here is one solution (adopted from [here](https://raspberrypi.stackexchange.com/questions/29783/how-to-setup-network-manager-on-raspbian)):
 ```
 sudo apt install network-manager network-manager-gnome openvpn openvpn-systemd-resolved network-manager-openvpn network-manager-openvpn-gnome
 ```
@@ -131,7 +133,7 @@ Use the "Connect" tab in Windows 10 and try to connect to the hostname of Pi (e.
 
 Windows 10 assigns the name of the display differently when using MICE. If the monitor connected to the Pi is successfully detected by the PC, the name of the display (e.g., raspberrypi) will be changed to the name of the monitor. If the detection fails, the name of the display will be changed to "Device". After disconnection, the name of the display will be changed back to the hostname of Pi (e.g., raspberrypi).  
 
-If you wish to run MICE and wifi p2p simultaneously, set the parameter ``concurrent`` to ``1`` in ``mice.py`` and only uses ``mice.py``. In networks where mDNS is disabled, manually set the ``ipstr`` variable to the IP of Pi and a PC will try to connect to this IP directly.  
+If you wish to run MICE and wifi p2p simultaneously, set the parameter ``concurrent`` to ``1`` in ``mice.py`` and only uses ``mice.py``. When there are multiple IPs assigned to the Pi and mDNS does not seem to be working, manually set the ``ipstr`` variable in ``mice.py`` to the target IP of Pi and a PC will try to connect to this IP directly.  
 # Others
 Some parts of the video player1 are modified from the codes on https://github.com/Apress/raspberry-pi-gpu-audio-video-prog. Many thanks to the author of "Raspberry Pi GPU Audio Video Programming" and, by extension, authors of omxplayer.  
 Using any part of the codes in this project in commercial products is prohibited.
