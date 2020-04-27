@@ -12,7 +12,7 @@ sudo apt --allow-downgrades install ./wpasupplicant_2.4-1+deb9u4_armhf.deb
 ```  
 ## Install NetworkManager
 **It is highly recommended to replace the "Wireless & Wired Network" in Raspbian with NetworkManager, which can maintain much more stable p2p connection.**  
-**Note that installing NetworkManager will reset the network and causes Pi to be disconnected from existing network. Therefore, these steps should be done locally and not over SSH. After the installation, you can connect to the network once again using the NetworkManager Interface.**  
+**Note that installing NetworkManager will reset the network and cause Pi to be disconnected from existing network. Therefore, these steps should be done locally and not over SSH. After the installation, you can connect to the network once again using the NetworkManager interface.**  
 Here is one solution (adopted from [here](https://raspberrypi.stackexchange.com/questions/29783/how-to-setup-network-manager-on-raspbian)):
 ```
 sudo apt install network-manager network-manager-gnome openvpn openvpn-systemd-resolved network-manager-openvpn network-manager-openvpn-gnome
