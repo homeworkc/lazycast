@@ -7,8 +7,8 @@ lazycast is a simple wifi display receiver. It was originally targeted Raspberry
 ## Downgrade wpa_supplicant
 **The wpa_supplicant installed on the latest Raspbian distribution does not seem to work properly. (See [this](https://www.reddit.com/r/linux4noobs/comments/c5qila/want_to_downgrade_wpa_supplicant/).) For Raspbian Buster, try downgrading the ``wpasupplicant`` package to the version for Raspbian Stretch. Here is one solution:**
 ```
-wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.4-1+deb9u4_armhf.deb
-sudo apt --allow-downgrades install ./wpasupplicant_2.4-1+deb9u4_armhf.deb
+wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.4-1+deb9u6_armhf.deb
+sudo apt --allow-downgrades install ./wpasupplicant_2.4-1+deb9u6_armhf.deb
 ```  
 ## Install NetworkManager
 **It is highly recommended to replace the "Wireless & Wired Network" in Raspbian with NetworkManager, which can maintain much more stable p2p connection.**  
