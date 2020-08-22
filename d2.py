@@ -82,7 +82,7 @@ sock.sendall(s_data)
 
 
 # M2
-s_data = 'OPTIONS * RTSP/1.0\r\nCSeq: 100\r\nRequire: org.wfa.wfd1.0\r\n\r\n'
+s_data = 'OPTIONS * RTSP/1.0\r\nCSeq: 1\r\nRequire: org.wfa.wfd1.0\r\n\r\n'
 print "<---M2---\n" + s_data
 sock.sendall(s_data)
 
@@ -128,7 +128,7 @@ if os.path.exists('edid.txt'):
 	edidlen = len(edidstr)
 
 if 'wfd_display_edid' in data and edidlen != 0:
-	msg = msg + 'wfd_display_edid: ' + '{:04X}'.format(edidlen/256) + ' ' + str(edidstr.encode('hex'))+'\r\n'
+	msg = msg + 'wfd_display_edid: ' + '{:04X}'.format(edidlen/256 + 1) + ' ' + str(edidstr.encode('hex'))+'\r\n'
 
 # if 'microsoft_latency_management_capability' in data:
 # 	msg = msg + 'microsoft-latency-management-capability: supported\r\n'
@@ -207,7 +207,7 @@ sock.sendall(s_data)
 
 # M6
 m6req ='SETUP rtsp://'+sourceip+'/wfd1.0/streamid=0 RTSP/1.0\r\n'\
-+'CSeq: 101\r\n'\
++'CSeq: 5\r\n'\
 +'Transport: RTP/AVP/UDP;unicast;client_port=1028\r\n\r\n'
 print "<---M6---\n" + m6req
 sock.sendall(m6req)
@@ -230,7 +230,7 @@ sessionid=paralist[position]
 
 # M7
 m7req ='PLAY rtsp://'+sourceip+'/wfd1.0/streamid=0 RTSP/1.0\r\n'\
-+'CSeq: 102\r\n'\
++'CSeq: 6\r\n'\
 +'Session: '+str(sessionid)+'\r\n\r\n'
 print "<---M7---\n" + m7req
 sock.sendall(m7req)
@@ -315,7 +315,7 @@ while True:
 					break
 				else:
 					csnum = csnum + 1
-					msg = 'wfd-idr-request\r\n'
+					msg = 'wfd_idr_request\r\n'
 					idrreq ='SET_PARAMETER rtsp://localhost/wfd1.0 RTSP/1.0\r\n'\
 					+'Content-Length: '+str(len(msg))+'\r\n'\
 					+'Content-Type: text/parameters\r\n'\
