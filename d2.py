@@ -65,7 +65,8 @@ while True:
 		break
 
 cpuinfo = os.popen('grep Hardware /proc/cpuinfo')
-runonpi = 'BCM2835' in cpuinfo.read()
+cpustr = cpuinfo.read()
+runonpi = 'BCM2835' in cpustr or 'BCM2711' in cpustr
 cpuinfo.close()
 
 idrsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
