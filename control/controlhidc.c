@@ -266,7 +266,7 @@ int main(int argc, char **argv)
 	s = DefaultScreen(d);
 	int width = XWidthOfScreen(DefaultScreenOfDisplay(d));
 	int height = XHeightOfScreen(DefaultScreenOfDisplay(d));
-	w = XCreateSimpleWindow(d, RootWindow(d, s), 0, 0, width, height, 1, BlackPixel(d, s), WhitePixel(d, s));
+	w = XCreateSimpleWindow(d, RootWindow(d, s), 0, 0, width, height, 1, BlackPixel(d, s), BlackPixel(d, s));
 
 	Atom delWindow = XInternAtom(d, "WM_DELETE_WINDOW", 0);
 	XSetWMProtocols(d, w, &delWindow, 1);
