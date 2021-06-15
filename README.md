@@ -87,7 +87,6 @@ HDCP(content protection): Neither the key nor the hardware is available on Pi an
 
 # Start on boot
 
-## Method 1:
 Append this line to ``/etc/xdg/lxsession/LXDE-pi/autostart``:
 ```
 @lxterminal -l --working-directory=<absolute path of lazycast> -e ./all.sh
@@ -96,23 +95,6 @@ For example, if lazycast is placed under ``~/`` (which corresponds to ``/home/pi
 ```
 @lxterminal -l --working-directory=/home/pi/lazycast -e ./all.sh
 ```
-
-
-## Method 2: SystemD
-
-You can run lazycast when booting your Pi using the [systemd unit](lazycast.service). To install, log into your Pi and run:
-
-```bash
-git clone https://github.com/homeworkc/lazycast.git
-mkdir -p ~/.config/systemd/user
-cp lazycast/lazycast.service ~/.config/systemd/user/
-systemctl --user daemon-reload
-systemctl --user enable lazycast.service
-systemctl --user start lazycast.service
-sudo loginctl enable-linger pi
-```
-
-NOTE: In this method, the systemd unit expects lazycast to be located under `/home/pi/lazycast`, adjust the WorkingDirectory if this is not the correct path.
 
 # Miracast over Infrastructure
 For Windows 10 sources, Miracast over Infrastructure (MICE) is a feature that allows transmission of screen data over Ethernet or secure wifi networks. The spec of Miracast over Infrastructure (MICE) is available [here](https://winprotocoldoc.blob.core.windows.net/productionwindowsarchives/MS-MICE/%5bMS-MICE%5d.pdf). Compared to wifi p2p, it allows stabler connection and lower latency. Although MICE relies on Ethernet or secure wifi network almost entirely, in the device discovery phase, it still requires a wifi p2p device to broadcast beacon and probe response frames to the source. (However, it might be possible to use two Pis so that one of the two does not need to have wifi hardware or be physically close to the source. One Pi would be used to trasmit the beacon while the other (that runs ``./project.py``) is used to project. For such setting to work, the variable ``hostname`` in ``mice.py`` must be set to the hostname of the machine running ``project.py``. In the future, it might be possible to emulate a wifi card by HW/SW on the source so that wifi p2p will not be necessary.)  
