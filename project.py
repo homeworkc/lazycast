@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """
 	This software is part of lazycast, a simple wireless display receiver for Raspberry Pi
 	Copyright (C) 2020 Hsun-Wei Cho
@@ -49,12 +49,12 @@ else:
 	uuidfile.close()
 
 hostname = socket.gethostname() 
-print 'The hostname of this machine is: '+hostname
+print('The hostname of this machine is: '+hostname)
 
-print uuidstr
+print(uuidstr)
 
 dnsstr = 'avahi-publish-service '+hostname+' _display._tcp 7250 container_id={'+uuidstr+'}'
-print dnsstr
+print(dnsstr)
 os.system(dnsstr+' &')
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -73,19 +73,19 @@ while True:
 	while True:
 		data = conn.recv(1024)
 		# print data
-		print data.encode('hex')
+		print(data.encode('utf-8').hex())
 
 		if data == '':
 			break
 
-		size = int(data[0:2].encode('hex'),16)
-		version = data[2].encode('hex')
-		command = data[3].encode('hex')
+		size = int(data[0:2].encode('utf-8').hex(),16)
+		version = data[2].encode('utf-8').hex()
+		command = data[3].encode('utf-8').hex()
 
 		print (size,version,command)
 		
 		messagetype = commands[command]
-		print messagetype
+		print(messagetype)
 
 		if messagetype == 'SOURCE_READY':
 			os.system('./d2.py '+sourceip+' &')
@@ -93,15 +93,15 @@ while True:
 
 		i = 4
 		while i<size:
-			tlvtypehex = data[i].encode('hex')
-			valuelen = int(data[i+1:i+3].encode('hex'),16)
+			tlvtypehex = data[i].encode('utf-8').hex()
+			valuelen = int(data[i+1:i+3].encode('utf-8').hex(),16)
 			value = data[i+3:i+3+valuelen]
 			i = i+3+valuelen
-			print (tlvtypehex,valuelen)
+			print(tlvtypehex,valuelen)
 			tlvtype = types[tlvtypehex]
-			print tlvtype,
+			print(tlvtype)
 			if tlvtype == 'FRIENDLY_NAME':
-				print value
+				print(value)
 
 
 		# conn.send(data)
