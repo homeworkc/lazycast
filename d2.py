@@ -35,7 +35,7 @@ sound_output_select = 0
 # 1: 3.5mm audio jack output
 # 2: alsa
 disable_1920_1080_60fps = 1
-enable_mouse_keyboard = 1
+enable_mouse_keyboard = 0
 
 display_power_management = 0
 # 1: (For projectors) Put the display in sleep mode when not in use by lazycast 
@@ -56,7 +56,7 @@ connectcounter = 0
 while True: 
 	try:
 		sock.connect(server_address)
-	except socket.error, e:
+	except socket.error as e:
 		#connectcounter = connectcounter + 1
 		#if connectcounter == 3:
 		sock.close()
@@ -75,25 +75,28 @@ idrsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 idrsock.bind(idrsock_address)
 addr, idrsockport = idrsock.getsockname()
 
-data = (sock.recv(1000))
+data = sock.recv(2048)
+data = data.decode()
 print("---M1--->\n" + data)
 s_data = 'RTSP/1.0 200 OK\r\nCSeq: 1\r\nPublic: org.wfa.wfd1.0, SET_PARAMETER, GET_PARAMETER\r\n\r\n'
 print("<--------\n" + s_data)
-sock.sendall(s_data)
+sock.sendall(s_data.encode())
 
 
 # M2
 s_data = 'OPTIONS * RTSP/1.0\r\nCSeq: 1\r\nRequire: org.wfa.wfd1.0\r\n\r\n'
 print("<---M2---\n" + s_data)
-sock.sendall(s_data)
+sock.sendall(s_data.encode())
 
-data = (sock.recv(1000))
+data = sock.recv(2048)
+data = data.decode()
 print("-------->\n" + data)
 m2data = data
 
 
 # M3
-data=(sock.recv(1000))
+data = sock.recv(2048)
+data = data.decode()
 print("---M3--->\n" + data)
 
 msg = 'wfd_client_rtp_ports: RTP/AVP/UDP;unicast 1028 0 mode=play\r\n'
@@ -119,7 +122,8 @@ if runonpi and not os.path.exists('edid.txt'):
 		os.system('tvservice -d edid.txt')
 
 edidlen = 0
-if os.path.exists('edid.txt'):
+#if os.path.exists('edid.txt'):
+if False:
 	edidfile = open('edid.txt','r')
 	lines = edidfile.readlines()
 	edidfile.close()
@@ -152,16 +156,17 @@ if 'intel_sink_device_URL' in data:
 
 m3resp ='RTSP/1.0 200 OK\r\nCSeq: 2\r\n'+'Content-Type: text/parameters\r\nContent-Length: '+str(len(msg))+'\r\n\r\n'+msg
 print("<--------\n" + m3resp)
-sock.sendall(m3resp)
+sock.sendall(m3resp.encode())
 
 
 # M4
-data=(sock.recv(1000))
+data = sock.recv(2048)
+data = data.decode()
 print("---M4--->\n" + data)
 
 s_data = 'RTSP/1.0 200 OK\r\nCSeq: 3\r\n\r\n'
 print("<--------\n" + s_data)
-sock.sendall(s_data)
+sock.sendall(s_data.encode())
 
 def uibcstart(sock, data):
 	#print data
@@ -198,12 +203,13 @@ def killall(control):
                 os.system('pkill controlhidc.bin')
 
 # M5
-data=(sock.recv(1000))
+data = sock.recv(2048)
+data = data.decode()
 print("---M5--->\n" + data)
 
 s_data = 'RTSP/1.0 200 OK\r\nCSeq: 4\r\n\r\n'
 print("<--------\n" + s_data)
-sock.sendall(s_data)
+sock.sendall(s_data.encode())
 
 
 # M6
@@ -211,9 +217,10 @@ m6req ='SETUP rtsp://'+sourceip+'/wfd1.0/streamid=0 RTSP/1.0\r\n'\
 +'CSeq: 5\r\n'\
 +'Transport: RTP/AVP/UDP;unicast;client_port=1028\r\n\r\n'
 print("<---M6---\n" + m6req)
-sock.sendall(m6req)
+sock.sendall(m6req.encode())
 
-data=(sock.recv(1000))
+data = sock.recv(2048)
+data = data.decode()
 print("-------->\n" + data)
 
 paralist=data.split(';')
@@ -229,17 +236,7 @@ position=paralist.index('Session:')+1
 sessionid=paralist[position]
 
 
-# M7
-m7req ='PLAY rtsp://'+sourceip+'/wfd1.0/streamid=0 RTSP/1.0\r\n'\
-+'CSeq: 6\r\n'\
-+'Session: '+str(sessionid)+'\r\n\r\n'
-print("<---M7---\n" + m7req)
-sock.sendall(m7req)
 
-data=(sock.recv(1000))
-print("-------->\n" + data)
-
-print("---- Negotiation successful ----")
 
 
 if not runonpi:
@@ -247,8 +244,8 @@ if not runonpi:
 
 def launchplayer(player_select):
 	killall(False)
-        if display_power_management == 1:
-                os.system('vcgencmd display_power 1')
+	if display_power_management == 1:
+		os.system('vcgencmd display_power 1')
 	if player_select == 0:
 		# os.system('gst-launch-1.0 -v udpsrc port=1028 ! application/x-rtp,media=video,encoding-name=H264 ! queue ! rtph264depay ! avdec_h264 ! autovideosink &')
 		# os.system('gst-launch-1.0 -v udpsrc port=1028 ! video/mpegts ! tsdemux !  h264parse ! queue ! avdec_h264 ! ximagesink sync=false &')
@@ -279,20 +276,40 @@ def launchplayer(player_select):
 
 launchplayer(player_select)
 
+
+# M7
+m7req ='PLAY rtsp://'+sourceip+'/wfd1.0/streamid=0 RTSP/1.0\r\n'\
++'CSeq: 6\r\n'\
++'Session: '+str(sessionid)+'\r\n\r\n'
+print("<---M7---\n" + m7req)
+sock.sendall(m7req.encode())
+
+data = sock.recv(2048)
+data = data.decode()
+print("-------->\n" + data)
+
+print("---- Negotiation successful ----")
+
 fcntl.fcntl(sock, fcntl.F_SETFL, os.O_NONBLOCK)
 fcntl.fcntl(idrsock, fcntl.F_SETFL, os.O_NONBLOCK)
+
+while False:
+	sleep(1)
+
 
 csnum = 102
 watchdog = 0
 while True:
 	try:
-		data = (sock.recv(1000))
-	except socket.error, e:
+		data = sock.recv(2048)
+		data = data.decode()
+	except socket.error as e:
 		err = e.args[0]
 		if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
 			try:
 				datafromc = idrsock.recv(1000)
-			except socket.error, e:
+				datafromc = datafromc.decode()
+			except socket.error as e:
 				err = e.args[0]
 				if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
 					processrunning = os.popen('ps au').read()
@@ -324,7 +341,7 @@ while True:
 					+msg
 	
 					print(idrreq)
-					sock.sendall(idrreq)
+					sock.sendall(idrreq.encode())
 
 		else:
 			sys.exit(1)
@@ -349,7 +366,7 @@ while True:
 
 			resp='RTSP/1.0 200 OK\r'+cseq+'\r\n\r\n';#cseq contains \n
 			print(resp)
-			sock.sendall(resp)
+			sock.sendall(resp.encode())
 		
 		uibcstart(sock,data)
 

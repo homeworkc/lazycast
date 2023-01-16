@@ -91,36 +91,7 @@ do
 		echo "PIN:"	
 		sudo wpa_cli -i$p2pinterface wps_pin any 31415926
 		echo ""
-		./bullseye.py
-		if [ `sudo wpa_cli interface | grep -c "p2p-wl"` == 0 ] 
-		then
-			break
-		fi
-		
-		wlanfreq=$(sudo wpa_cli -i$wlaninterface status | grep "freq")
-		p2pfreq=$(sudo wpa_cli -i$p2pinterface status | grep "freq")
-		if [ "$managefrequency" == "0" ]
-		then
-			wlanfreq=""
-		fi
-		if [ "$wlanfreq" != "" ]
-		then		
-			if [ "$wlanfreq" != "$p2pfreq" ] 
-			then
-				echo "The display is disconnected since "$wlaninterface" changes from "$p2pfreq" to "$wlanfreq
-				echo "To disable WLAN roaming, run: sudo killall -STOP NetworkManager"
-				echo "You can re-enable roaming afterwards by running: sudo killall -CONT NetworkManager"
-				sudo wpa_cli -i$p2pinterface p2p_group_remove $p2pinterface
-				while :
-				do
-					if [ `sudo wpa_cli interface | grep -c "p2p-wl"` == 0 ] 
-					then
-						break
-					fi
-				done
-				break
-			fi
-		fi
+		./d2vlc.py
 
 	done
 done

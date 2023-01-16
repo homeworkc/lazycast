@@ -10,6 +10,8 @@
 #
 #################################################################################
 managefrequency=1
+LD_LIBRARY_PATH=/opt/vc/lib
+export LD_LIBRARY_PATH
 while :
 do
 	p2pdevinterface=$(sudo wpa_cli interface | grep -E "p2p-dev" | tail -1)

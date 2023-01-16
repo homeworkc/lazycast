@@ -26,19 +26,10 @@ import subprocess
 import argparse
 ##################### Settings #####################
 player_select = 0
-# 0: non-RPi systems. (using vlc or gstreamer)
-# 1: player1 has lower latency.
-# 2: player2 handles still images and sound better.
-# 3: omxplayer # Using this option for video playback on Android
-sound_output_select = 0
-# 0: HDMI sound output
-# 1: 3.5mm audio jack output
-# 2: alsa
 disable_1920_1080_60fps = 1
 enable_mouse_keyboard = 1
 
 display_power_management = 0
-# 1: (For projectors) Put the display in sleep mode when not in use by lazycast 
 
 ####################################################
 
@@ -69,11 +60,6 @@ cpustr = cpuinfo.read()
 runonpi = 'BCM2835' in cpustr or 'BCM2711' in cpustr
 cpuinfo.close()
 
-idrsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-idrsock_address = ('127.0.0.1', 0)
-idrsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-idrsock.bind(idrsock_address)
-addr, idrsockport = idrsock.getsockname()
 
 data = sock.recv(1000)
 data = data.decode()
@@ -199,15 +185,8 @@ sock.sendall(s_data.encode())
 
 def killall(control):
         os.system('pkill vlc')
-        os.system('pkill cvlc')
-        os.system('pkill gst-launch-1.0')
-        os.system('pkill player.bin')
-        os.system('pkill h264.bin')
         if display_power_management == 1:
                 os.system('vcgencmd display_power 0')
-        if control:
-                os.system('pkill control.bin')
-                os.system('pkill controlhidc.bin')
 
 # M5
 data = sock.recv(1000)
@@ -259,124 +238,58 @@ print(data)
 print("---- Negotiation successful ----")
 
 
-if not runonpi:
-	player_select = 0
+player_select = 0
 
 def launchplayer(player_select):
-	killall(False)
-	if display_power_management == 1:
-		os.system('vcgencmd display_power 1')
-	if player_select == 0:
-		#os.system('nc -u -l 1028 > test.ts')
-		#os.system('gst-launch-1.0 -v udpsrc port=1028 ! tsdemux name=d !  h264parse ! queue ! v4l2h264dec capture-io-mode=4 ! kmssink d. ! queue ! decodebin ! audioconvert ! audioresample ! alsasink &')
-		#os.system('gst-launch-1.0 -v udpsrc port=1028  ! tsparse set-timestamps=true ! tsdemux name=d !  h264parse ! queue ! v4l2h264dec capture-io-mode=4 ! kmssink  &')
-		os.system('vlc --fullscreen rtp://0.0.0.0:1028/wfd1.0/streamid=0 --intf dummy --no-ts-trust-pcr --ts-seek-percent --network-caching=100 --no-mouse-events & ')
-		# os.system('gst-launch-1.0  -v  playbin   uri=udp://0.0.0.0:1028/wfd1.0/streamid=0  video-sink=autovideosink audio-sink=alsasink sync=false &')
-		# # os.system('gst-launch-1.0 -v udpsrc port=1028 ! application/x-rtp,media=video,encoding-name=H264 ! queue ! rtph264depay ! avdec_h264 ! autovideosink &')
-		# # os.system('gst-launch-1.0 -v udpsrc port=1028 ! video/mpegts ! tsdemux !  h264parse ! queue ! avdec_h264 ! ximagesink sync=false &')
-		# # os.system('gst-launch-1.0  -v  playbin   uri=udp://0.0.0.0:1028/wfd1.0/streamid=0  video-sink=ximagesink audio-sink=alsasink sync=false &')
-		# # os.system('gst-launch-1.0  -v  playbin   uri=udp://0.0.0.0:1028/wfd1.0/streamid=0  video-sink=xvimagesink audio-sink=alsasink sync=false &')
-		# if True:
-		#os.system('gst-launch-1.0  -v  playbin   uri=udp://0.0.0.0:1028/wfd1.0/streamid=0  video-sink=kmssink audio-sink=alsasink sync=true &')
-		# else:
-		# 	os.system('vlc --fullscreen rtp://0.0.0.0:1028/wfd1.0/streamid=0 --intf dummy --no-ts-trust-pcr --ts-seek-percent --network-caching=300 --no-mouse-events & ')
-	elif player_select == 1:
-		os.system('./player/player.bin '+str(idrsockport)+' '+str(sound_output_select)+' &')
-	elif player_select == 2:
-		sinkip = sock.getsockname()[0]
-		print(sinkip)
-		print('./h264/h264.bin '+str(idrsockport)+' '+str(sound_output_select)+' '+sinkip+' &')
-		os.system('./h264/h264.bin '+str(idrsockport)+' '+str(sound_output_select)+' '+sinkip+' &')
-	elif player_select == 3:
-		#if 'MSMiracastSource' in m2data:
-		#	os.system('omxplayer rtp://0.0.0.0:1028 -n -1 --live &') # For Windows 10 when no sound is playing
-		#else:
-		#	os.system('omxplayer rtp://0.0.0.0:1028 --live &')
-		#os.system('omxplayer rtp://0.0.0.0:1028 -i')
-		omxplayerinfo = subprocess.Popen('omxplayer rtp://0.0.0.0:1028 -i'.split(),stderr=subprocess.PIPE).communicate()
-		if '0 channels' in omxplayerinfo[1]:
-			os.system('omxplayer rtp://0.0.0.0:1028 -n -1 --live &') # For Windows 10 when no sound is playing
-		else:
-			os.system('omxplayer rtp://0.0.0.0:1028 --live &')
+	
+	#os.system('nc -u -l 1028 > test.ts')
+	#os.system('gst-launch-1.0 -v udpsrc port=1028 ! tsdemux name=d !  h264parse ! queue ! v4l2h264dec capture-io-mode=4 ! kmssink d. ! queue ! decodebin ! audioconvert ! audioresample ! alsasink &')
+	#os.system('gst-launch-1.0 -v udpsrc port=1028  ! tsparse set-timestamps=true ! tsdemux name=d !  h264parse ! queue ! v4l2h264dec capture-io-mode=4 ! kmssink  &')
+	os.system('vlc --fullscreen rtp://0.0.0.0:1028/wfd1.0/streamid=0 --intf dummy --no-ts-trust-pcr --ts-seek-percent --network-caching=100 --no-mouse-events & ')
+	# os.system('gst-launch-1.0  -v  playbin   uri=udp://0.0.0.0:1028/wfd1.0/streamid=0  video-sink=autovideosink audio-sink=alsasink sync=false &')
+	# # os.system('gst-launch-1.0 -v udpsrc port=1028 ! application/x-rtp,media=video,encoding-name=H264 ! queue ! rtph264depay ! avdec_h264 ! autovideosink &')
+	# # os.system('gst-launch-1.0 -v udpsrc port=1028 ! video/mpegts ! tsdemux !  h264parse ! queue ! avdec_h264 ! ximagesink sync=false &')
+	# # os.system('gst-launch-1.0  -v  playbin   uri=udp://0.0.0.0:1028/wfd1.0/streamid=0  video-sink=ximagesink audio-sink=alsasink sync=false &')
+	# # os.system('gst-launch-1.0  -v  playbin   uri=udp://0.0.0.0:1028/wfd1.0/streamid=0  video-sink=xvimagesink audio-sink=alsasink sync=false &')
+	# if True:
+	#os.system('gst-launch-1.0  -v  playbin   uri=udp://0.0.0.0:1028/wfd1.0/streamid=0  video-sink=kmssink audio-sink=alsasink sync=true &')
+	# else:
+	# 	os.system('vlc --fullscreen rtp://0.0.0.0:1028/wfd1.0/streamid=0 --intf dummy --no-ts-trust-pcr --ts-seek-percent --network-caching=300 --no-mouse-events & ')
+
 
 launchplayer(player_select)
 
-fcntl.fcntl(sock, fcntl.F_SETFL, os.O_NONBLOCK)
-fcntl.fcntl(idrsock, fcntl.F_SETFL, os.O_NONBLOCK)
+
 
 csnum = 102
-watchdog = 0
 while True:
-	try:
-		data = sock.recv(1000)
-	except socket.error as e:
-		err = e.args[0]
-		if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
-			try:
-				datafromc = idrsock.recv(1000)
-			except socket.error as e:
-				err = e.args[0]
-				if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
-					processrunning = os.popen('ps au').read()
-					if player_select == 2 and 'h264.bin' not in processrunning:
-						launchplayer(player_select)						
-						sleep(0.01)
-					else:
-						watchdog = watchdog + 1
-						if watchdog == 70/0.01:
-							killall(True)
-							sleep(1)
-							break
-				else:
-					sys.exit(1)
-			else:
-				print(datafromc)
-				elemfromc = datafromc.split(' ')				
-				if elemfromc[0] == 'recv':
-					killall(True)
-					sleep(1)
-					break
-				else:
-					csnum = csnum + 1
-					msg = 'wfd_idr_request\r\n'
-					idrreq ='SET_PARAMETER rtsp://localhost/wfd1.0 RTSP/1.0\r\n'\
-					+'Content-Length: '+str(len(msg))+'\r\n'\
-					+'Content-Type: text/parameters\r\n'\
-					+'CSeq: '+str(csnum)+'\r\n\r\n'\
-					+msg
+	data = sock.recv(1000)
+	data = data.decode()
+	print(data)
+	watchdog = 0
+	if len(data)==0 or 'wfd_trigger_method: TEARDOWN' in data:
+		killall(True)
+		sleep(1)
+		break
+	elif 'wfd_video_formats' in data:
+		launchplayer(player_select)
+	messagelist=data.split('\r\n\r\n')
+	print(messagelist)
+	singlemessagelist=[x for x in messagelist if ('GET_PARAMETER' in x or 'SET_PARAMETER' in x )]
+	print(singlemessagelist)
+	for singlemessage in singlemessagelist:
+		entrylist=singlemessage.split('\r')
+		for entry in entrylist:
+			if 'CSeq' in entry:
+				cseq = entry
+
+		resp='RTSP/1.0 200 OK\r'+cseq+'\r\n\r\n';#cseq contains \n
+		print(resp)
+		sock.sendall(resp.encode())
 	
-					print(idrreq)
-					sock.sendall(idrreq.encode())
+	# uibcstart(sock,data)
 
-		else:
-			sys.exit(1)
-	else:
-		data = data.decode()
-		print(data)
-		watchdog = 0
-		if len(data)==0 or 'wfd_trigger_method: TEARDOWN' in data:
-			killall(True)
-			sleep(1)
-			break
-		elif 'wfd_video_formats' in data:
-			launchplayer(player_select)
-		messagelist=data.split('\r\n\r\n')
-		print(messagelist)
-		singlemessagelist=[x for x in messagelist if ('GET_PARAMETER' in x or 'SET_PARAMETER' in x )]
-		print(singlemessagelist)
-		for singlemessage in singlemessagelist:
-			entrylist=singlemessage.split('\r')
-			for entry in entrylist:
-				if 'CSeq' in entry:
-					cseq = entry
 
-			resp='RTSP/1.0 200 OK\r'+cseq+'\r\n\r\n';#cseq contains \n
-			print(resp)
-			sock.sendall(resp.encode())
-		
-		# uibcstart(sock,data)
-
-idrsock.close()
 sock.close()
 
 

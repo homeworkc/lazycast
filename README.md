@@ -4,16 +4,16 @@ lazycast: A Simple Wireless Display Receiver
 lazycast is a simple wifi display receiver. It was originally targeted Raspberry Pi (as display) and Windows 8.1/10 (as source), but it **might** also work on other Linux platforms and Miracast sources. (For other Linux systems, skip the preparation section. For video playback from Android sources, modify the ``player_select`` option in ``d2.py``.) For Windows 10 systems, the Miracast over Infrastructure (**MICE**) feature is also supported, which may provide better user experiences. In general, lazycast does not require re-compilation of wpa_supplicant to support various p2p functionalities, and should work on an "out of the box" Raspberry Pi.
 
 # Important Information
-If you are using the latest Raspberry Pi OS ("Bullseye"),  see this https://github.com/homeworkc/lazycast/issues/100 before preceding to the following sections.
+If you are using the latest Raspberry Pi OS ("Bullseye"),  follow [these instructions](https://github.com/homeworkc/lazycast/issues/100) before preceding to the following sections.
 
 # Preparation
-## Downgrade wpa_supplicant
+## Downgrade wpa_supplicant (only for Raspbian Buster)
 **For Raspbian Buster, downgrade the ``wpasupplicant`` package to the version for Raspbian Stretch:**
 ```
 wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.4-1+deb9u6_armhf.deb
 sudo apt --allow-downgrades install ./wpasupplicant_2.4-1+deb9u6_armhf.deb
 ```  
-## Install NetworkManager
+## Install NetworkManager  (recommended for Raspbian Buster or older)
 **It is highly recommended to replace the "Wireless & Wired Network" in Raspbian with NetworkManager, which can maintain much more stable p2p connection.**  
 **Note that installing NetworkManager will reset the network and cause Pi to be disconnected from existing network. Therefore, these steps should be done locally and not over SSH. After the installation, you can connect to the network once again using the NetworkManager interface.**  
 Here is one solution (adopted from [here](https://raspberrypi.stackexchange.com/questions/29783/how-to-setup-network-manager-on-raspbian)):
@@ -40,9 +40,9 @@ sudo apt install libx11-dev libasound2-dev libavformat-dev libavcodec-dev
 Compile libraries on Pi:
 ```
 cd /opt/vc/src/hello_pi/libs/ilclient/
-make
+sudo make
 cd /opt/vc/src/hello_pi/hello_video
-make
+sudo make
 ```
 Clone this repo (to a desired directory):
 ```
