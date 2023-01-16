@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """
 	This software is part of lazycast, a simple wireless display receiver for Raspberry Pi
 	Copyright (C) 2020 Hsun-Wei Cho
@@ -20,7 +20,7 @@
 import dbus
 import sys, os
 import time
-import gobject
+from gi.repository import GObject as gobject
 import threading
 import socket
 from dbus.mainloop.glib import DBusGMainLoop
@@ -58,25 +58,25 @@ if len(ipelems)>1 and ipstr == '':
 
 def groupStarted(properties):
 
-	print "groupStarted: " + str(properties)
+	print("groupStarted: " + str(properties))
 	g_obj = dbus.SystemBus().get_object('fi.w1.wpa_supplicant1',properties['group_object'])
 	res = g_obj.GetAll('fi.w1.wpa_supplicant1.Group', dbus_interface=dbus.PROPERTIES_IFACE, byte_arrays=True)
-	print "Group properties: " + str(res)
+	print("Group properties: " + str(res))
 	
-	hostnamehex = hostname.encode('hex')
+	hostnamehex = hostname.encode('utf-8').hex()
 	hostnamemessage = '2002'+'{:04X}'.format(len(hostname))+hostnamehex
 
 	ipmessage = ''
 	
 	if ipstr != '':
 		# The spec supportes multiple ip attributes. However, Windows will only try the first one
-		iphex = ipstr.encode('hex')
+		iphex = ipstr.encode('utf-8').hex()
 		ipmessage = '2005'+'{:04X}'.format(len(iphex)/2)+iphex
 
 	capandhostmessage = '0001372001000105' + hostnamemessage + ipmessage
 
 	innerarray = []
-	for c in capandhostmessage.decode('hex'):
+	for c in bytes.fromhex(capandhostmessage).decode('utf-8'):
 		innerarray.append(dbus.Byte(c))
 
 	g_obj.Set('fi.w1.wpa_supplicant1.Group', 'WPSVendorExtensions',  
@@ -84,7 +84,7 @@ def groupStarted(properties):
 
 	g_obj = dbus.SystemBus().get_object('fi.w1.wpa_supplicant1',properties['group_object'])
 	res = g_obj.GetAll('fi.w1.wpa_supplicant1.Group', dbus_interface=dbus.PROPERTIES_IFACE, byte_arrays=True)
-	print "Group properties: " + str(res)
+	print("Group properties: " + str(res))
 
 	event.set()
 	
@@ -161,7 +161,7 @@ class P2P_Group_Add (threading.Thread):
 
 		props = self.interface_object.GetAll(self.wpas_dbus_interfaces_p2pdevice,dbus_interface=dbus.PROPERTIES_IFACE)
 		print(props)
-		print ''	
+		print('')	
 
 		dbus.Interface(self.interface_object, dbus_interface=dbus.PROPERTIES_IFACE).Set(self.wpas_dbus_interfaces_p2pdevice, 'P2PDeviceConfig',dbus.Dictionary({ 'DeviceName' : hostname},signature='sv'))
 
@@ -171,7 +171,7 @@ class P2P_Group_Add (threading.Thread):
 
 		props = self.wpas_object.GetAll('fi.w1.wpa_supplicant1',dbus_interface=dbus.PROPERTIES_IFACE)
 		print(props)
-		print ''	
+		print('')	
 
 	def run(self):
 
@@ -180,8 +180,8 @@ class P2P_Group_Add (threading.Thread):
 			self.interfacep2pdevice.GroupAdd(groupadddict)
 		except:
 			print('Warning:\n  Could not preform group add')
-			print 'If existing beacon does not function properly, run ./removep2p.sh first.'
-			print 'Now running ./project.py'
+			print('If existing beacon does not function properly, run ./removep2p.sh first.')
+			print('Now running ./project.py')
 			event.set()
 
 		gobject.MainLoop().get_context().iteration(True)
