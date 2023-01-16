@@ -4,7 +4,7 @@ lazycast: A Simple Wireless Display Receiver
 lazycast is a simple wifi display receiver. It was originally targeted Raspberry Pi (as display) and Windows 8.1/10 (as source), but it **might** also work on other Linux platforms and Miracast sources. (For other Linux systems, skip the preparation section. For video playback from Android sources, modify the ``player_select`` option in ``d2.py``.) For Windows 10 systems, the Miracast over Infrastructure (**MICE**) feature is also supported, which may provide better user experiences. In general, lazycast does not require re-compilation of wpa_supplicant to support various p2p functionalities, and should work on an "out of the box" Raspberry Pi.
 
 # Important Information
-The following commands are intended to run on Raspberry Pi **Buster or older**. The latest Raspberry Pi OS ("Bullseye") completely changes the hardware acceleration for video rendering. While it is technically possible to run lazycast on Bullseye, running lazycast on Buster or older will have much lower latency and much more features. If you still want to use lazycast on Bullseye, please **skip the Preparation section**, modify d2.py in python3 syntax, and use VLC or gstreamer.
+The following commands are intended to run on Raspberry Pi **Buster or older**. The latest Raspberry Pi OS ("Bullseye") completely changes the hardware acceleration for video rendering. While it is technically possible to run lazycast on Bullseye, running lazycast on Buster or older will have much lower latency and much more features. If you still want to use lazycast on Bullseye, please **skip the Preparation section**.
 
 # Preparation (Do not run this on Bullseye)
 ## Downgrade wpa_supplicant
@@ -56,7 +56,7 @@ make
 ```
 
 # Usage
-Run `./all.sh` to initiate lazycast receiver. Wait until the "The display is ready" message. The name of the display will appear after this message. Then, search for this name on the source device you want to cast. The default PIN number is ``31415926``. If backchannel control is supported by the source, keyboard and mouse input on Pi are redirected to the source as remote controls.  
+Run `./all.sh` to initiate lazycast receiver. (For Bullseye, run `./bullseye.sh` instead.) Wait until the "The display is ready" message. The name of the display will appear after this message. Then, search for this name on the source device you want to cast. The default PIN number is ``31415926``. If backchannel control is supported by the source, keyboard and mouse input on Pi are redirected to the source as remote controls.  
 
 It is recommended to initiate the termination of the receiver on the source side. These user controls are often near the pairing controls on the source device. You can utilize the backchannel feature to remotely control the source device in order to close lazycast.  
 
