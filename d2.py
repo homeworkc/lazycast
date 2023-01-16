@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 
 """
 	This software is part of lazycast, a simple wireless display receiver for Raspberry Pi
@@ -76,25 +76,25 @@ idrsock.bind(idrsock_address)
 addr, idrsockport = idrsock.getsockname()
 
 data = (sock.recv(1000))
-print("---M1--->\n" + data)
+print "---M1--->\n" + data
 s_data = 'RTSP/1.0 200 OK\r\nCSeq: 1\r\nPublic: org.wfa.wfd1.0, SET_PARAMETER, GET_PARAMETER\r\n\r\n'
-print("<--------\n" + s_data)
+print "<--------\n" + s_data
 sock.sendall(s_data)
 
 
 # M2
 s_data = 'OPTIONS * RTSP/1.0\r\nCSeq: 1\r\nRequire: org.wfa.wfd1.0\r\n\r\n'
-print("<---M2---\n" + s_data)
+print "<---M2---\n" + s_data
 sock.sendall(s_data)
 
 data = (sock.recv(1000))
-print("-------->\n" + data)
+print "-------->\n" + data
 m2data = data
 
 
 # M3
 data=(sock.recv(1000))
-print("---M3--->\n" + data)
+print "---M3--->\n" + data
 
 msg = 'wfd_client_rtp_ports: RTP/AVP/UDP;unicast 1028 0 mode=play\r\n'
 if player_select == 2:
@@ -129,7 +129,7 @@ if os.path.exists('edid.txt'):
 	edidlen = len(edidstr)
 
 if 'wfd_display_edid' in data and edidlen != 0:
-	msg = msg + 'wfd_display_edid: ' + '{:04X}'.format(edidlen/256 + 1) + ' ' + str(edidstr.encode('utf-8').hex())+'\r\n'
+	msg = msg + 'wfd_display_edid: ' + '{:04X}'.format(edidlen/256 + 1) + ' ' + str(edidstr.encode('hex'))+'\r\n'
 
 # if 'microsoft_latency_management_capability' in data:
 # 	msg = msg + 'microsoft-latency-management-capability: supported\r\n'
@@ -151,16 +151,16 @@ if 'intel_sink_device_URL' in data:
 
 
 m3resp ='RTSP/1.0 200 OK\r\nCSeq: 2\r\n'+'Content-Type: text/parameters\r\nContent-Length: '+str(len(msg))+'\r\n\r\n'+msg
-print("<--------\n" + m3resp)
+print "<--------\n" + m3resp
 sock.sendall(m3resp)
 
 
 # M4
 data=(sock.recv(1000))
-print("---M4--->\n" + data)
+print "---M4--->\n" + data
 
 s_data = 'RTSP/1.0 200 OK\r\nCSeq: 3\r\n\r\n'
-print("<--------\n" + s_data)
+print "<--------\n" + s_data
 sock.sendall(s_data)
 
 def uibcstart(sock, data):
@@ -174,7 +174,7 @@ def uibcstart(sock, data):
 			uibcport = uibcport[0]
 			uibcport = uibcport.split('=')
 			uibcport = uibcport[1]
-			print('uibcport:'+uibcport+"\n")
+			print 'uibcport:'+uibcport+"\n"
 			if 'none' not in uibcport and enable_mouse_keyboard == 1:
 				os.system('pkill control.bin')
 				os.system('pkill controlhidc.bin')
@@ -199,10 +199,10 @@ def killall(control):
 
 # M5
 data=(sock.recv(1000))
-print("---M5--->\n" + data)
+print "---M5--->\n" + data
 
 s_data = 'RTSP/1.0 200 OK\r\nCSeq: 4\r\n\r\n'
-print("<--------\n" + s_data)
+print "<--------\n" + s_data
 sock.sendall(s_data)
 
 
@@ -210,19 +210,19 @@ sock.sendall(s_data)
 m6req ='SETUP rtsp://'+sourceip+'/wfd1.0/streamid=0 RTSP/1.0\r\n'\
 +'CSeq: 5\r\n'\
 +'Transport: RTP/AVP/UDP;unicast;client_port=1028\r\n\r\n'
-print("<---M6---\n" + m6req)
+print "<---M6---\n" + m6req
 sock.sendall(m6req)
 
 data=(sock.recv(1000))
-print("-------->\n" + data)
+print "-------->\n" + data
 
 paralist=data.split(';')
-print(paralist)
+print paralist
 serverport=[x for x in paralist if 'server_port=' in x]
-print(serverport)
+print serverport
 serverport=serverport[-1]
 serverport=serverport[12:17]
-print(serverport)
+print serverport
 
 paralist=data.split( )
 position=paralist.index('Session:')+1
@@ -233,13 +233,13 @@ sessionid=paralist[position]
 m7req ='PLAY rtsp://'+sourceip+'/wfd1.0/streamid=0 RTSP/1.0\r\n'\
 +'CSeq: 6\r\n'\
 +'Session: '+str(sessionid)+'\r\n\r\n'
-print("<---M7---\n" + m7req)
+print "<---M7---\n" + m7req
 sock.sendall(m7req)
 
 data=(sock.recv(1000))
-print("-------->\n" + data)
+print "-------->\n" + data
 
-print("---- Negotiation successful ----")
+print "---- Negotiation successful ----"
 
 
 if not runonpi:
@@ -262,7 +262,7 @@ def launchplayer(player_select):
 		os.system('./player/player.bin '+str(idrsockport)+' '+str(sound_output_select)+' &')
 	elif player_select == 2:
 		sinkip = sock.getsockname()[0]
-		print(sinkip)
+		print sinkip
 		print('./h264/h264.bin '+str(idrsockport)+' '+str(sound_output_select)+' '+sinkip+' &')
 		os.system('./h264/h264.bin '+str(idrsockport)+' '+str(sound_output_select)+' '+sinkip+' &')
 	elif player_select == 3:
@@ -308,7 +308,7 @@ while True:
 				else:
 					sys.exit(1)
 			else:
-				print(datafromc)
+				print datafromc
 				elemfromc = datafromc.split(' ')				
 				if elemfromc[0] == 'recv':
 					killall(True)
@@ -323,13 +323,13 @@ while True:
 					+'CSeq: '+str(csnum)+'\r\n\r\n'\
 					+msg
 	
-					print(idrreq)
+					print idrreq
 					sock.sendall(idrreq)
 
 		else:
 			sys.exit(1)
 	else:
-		print(data)
+		print data
 		watchdog = 0
 		if len(data)==0 or 'wfd_trigger_method: TEARDOWN' in data:
 			killall(True)
@@ -338,9 +338,9 @@ while True:
 		elif 'wfd_video_formats' in data:
 			launchplayer(player_select)
 		messagelist=data.split('\r\n\r\n')
-		print(messagelist)
+		print messagelist
 		singlemessagelist=[x for x in messagelist if ('GET_PARAMETER' in x or 'SET_PARAMETER' in x )]
-		print(singlemessagelist)
+		print singlemessagelist
 		for singlemessage in singlemessagelist:
 			entrylist=singlemessage.split('\r')
 			for entry in entrylist:
@@ -348,7 +348,7 @@ while True:
 					cseq = entry
 
 			resp='RTSP/1.0 200 OK\r'+cseq+'\r\n\r\n';#cseq contains \n
-			print(resp)
+			print resp
 			sock.sendall(resp)
 		
 		uibcstart(sock,data)
