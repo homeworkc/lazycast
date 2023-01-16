@@ -3,9 +3,12 @@ lazycast: A Simple Wireless Display Receiver
 # Description
 lazycast is a simple wifi display receiver. It was originally targeted Raspberry Pi (as display) and Windows 8.1/10 (as source), but it **might** also work on other Linux platforms and Miracast sources. (For other Linux systems, skip the preparation section. For video playback from Android sources, modify the ``player_select`` option in ``d2.py``.) For Windows 10 systems, the Miracast over Infrastructure (**MICE**) feature is also supported, which may provide better user experiences. In general, lazycast does not require re-compilation of wpa_supplicant to support various p2p functionalities, and should work on an "out of the box" Raspberry Pi.
 
-# Preparation
+# Important Information
+The following commands are intended to run on Raspberry Pi **Buster or older**. The latest Raspberry Pi OS ("Bullseye") completely changes the hardware acceleration for video rendering. While it is technically possible to run lazycast on Bullseye, running lazycast on Buster or older will have much lower latency and much more features. If you still want to use lazycast on Bullseye, please **skip the Preparation section**, modify d2.py in python3 syntax, and use VLC or gstreamer.
+
+# Preparation (Do not run this on Bullseye)
 ## Downgrade wpa_supplicant
-**The wpa_supplicant installed on the latest Raspbian distribution does not seem to work properly. (See [this](https://www.reddit.com/r/linux4noobs/comments/c5qila/want_to_downgrade_wpa_supplicant/).) For Raspbian Buster, try downgrading the ``wpasupplicant`` package to the version for Raspbian Stretch. Here is one solution:**
+**For Raspbian Buster, downgrade the ``wpasupplicant`` package to the version for Raspbian Stretch:**
 ```
 wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.4-1+deb9u6_armhf.deb
 sudo apt --allow-downgrades install ./wpasupplicant_2.4-1+deb9u6_armhf.deb
