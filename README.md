@@ -75,6 +75,7 @@ After Pi connects to the source, it has an IP address of ``192.168.173.1`` and t
 
 Two in-house players are written for Raspberry Pi 3. VLC, omxplayer or gstreamer can be used instead on other platforms. (See [here](https://gstreamer.freedesktop.org/documentation/installing/on-linux.html) for details of installing gstreamer.) 
 
+
 # Known issues
 lazycast tries to remember the pairing credentials so that entering the PIN is only needed once for each device. However, this feature does not seem to work properly all the time with recent Raspbian images. (Using the latest Raspbian is still recommended from the security perspective. However, recent Raspbians randomize the MAC address of the ``p2p-dev-wlan0`` interface upon reboot, while old Raspbians ([example](https://downloads.raspberrypi.org/raspbian/images/raspbian-2017-09-08/)) do not. **Any insights or suggestions on this issue are appreciated**, and could make this important feature work again.) Therefore, re-pairing may be needed after every Raspberry Pi reboot. Try clearing the 'lazycast' information on the source device before re-pairing if you run into pairing problems.  
 
@@ -87,6 +88,8 @@ Due to the overcrowded nature of the wifi spectrum and the use of unreliable rtp
 Devices may not fully support backchannel control and some keystrokes/clicks will behave differently in this case. The left Windows key is not captured and when it is pressed, it makes the current window to be out-of-focus and thus disables the backchannel controls. If it is pressed again the window will be in-focus.   
 
 HDCP(content protection): Neither the key nor the hardware is available on Pi and therefore is not supported.  
+
+Some Windows 10 devices seem to disconnect shortly after a connection is established. You can try using ``win10debug.sh`` instead of ``all.sh`` and see if it helps.
 
 # Start on boot
 
