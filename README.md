@@ -6,6 +6,8 @@ lazycast is a simple wifi display receiver. It was originally targeted Raspberry
 # Important Information
 If you are using the latest Raspberry Pi OS ("Bullseye"),  follow [these instructions](https://github.com/homeworkc/lazycast/issues/100) before preceding to the following sections.
 
+
+
 # Preparation
 ## Downgrade wpa_supplicant (only for Raspbian Buster)
 **For Raspbian Buster, downgrade the ``wpasupplicant`` package to the version for Raspbian Stretch:**
@@ -74,6 +76,8 @@ To change the default PIN number, replace the string ``31415926`` in ``all.sh`` 
 After Pi connects to the source, it has an IP address of ``192.168.173.1`` and this connection can be reused for other purposes like SSH. On the other hand, since they are under the same subnet, precautions should be taken to prevent unauthorized access to Pi by anyone who knows the PIN number.    
 
 Two in-house players are written for Raspberry Pi 3. VLC, omxplayer or gstreamer can be used instead on other platforms. (See [here](https://gstreamer.freedesktop.org/documentation/installing/on-linux.html) for details of installing gstreamer.) 
+
+**For a more stable p2p connection, disable background WiFi scanning if you're using the built-in WiFi UI. (i.e., if you are not using NetworkManager.) See [this post](https://forums.raspberrypi.com/viewtopic.php?t=250729#p1772473). Use keyboard hotkeys (CTRL+ALT+T) to access the terminal after reboot.**
 
 
 # Known issues
