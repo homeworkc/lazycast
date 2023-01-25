@@ -74,6 +74,8 @@ The maximum resolutions supported are 1920x1080p60 and 1920x1200p30. The GPU on 
 
 To change the default PIN number, replace the string ``31415926`` in ``all.sh`` to another 8-digit number.  
 
+You can hide Pi's cursor by using ``unclutter -idle 3``. See [this post](https://forums.raspberrypi.com/viewtopic.php?t=234879#p1437648).
+
 After Pi connects to the source, it has an IP address of ``192.168.173.1`` and this connection can be reused for other purposes like SSH. On the other hand, since they are under the same subnet, precautions should be taken to prevent unauthorized access to Pi by anyone who knows the PIN number.    
 
 Two in-house players are written for Raspberry Pi 3. VLC, omxplayer or gstreamer can be used instead on other platforms. (See [here](https://gstreamer.freedesktop.org/documentation/installing/on-linux.html) for details of installing gstreamer.) 
