@@ -62,7 +62,7 @@ Run `./all.sh` to initiate lazycast receiver. Wait until the "The display is rea
 
 It is recommended to initiate the termination of the receiver on the source side. These user controls are often near the pairing controls on the source device. You can utilize the backchannel feature to remotely control the source device in order to close lazycast.  
 
-**For a more stable p2p connection, disable background WiFi scanning if you're using the built-in WiFi UI. (i.e., if you are not using NetworkManager.) See [this post](https://forums.raspberrypi.com/viewtopic.php?t=250729#p1772473). Use keyboard hotkeys (CTRL+ALT+T) to access the terminal after reboot.**
+**For a more stable p2p connection, disable background WiFi scanning if you're using the built-in WiFi UI. (i.e., if NetworkManager is not installed.) See [this post](https://forums.raspberrypi.com/viewtopic.php?t=250729#p1772473). You can double-check that no background WiFi scanning happens by running ``iw event`` in a second terminal (and no scanning event should be shown). If you disable lxpanel, Use keyboard hotkeys (CTRL+ALT+T) to open the terminal after reboot.**
 
 
 # Tips
@@ -93,7 +93,7 @@ Devices may not fully support backchannel control and some keystrokes/clicks wil
 
 HDCP(content protection): Neither the key nor the hardware is available on Pi and therefore is not supported.  
 
-Some Windows 10 devices seem to disconnect shortly after a connection is established. You can try using ``win10debug.sh`` instead of ``all.sh`` and see if it helps.
+<!-- Some Windows 10 devices seem to disconnect shortly after a connection is established. You can try using ``win10debug.sh`` instead of ``all.sh`` and see if it helps. -->
 
 # Start on boot
 
@@ -107,6 +107,9 @@ For example, if lazycast is placed under ``~/`` (which corresponds to ``/home/pi
 ```
 
 # Miracast over Infrastructure
+
+**This feature was tested only on Raspbian Buster and a PC with an older version of Windows 10** 
+
 For Windows 10 sources, Miracast over Infrastructure (MICE) is a feature that allows transmission of screen data over Ethernet or secure wifi networks. The spec of Miracast over Infrastructure (MICE) is available [here](https://winprotocoldoc.blob.core.windows.net/productionwindowsarchives/MS-MICE/%5bMS-MICE%5d.pdf). Compared to wifi p2p, it allows stabler connection and lower latency. Although MICE relies on Ethernet or secure wifi network almost entirely, in the device discovery phase, it still requires a wifi p2p device to broadcast beacon and probe response frames to the source. (However, it might be possible to use two Pis so that one of the two does not need to have wifi hardware or be physically close to the source. One Pi would be used to trasmit the beacon while the other (that runs ``./project.py``) is used to project. For such setting to work, the variable ``hostname`` in ``mice.py`` must be set to the hostname of the machine running ``project.py``. In the future, it might be possible to emulate a wifi card by HW/SW on the source so that wifi p2p will not be necessary.)  
 
 Currently, this feature is tested to be working with a Windows 10 PC and a Pi (with manually assigned IPs) connected via Ethernet. More tests might be needed, especially for different DHCP, DNS and firewall configurations. Ports used include but are not limited to UDP 53 (DNS), UDP 5353 (mDNS), TCP 7236 and TCP 7250. Also, the encryption feature is not implemented yet so it should only be used over trusted networks and it should not be used for sensitive data. MICE works in ipv6 networks but currently only ipv4 is implemented.  

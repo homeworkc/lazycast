@@ -118,22 +118,18 @@ msg = msg +'wfd_3d_video_formats: none\r\n'\
 	+'wfd_content_protection: none\r\n'
 
 
-if runonpi and not os.path.exists('edid.txt'):
-		os.system('tvservice -d edid.txt')
+if runonpi:
+	os.system('tvservice -d edid.txt')
 
 edidlen = 0
-#if os.path.exists('edid.txt'):
-if False:
-	edidfile = open('edid.txt','r')
-	lines = edidfile.readlines()
+if os.path.exists('edid.txt') and True:
+	edidfile = open('edid.txt','rb')
+	edidbytes = edidfile.read()
 	edidfile.close()
-	edidstr =''
-	for line in lines:
-		edidstr = edidstr + line
-	edidlen = len(edidstr)
+	edidlen = len(edidbytes)
 
 if 'wfd_display_edid' in data and edidlen != 0:
-	msg = msg + 'wfd_display_edid: ' + '{:04X}'.format(edidlen/256 + 1) + ' ' + str(edidstr.encode('utf-8').hex())+'\r\n'
+	msg = msg + 'wfd_display_edid: ' + '{:04X}'.format(int(edidlen/256 + 1)) + ' ' + str(edidbytes.hex())+'\r\n'
 
 # if 'microsoft_latency_management_capability' in data:
 # 	msg = msg + 'microsoft-latency-management-capability: supported\r\n'

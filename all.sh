@@ -83,7 +83,7 @@ do
 	printf "end	192.168.173.80\n">>udhcpd.conf
 	printf "interface	$p2pinterface\n">>udhcpd.conf
 	printf "option subnet 255.255.255.0\n">>udhcpd.conf
-	printf "option lease 10">>udhcpd.conf
+	printf "option lease 10000">>udhcpd.conf
 	sleep 3
 	sudo busybox udhcpd ./udhcpd.conf 
 	echo "The display is ready"
