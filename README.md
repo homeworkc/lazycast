@@ -62,8 +62,6 @@ Run `./all.sh` to initiate lazycast receiver. Wait until the "The display is rea
 
 It is recommended to initiate the termination of the receiver on the source side. These user controls are often near the pairing controls on the source device. You can utilize the backchannel feature to remotely control the source device in order to close lazycast.  
 
-**For a more stable p2p connection, disable background WiFi scanning if you're using the built-in WiFi UI. (i.e., if NetworkManager is not installed.) See [this post](https://forums.raspberrypi.com/viewtopic.php?t=250729#p1772473). You can double-check that no background WiFi scanning happens by running ``iw event`` in a second terminal (and no scanning event should be shown). If you disable lxpanel, Use keyboard hotkeys (CTRL+ALT+T) to open the terminal after reboot.**
-
 
 # Tips
 Set the resolution on the source side. lazycast advertises all possible resolutions regardless of the current rendering resolution. Therefore, you may want to change the resolution (on the source) to match the actual resolution of the display connecting to Pi.  
@@ -80,6 +78,7 @@ After Pi connects to the source, it has an IP address of ``192.168.173.1`` and t
 
 Two in-house players are written for Raspberry Pi 3. VLC, omxplayer or gstreamer can be used instead on other platforms. (See [here](https://gstreamer.freedesktop.org/documentation/installing/on-linux.html) for details of installing gstreamer.) 
 
+**For a more stable p2p connection, disable background WiFi scanning if you're using the built-in WiFi UI. (i.e., if NetworkManager is not installed.) See [this post](https://forums.raspberrypi.com/viewtopic.php?t=250729#p1772473). You can double-check that no background WiFi scanning happens by running ``iw event`` in a second terminal (and no scanning event should be shown). If you disable lxpanel, Use keyboard hotkeys (CTRL+ALT+T) to open the terminal after reboot.**
 
 
 # Known issues

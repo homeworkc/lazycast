@@ -120,6 +120,7 @@ msg = msg +'wfd_3d_video_formats: none\r\n'\
 
 if runonpi:
 	os.system('tvservice -d edid.txt')
+	os.system('pkill lxpanel')
 
 edidlen = 0
 if os.path.exists('edid.txt') and True:
@@ -368,6 +369,10 @@ while True:
 
 idrsock.close()
 sock.close()
+
+
+if runonpi:
+	os.system('nohup lxpanel --profile LXDE-pi &')
 
 
 
