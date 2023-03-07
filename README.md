@@ -117,22 +117,22 @@ For Windows 10 sources, Miracast over Infrastructure (MICE) is a feature that al
 Currently, this feature is tested to be working with a Windows 10 PC and a Pi (with manually assigned IPs) connected via Ethernet. More tests might be needed, especially for different DHCP, DNS and firewall configurations. Ports used include but are not limited to UDP 53 (DNS), UDP 5353 (mDNS), TCP 7236 and TCP 7250. Also, the encryption feature is not implemented yet so it should only be used over trusted networks and it should not be used for sensitive data. MICE works in ipv6 networks but currently only ipv4 is implemented.  
 
 ## Preparation
-Follow the steps in the previous preparation section. Note that installing NetworkManager is required for MICE.   
 Install avahi-utils:
 ```
 sudo apt install avahi-utils
 ```
 Make sure the Windows 10 PC is on the same network as the Pi. You can try pinging the Pi from the PC.  
+NetworkManager is **not** required for this version of MICE. However, using MICE will disable the built-in WiFi UI. (To restore the built-in WiFi UI after MICE, either run ``resetwpa.sh`` or simply reboot.)   
 ## Usage
-Make sure there is no p2p interface that has already been created and ``all.sh`` is not running. (You can disable ``all.sh`` to start on boot and then simply reboot.)  
+Make sure there is no p2p interface that has already been created and ``all.sh`` is not running. (Make sure ``all.sh`` does not start on boot and then simply reboot.)  
 
-Run ``./mice.py``.  
+Run ``./mice.sh``.  
 
-Use the "Connect" tab in Windows 10 and try to connect to the hostname of Pi (e.g., raspberrypi). Windows may try to connect using the traditional method first and therefore may ask for PIN. In that case, simply cancel the connecting process and try again. You can also try relaunching ``mice.py`` and see if it helps. Since no encryption is implemented at the moment, the prompt for PIN should not appear using MICE.  
+Use the "Connect" tab in Windows 10 and try to connect to the hostname of Pi (e.g., raspberrypi). Windows may try to connect using the traditional method first and therefore may ask for PIN. In that case, simply cancel the connecting process and try again. Since no encryption is implemented at the moment, the prompt for PIN should not appear using MICE.  
 
 Windows 10 assigns the name of the display differently when using MICE. If the monitor connected to the Pi is successfully detected by the PC, the name of the display (e.g., raspberrypi) will be changed to the name of the monitor. If the detection fails, the name of the display will be changed to "Device". After disconnection, the name of the display will be changed back to the hostname of Pi (e.g., raspberrypi).  
 
-If you wish to run MICE and wifi p2p simultaneously, set the parameter ``concurrent`` to ``1`` in ``mice.py`` and only uses ``mice.py``. When there are multiple IPs assigned to the Pi and mDNS does not seem to be working, manually set the ``ipstr`` variable in ``mice.py`` to the target IP of Pi and a PC will try to connect to this IP directly.  
+If you wish to run MICE and wifi p2p simultaneously, set the parameter ``concurrent`` to ``1`` in ``newmice.py`` and only uses ``mice.sh``. When there are multiple IPs assigned to the Pi and mDNS does not seem to be working, manually set the ``ipstr`` variable in ``newmice.py`` to the target IP of Pi and a PC will try to connect to this IP directly.  
 # Others
 Some parts of the video player1 are modified from the codes on https://github.com/Apress/raspberry-pi-gpu-audio-video-prog. Many thanks to the author of "Raspberry Pi GPU Audio Video Programming" and, by extension, authors of omxplayer.  
 Using any part of the codes in this project in commercial products is prohibited.

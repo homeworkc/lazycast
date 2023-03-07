@@ -76,7 +76,8 @@ def groupStarted(properties):
 	capandhostmessage = '0001372001000105' + hostnamemessage + ipmessage
 
 	innerarray = []
-	for c in bytes.fromhex(capandhostmessage).decode('utf-8'):
+	print(capandhostmessage)
+	for c in bytes.fromhex(capandhostmessage):
 		innerarray.append(dbus.Byte(c))
 
 	g_obj.Set('fi.w1.wpa_supplicant1.Group', 'WPSVendorExtensions',  
@@ -210,7 +211,5 @@ if __name__ == "__main__":
 	if concurrent == 1:
 		os.system('./all.sh &')
 
-	execfile('project.py')
+	exec(open('project.py').read())
 
-	# print("Error:\n  Group formation timed out")
-	# os._exit(0)
