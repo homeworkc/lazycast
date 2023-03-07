@@ -64,14 +64,14 @@ def groupStarted(properties):
 	print("Group properties: " + str(res))
 	
 	hostnamehex = hostname.encode('utf-8').hex()
-	hostnamemessage = '2002'+'{:04X}'.format(len(hostname))+hostnamehex
+	hostnamemessage = '2002'+'{:04X}'.format(int(len(hostname)))+hostnamehex
 
 	ipmessage = ''
 	
 	if ipstr != '':
 		# The spec supportes multiple ip attributes. However, Windows will only try the first one
 		iphex = ipstr.encode('utf-8').hex()
-		ipmessage = '2005'+'{:04X}'.format(len(iphex)/2)+iphex
+		ipmessage = '2005'+'{:04X}'.format(int(len(iphex)/2))+iphex
 
 	capandhostmessage = '0001372001000105' + hostnamemessage + ipmessage
 
