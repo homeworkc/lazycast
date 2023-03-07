@@ -4,7 +4,7 @@ lazycast: A Simple Wireless Display Receiver
 lazycast is a simple wifi display receiver. It was originally targeted Raspberry Pi (as display) and Windows 8.1/10 (as source), but it **might** also work on other Linux platforms and Miracast sources. (For other Linux systems, skip the preparation section. For video playback from Android sources, modify the ``player_select`` option in ``d2.py``.) For Windows 10 systems, the Miracast over Infrastructure (**MICE**) feature is also supported, which may provide better user experiences. In general, lazycast does not require re-compilation of wpa_supplicant to support various p2p functionalities, and should work on an "out of the box" Raspberry Pi.
 
 # Important Information
-If you are using the latest Raspberry Pi OS ("Bullseye"),  follow [these instructions](https://github.com/homeworkc/lazycast/issues/100) before preceding to the following sections.
+If you are using the latest Raspberry Pi OS ("Bullseye"),  follow [these instructions](https://github.com/homeworkc/lazycast/issues/100) and directly go to the [Build Binaries](https://github.com/homeworkc/lazycast/edit/master/README.md#build-binaries) section.
 
 
 
@@ -15,7 +15,7 @@ If you are using the latest Raspberry Pi OS ("Bullseye"),  follow [these instruc
 wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.4-1+deb9u6_armhf.deb
 sudo apt --allow-downgrades install ./wpasupplicant_2.4-1+deb9u6_armhf.deb
 ```  
-## Install NetworkManager  (recommended for Raspbian Buster or older)
+## Install NetworkManager  (for Raspbian Buster or older)
 **It is highly recommended to replace the "Wireless & Wired Network" in Raspbian with NetworkManager, which can maintain much more stable p2p connection.**  
 **Note that installing NetworkManager will reset the network and cause Pi to be disconnected from existing network. Therefore, these steps should be done locally and not over SSH. After the installation, you can connect to the network once again using the NetworkManager interface.**  
 Here is one solution (adopted from [here](https://raspberrypi.stackexchange.com/questions/29783/how-to-setup-network-manager-on-raspbian)):
@@ -35,7 +35,7 @@ Then reboot:
 sudo reboot
 ```
 ## Build Binaries
-Install packages used to compile the players:
+Install packages (for compiling the players):
 ```
 sudo apt install libx11-dev libasound2-dev libavformat-dev libavcodec-dev
 ```
