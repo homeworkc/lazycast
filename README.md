@@ -78,11 +78,10 @@ After Pi connects to the source, it has an IP address of ``192.168.173.1`` and t
 
 Two in-house players are written for Raspberry Pi 3. VLC, omxplayer or gstreamer can be used instead on other platforms. (See [here](https://gstreamer.freedesktop.org/documentation/installing/on-linux.html) for details of installing gstreamer.) 
 
-**For a more stable p2p connection, disable background WiFi scanning if you're using the built-in WiFi UI. (i.e., if NetworkManager is not installed.) See [this post](https://forums.raspberrypi.com/viewtopic.php?t=250729#p1772473). You can double-check that no background WiFi scanning happens by running ``iw event`` in a second terminal (and no scanning event should be shown). If you disable lxpanel, Use keyboard hotkeys (CTRL+ALT+T) to open the terminal after reboot.**
-
+**It is very important that no background WiFi scanning occurs during casting. On Raspberry Pi, lazycast will automatically disable ``lxpanel`` during casting (in order to stop the ``lxplug-network`` plugin from scanning the network), and re-enable ``lxpanel`` after the casting is terminated. You can double-check that no background WiFi scanning happens by running ``iw event`` in a second terminal (and no event should be shown). [This post](https://forums.raspberrypi.com/viewtopic.php?t=250729#p1772473) has more information.**
 
 # Known issues
-lazycast tries to remember the pairing credentials so that entering the PIN is only needed once for each device. However, this feature does not seem to work properly all the time with recent Raspbian images. (Using the latest Raspbian is still recommended from the security perspective. However, recent Raspbians randomize the MAC address of the ``p2p-dev-wlan0`` interface upon reboot, while old Raspbians ([example](https://downloads.raspberrypi.org/raspbian/images/raspbian-2017-09-08/)) do not. **Any insights or suggestions on this issue are appreciated**, and could make this important feature work again.) Therefore, re-pairing may be needed after every Raspberry Pi reboot. Try clearing the 'lazycast' information on the source device before re-pairing if you run into pairing problems.  
+lazycast tries to remember the pairing credentials so that entering the PIN is only needed once for each device. However, this feature does not seem to work properly all the time with recent Raspbian images. Therefore, re-pairing may be needed after every Raspberry Pi reboot. Try clearing the 'lazycast' information on the source device before re-pairing if you run into pairing problems.  
 
 Player2 seems to have a double-free bug which causes it to crash when playing some videos. Currently a workaround (that constantly monitors the liveliness of player2) is implemented.
 
@@ -90,7 +89,7 @@ Latency: Limited by the implementation of the rtp player used. (In VLC, latency 
 
 Due to the overcrowded nature of the wifi spectrum and the use of unreliable rtp transmission, you may experience some video glitching/audio stuttering. The in-house players employ several mechanisms to conceal transmission error, but it may still be noticeable in challenging wireless environments. Interference from other devices may cause disconnections.  
 
-Devices may not fully support backchannel control and some keystrokes/clicks will behave differently in this case. The left Windows key is not captured and when it is pressed, it makes the current window to be out-of-focus and thus disables the backchannel controls. If it is pressed again the window will be in-focus.   
+Devices may not fully support backchannel control and some keystrokes/clicks will behave differently in this case. The left Windows key is not captured and when it is pressed, it makes the current window to be out-of-focus and thus disables the backchannel controls. If it is pressed again the window will be in-focus. Also, keyboard backchannel and hiding the cursor do not seem to work properly on recent systems.
 
 HDCP(content protection): Neither the key nor the hardware is available on Pi and therefore is not supported.  
 
@@ -102,7 +101,7 @@ Append this line to ``/etc/xdg/lxsession/LXDE-pi/autostart``:
 ```
 @lxterminal -l --working-directory=<absolute path of lazycast> -e ./all.sh
 ```
-For example, if lazycast is placed under ``~/`` (which corresponds to ``/home/pi/``), append the following line to the file:
+For example, if lazycast is placed under ``~/`` (which is ``/home/pi/``, if your username is ``pi``), append the following line to the file:
 ```
 @lxterminal -l --working-directory=/home/pi/lazycast -e ./all.sh
 ```
