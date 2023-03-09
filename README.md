@@ -82,6 +82,9 @@ Two in-house players are written for Raspberry Pi 3. VLC, omxplayer or gstreamer
 
 **It is very important that no background WiFi scanning occurs during casting. On Raspberry Pi, lazycast will automatically disable ``lxpanel`` during casting (in order to stop the ``lxplug-network`` plugin from scanning the network), and re-enable ``lxpanel`` after the casting is terminated. You can double-check that no background WiFi scanning happens by running ``iw event`` in a second terminal (and no event should be shown). [This post](https://forums.raspberrypi.com/viewtopic.php?t=250729#p1772473) has more information.**
 
+
+To redirect mouse and keyboard inputs on Pi, first install evdev (``pip install evdev``) and then set ``enable_mouse_keyboard`` to ``1`` in ``d2.py``. You also need to allow mouse and keyboard inputs on the PC.
+
 # Known issues
 lazycast tries to remember the pairing credentials so that entering the PIN is only needed once for each device. However, this feature does not seem to work properly all the time with recent Raspbian images. Therefore, re-pairing may be needed after every Raspberry Pi reboot. Try clearing the 'lazycast' information on the source device before re-pairing if you run into pairing problems.  
 
