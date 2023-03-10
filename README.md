@@ -94,7 +94,7 @@ Latency: Limited by the implementation of the rtp player used. (In VLC, latency 
 
 Due to the overcrowded nature of the wifi spectrum and the use of unreliable rtp transmission, you may experience some video glitching/audio stuttering. The in-house players employ several mechanisms to conceal transmission error, but it may still be noticeable in challenging wireless environments. Interference from other devices may cause disconnections.  
 
-Devices may not fully support backchannel control and some keystrokes/clicks will behave differently in this case. The left Windows key is not captured and when it is pressed, it makes the current window to be out-of-focus and thus disables the backchannel controls. If it is pressed again the window will be in-focus. Also, keyboard backchannel and hiding the cursor do not seem to work properly on recent systems.
+Devices may not fully support backchannel control and some keystrokes/clicks will behave differently. 
 
 HDCP(content protection): Neither the key nor the hardware is available on Pi and therefore is not supported.  
 
