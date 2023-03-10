@@ -30,7 +30,7 @@ player_select = 2
 # 1: player1 has lower latency.
 # 2: player2 handles still images and sound better.
 # 3: omxplayer # Using this option for video playback on Android
-sound_output_select = 0
+sound_output_select = 2
 # 0: HDMI sound output
 # 1: 3.5mm audio jack output
 # 2: alsa
