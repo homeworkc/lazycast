@@ -30,7 +30,7 @@ player_select = 2
 # 1: player1 has lower latency.
 # 2: player2 handles still images and sound better.
 # 3: omxplayer # Using this option for video playback on Android
-sound_output_select = 2
+sound_output_select = 0
 # 0: HDMI sound output
 # 1: 3.5mm audio jack output
 # 2: alsa
@@ -70,104 +70,107 @@ while True:
 tohid = [0, 41, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 45, 46, 42, 43, 20, 26, 8, 21, 23, 28, 24, 12, 18, 19, 47, 48, 40, 0, 4, 22, 7, 9, 10, 11, 13, 14, 15, 51, 52, 53, 0, 49, 29, 27, 6, 25, 5, 17, 16, 54, 55, 56, 0, 85, 0, 44, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 83, 71, 95, 96, 97, 86, 92, 93, 94, 87, 89, 90, 91, 98, 99, 0, 0, 0, 68, 69, 0, 0, 0, 0, 0, 0, 0, 88, 0, 84, 70, 0, 0, 74, 82, 75, 80, 79, 77, 81, 78, 73, 76, 0, 127, 129, 128, 0, 0, 0, 72, 
 0,0,0,0,0,0,0,0x65]
 
-def hidcprocessing(hidcsock,mousemask,keyboardmask):
-	for key,mask in selector.select():
-		device = key.fileobj
-		for event in device.read():
+def hidcprocessing(hidcsock):
+	print('hidcprocessing')
+	mousemask = 0
+	keyboardmask = 0
+	while(1):
+		for key,mask in selector.select():
+			device = key.fileobj
+			for event in device.read():
 
-			if event.type == 0:
-				continue
+				if event.type == 0:
+					continue
 
-			if event.type ==  ecodes.EV_KEY:
-				
-				if(event.code<272):
-					keyin = event.code
+				if event.type ==  ecodes.EV_KEY:
+					
+					if(event.code<272):
+						keyin = event.code
 
-					keyout = 0
-					if (keyin == 29): #left ctrl
-						if(event.value == 0):
-							keyboardmask &= ~1
+						keyout = 0
+						if (keyin == 29): #left ctrl
+							if(event.value == 0):
+								keyboardmask &= ~1
+							else:
+								keyboardmask |= 1
+						elif (keyin == 42): #left shift
+							if(event.value == 0):
+								keyboardmask &= ~(1<<1) #shift
+							else:
+								keyboardmask |= (1<<1)
+						elif (keyin == 56): #left alt
+							if(event.value == 0):
+								keyboardmask &= ~(1<<2)
+							else:
+								keyboardmask |= (1<<2)
+						elif (keyin == 125): #leftmeta
+							if(event.value == 0):
+								keyboardmask &= ~(1<<3) #windows
+							else:
+								keyboardmask |= (1<<3)
+						elif (keyin == 97):#right ctrl
+							if(event.value == 0):
+								keyboardmask &= ~(1<<4)
+							else:
+								keyboardmask |= (1<<4)
+						elif (keyin == 54):#right shift
+							if(event.value == 0):
+								keyboardmask &= ~(1<<5)
+							else:
+								keyboardmask |= (1<<5)
+						elif (keyin == 100):#right alt
+							if(event.value == 0):
+								keyboardmask &= ~(1<<6)
+							else:
+								keyboardmask |= (1<<6)
+						elif (keyin == 0x7e): #rightmeta
+							if(event.value == 0):
+								keyboardmask &= ~(1<<7) #windows
+							else:
+								keyboardmask |= (1<<7)
 						else:
-							keyboardmask |= 1
-					elif (keyin == 42): #left shift
-						if(event.value == 0):
-							keyboardmask &= ~(1<<1) #shift
-						else:
-							keyboardmask |= (1<<1)
-					elif (keyin == 56): #left alt
-						if(event.value == 0):
-							keyboardmask &= ~(1<<2)
-						else:
-							keyboardmask |= (1<<2)
-					elif (keyin == 125): #leftmeta
-						if(event.value == 0):
-							keyboardmask &= ~(1<<3) #windows
-						else:
-							keyboardmask |= (1<<3)
-					elif (keyin == 97):#right ctrl
-						if(event.value == 0):
-							keyboardmask &= ~(1<<4)
-						else:
-							keyboardmask |= (1<<4)
-					elif (keyin == 54):#right shift
-						if(event.value == 0):
-							keyboardmask &= ~(1<<5)
-						else:
-							keyboardmask |= (1<<5)
-					elif (keyin == 100):#right alt
-						if(event.value == 0):
-							keyboardmask &= ~(1<<6)
-						else:
-							keyboardmask |= (1<<6)
-					elif (keyin == 0x7e): #rightmeta
-						if(event.value == 0):
-							keyboardmask &= ~(1<<7) #windows
-						else:
-							keyboardmask |= (1<<7)
-					else:
-						if(event.value != 0):
-							keyout = tohid[keyin]
-							
-					m7 = '00010012010000000929'+'{:02x}'.format(keyboardmask)+'00'+'{:02x}'.format(keyout)+'0000000000'
-					hidcsock.send(bytes.fromhex(m7))
+							if(event.value != 0):
+								keyout = tohid[keyin]
+								
+						m7 = '00010012010000000929'+'{:02x}'.format(keyboardmask)+'00'+'{:02x}'.format(keyout)+'0000000000'
+						hidcsock.send(bytes.fromhex(m7))
 
 
-				elif(event.code == 272): # left
-					if(event.value == 1):
-						mousemask |= 1
-					else:
-						mousemask &= ~1
-					m7 = '00010010010100000628'+'{:02x}'.format(mousemask & 0xFF)+'0000000000'
-					hidcsock.send(bytes.fromhex(m7))
-				elif(event.code == 273): 
-					if(event.value == 1):
-						mousemask |= 2
-					else:
-						mousemask &= ~2
-					m7 = '00010010010100000628'+'{:02x}'.format(mousemask & 0xFF)+'0000000000'
-					hidcsock.send(bytes.fromhex(m7))
-				elif(event.code == 274): 
-					if(event.value == 1):
-						mousemask |= 4
-					else:
-						mousemask &= ~4
-					m7 = '00010010010100000628'+'{:02x}'.format(mousemask & 0xFF)+'0000000000'
-					hidcsock.send(bytes.fromhex(m7))
+					elif(event.code == 272): # left
+						if(event.value == 1):
+							mousemask |= 1
+						else:
+							mousemask &= ~1
+						m7 = '00010010010100000628'+'{:02x}'.format(mousemask & 0xFF)+'0000000000'
+						hidcsock.send(bytes.fromhex(m7))
+					elif(event.code == 273): 
+						if(event.value == 1):
+							mousemask |= 2
+						else:
+							mousemask &= ~2
+						m7 = '00010010010100000628'+'{:02x}'.format(mousemask & 0xFF)+'0000000000'
+						hidcsock.send(bytes.fromhex(m7))
+					elif(event.code == 274): 
+						if(event.value == 1):
+							mousemask |= 4
+						else:
+							mousemask &= ~4
+						m7 = '00010010010100000628'+'{:02x}'.format(mousemask & 0xFF)+'0000000000'
+						hidcsock.send(bytes.fromhex(m7))
 
-			elif event.type == ecodes.EV_REL:
-				if(event.code == 0): #x
-					m7 = '00010010010100000628'+'{:02x}'.format(mousemask & 0xFF)+'{:02x}'.format(event.value & 0xFF)+'00000000'
-					hidcsock.send(bytes.fromhex(m7))
-				elif(event.code == 1): #y
-					m7 = '00010010010100000628'+'{:02x}'.format(mousemask & 0xFF)+'00'+'{:02x}'.format(event.value & 0xFF)+'000000'
-					hidcsock.send(bytes.fromhex(m7))
-				elif(event.code == 8): # wheel
-					if(event.value<0):
-						m7 = '00010010010100000628'+'{:02x}'.format(mousemask & 0xFF)+'0000FF0000'
-					else:
-						m7 = '00010010010100000628'+'{:02x}'.format(mousemask & 0xFF)+'0000010000'
-					hidcsock.send(bytes.fromhex(m7))
-	return (mousemask,keyboardmask)
+				elif event.type == ecodes.EV_REL:
+					if(event.code == 0): #x
+						m7 = '00010010010100000628'+'{:02x}'.format(mousemask & 0xFF)+'{:02x}'.format(event.value & 0xFF)+'00000000'
+						hidcsock.send(bytes.fromhex(m7))
+					elif(event.code == 1): #y
+						m7 = '00010010010100000628'+'{:02x}'.format(mousemask & 0xFF)+'00'+'{:02x}'.format(event.value & 0xFF)+'000000'
+						hidcsock.send(bytes.fromhex(m7))
+					elif(event.code == 8): # wheel
+						if(event.value<0):
+							m7 = '00010010010100000628'+'{:02x}'.format(mousemask & 0xFF)+'0000FF0000'
+						else:
+							m7 = '00010010010100000628'+'{:02x}'.format(mousemask & 0xFF)+'0000010000'
+						hidcsock.send(bytes.fromhex(m7))
 
 
 
@@ -287,8 +290,6 @@ for entry in messagelist:
 		print('uibcport:'+uibcport+"\n")
 		if 'none' not in uibcport and enable_mouse_keyboard == 1:
 			usehidc = True
-			mousemask = 0
-			keyboardmask = 0
 
 
 
@@ -332,6 +333,9 @@ if usehidc:
 		if inputdev.phys not in phys:
 			inputdev.grab()
 			phys.append(inputdev.phys)
+
+	t1 = threading.Thread(target=hidcprocessing, args=(hidcsock,))
+	t1.start()
 
 
 
@@ -451,9 +455,6 @@ while True:
 		data = sock.recv(2048)
 		data = data.decode()
 	except socket.error as e:
-		if usehidc:
-			(mousemask,keyboardmask) = hidcprocessing(hidcsock,mousemask,keyboardmask)
-			
 		err = e.args[0]
 		if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
 			try:
