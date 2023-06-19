@@ -446,7 +446,7 @@ print("---- Negotiation successful ----")
 fcntl.fcntl(sock, fcntl.F_SETFL, os.O_NONBLOCK)
 fcntl.fcntl(idrsock, fcntl.F_SETFL, os.O_NONBLOCK)
 
-
+negotiation_time = time.time()
 
 csnum = 102
 watchdog = 0
@@ -503,7 +503,7 @@ while True:
 			killall(True)
 			sleep(1)
 			break
-		elif 'wfd_video_formats' in data:
+		elif 'wfd_video_formats' in data and time.time() - negotiation_time > 5:
 			launchplayer(player_select)
 		messagelist=data.split('\r\n\r\n')
 		print(messagelist)
