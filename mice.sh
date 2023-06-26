@@ -12,6 +12,7 @@
 sudo systemctl stop dhcpcd
 sudo systemctl stop wpa_supplicant
 sudo wpa_supplicant -Dnl80211 -iwlan0 -u -c/etc/wpa_supplicant/wpa_supplicant.conf &
+sleep 1; sudo systemctl start dhcpcd
 
 LD_LIBRARY_PATH=/opt/vc/lib
 export LD_LIBRARY_PATH
