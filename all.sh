@@ -9,7 +9,7 @@
 #   under the GPL along with build & install instructions.
 #
 #################################################################################
-managefrequency=1
+managefrequency=0
 LD_LIBRARY_PATH=/opt/vc/lib
 export LD_LIBRARY_PATH
 while :
@@ -58,7 +58,7 @@ do
 			while [ `echo "${ain}" | grep -c "p2p-wl"`  -lt 1 ]
 			do
 				#sudo wpa_cli p2p_group_add -i$p2pdevinterface persistent$perstr freq=2
-				result=$(sudo wpa_cli p2p_group_add -i$p2pdevinterface persistent$perstr $wlanfreq)
+				result=$(sudo wpa_cli p2p_group_add -i$p2pdevinterface persistent$perstr freq=2)
 				if [ "$result" == "FAIL" ]					
 				then
 					wlanfreq=""
