@@ -4,9 +4,9 @@ lazycast: A Simple Wireless Display Receiver
 lazycast is a simple wifi display receiver. It was originally targeted Raspberry Pi (as display) and Windows 8.1/10 (as source), but it **might** also work on other Linux platforms and Miracast sources. (For other Linux systems, skip the preparation section. For video playback from Android sources, modify the ``player_select`` option in ``d2.py``.) For Windows 10 systems, the Miracast over Infrastructure (**MICE**) feature is also supported, which may provide better user experiences. In general, lazycast does not require re-compilation of wpa_supplicant to support various p2p functionalities, and should work on an "out of the box" Raspberry Pi.
 
 # OS
-Select "**Raspberry Pi OS (Legacy, 32-bit)** (A port of Debian Bullseye with security updates and desktop environment" when flashing the SD card. Debian Bookworm seems to cause some issues.
+Select "**Raspberry Pi OS (Legacy, 32-bit)** A port of Debian Bullseye with security updates and desktop environment" when flashing the SD card. Debian Bookworm seems to cause some issues.
 
-On a fresh installed OS, install ``cmake``:
+On a fresh OS, install ``cmake``:
 ```
 sudo apt install cmake
 ```
