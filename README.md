@@ -3,42 +3,32 @@ lazycast: A Simple Wireless Display Receiver
 # Description
 lazycast is a simple wifi display receiver. It was originally targeted Raspberry Pi (as display) and Windows 8.1/10 (as source), but it **might** also work on other Linux platforms and Miracast sources. (For other Linux systems, skip the preparation section. For video playback from Android sources, modify the ``player_select`` option in ``d2.py``.) For Windows 10 systems, the Miracast over Infrastructure (**MICE**) feature is also supported, which may provide better user experiences. In general, lazycast does not require re-compilation of wpa_supplicant to support various p2p functionalities, and should work on an "out of the box" Raspberry Pi.
 
-# Important Information
-If you are using the latest Raspberry Pi OS ("Bullseye"),  follow [these instructions](https://github.com/homeworkc/lazycast/issues/100#issuecomment-1003732280) and then directly go to the [Build Binaries](https://github.com/homeworkc/lazycast/#build-binaries) section.
+# OS
+Select "**Raspberry Pi OS (Legacy, 32-bit)** (A port of Debian Bullseye with security updates and desktop environment" when flashing the SD card. Debian Bookworm seems to cause some issues.
 
-(Also, setting the LD_LIBRARY_PATH is not necessary anymore because it has been integrated into ``all.sh``)
-
-
-
-# Preparation
-## Downgrade wpa_supplicant (only for Raspbian Buster)
-**For Raspbian Buster, downgrade the ``wpasupplicant`` package to the version for Raspbian Stretch:**
+On a fresh installed OS, install ``cmake``:
 ```
-wget http://ftp.us.debian.org/debian/pool/main/w/wpa/wpasupplicant_2.4-1+deb9u6_armhf.deb
-sudo apt --allow-downgrades install ./wpasupplicant_2.4-1+deb9u6_armhf.deb
-```  
-## Install NetworkManager  (for Raspbian Buster or older)
-Note that installing NetworkManager will reset the network and cause Pi to be disconnected from existing network. Therefore, these steps should be done locally and not over SSH. After the installation, you can connect to the network once again using the NetworkManager interface.  
-Here is one solution (adopted from [here](https://raspberrypi.stackexchange.com/questions/29783/how-to-setup-network-manager-on-raspbian)):
+sudo apt install cmake
 ```
-sudo apt install network-manager network-manager-gnome openvpn openvpn-systemd-resolved network-manager-openvpn network-manager-openvpn-gnome
+Clone the Raspberry Pi userland repo and run ``buildme``:
 ```
-And,
+git clone https://github.com/raspberrypi/userland
+cd userland
+./buildme
 ```
-sudo apt purge dhcpcd5
+Replace ``vc4-kms-v3d`` with ``vc4-fkms-v3d`` in ``/boot/config.txt``:
 ```
-Additionally, ``systemd-resolved`` should be disabled since it does not seem to work well with NetworkManager, which causes DNS problems. (See [here](https://unix.stackexchange.com/questions/518266/ping-displays-name-or-service-not-known) for details.) (It may take a while for the problems to show).
-```
-sudo systemctl disable systemd-resolved
+sudo sed -i 's/vc4-kms-v3d/vc4-fkms-v3d/g' /boot/config.txt
 ```
 Then reboot:
 ```
 sudo reboot
 ```
+(You can see [this post](https://github.com/homeworkc/lazycast/issues/100#issuecomment-1003732280) for more details.)
 ## Build Binaries
 Install packages (for compiling the players):
 ```
-sudo apt install libx11-dev libasound2-dev libavformat-dev libavcodec-dev
+sudo apt install libx11-dev libasound2-dev libavformat-dev libavcodec-dev python3-evdev
 ```
 Compile libraries on Pi:
 ```
