@@ -292,7 +292,7 @@ for entry in messagelist:
 			usehidc = True
 
 
-
+inputdevs = []
 if usehidc:
 	from evdev import InputDevice, categorize, ecodes
 	import evdev
@@ -326,13 +326,13 @@ if usehidc:
 	selector = DefaultSelector()
 
 
-	phys = []
+	
 	for path in evdev.list_devices():
 		inputdev = InputDevice(path)
 		selector.register(inputdev, EVENT_READ)
-		if inputdev.phys not in phys:
+		if inputdev not in inputdevs:
 			inputdev.grab()
-			phys.append(inputdev.phys)
+			inputdevs.append(inputdev)
 
 	t1 = threading.Thread(target=hidcprocessing, args=(hidcsock,))
 	t1.start()
@@ -529,8 +529,7 @@ if runonpi:
 
 if usehidc:
 	hidcsock.close()
-	for path in evdev.list_devices():
-		inputdev = InputDevice(path)
+	for inputdev in inputdevs:
 		try:
 			inputdev.ungrab()
 		except IOError:
