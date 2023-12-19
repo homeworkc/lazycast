@@ -58,7 +58,7 @@ do
 			while [ `echo "${ain}" | grep -c "p2p-wl"`  -lt 1 ]
 			do
 				#sudo wpa_cli p2p_group_add -i$p2pdevinterface persistent$perstr freq=2
-				result=$(sudo wpa_cli p2p_group_add -i$p2pdevinterface persistent$perstr freq=2)
+				result=$(sudo wpa_cli p2p_group_add -i$p2pdevinterface persistent$perstr freq=2412)
 				if [ "$result" == "FAIL" ]					
 				then
 					wlanfreq=""
