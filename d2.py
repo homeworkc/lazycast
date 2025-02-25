@@ -278,15 +278,20 @@ print("<--------\n" + s_data)
 sock.sendall(s_data.encode())
 
 usehidc = False
+print(data)
 messagelist=data.split('\r\n\r\n')
+print(messagelist)
 for entry in messagelist:
 	if 'wfd_uibc_capability:' in entry:
-		entrylist = entry.split(';')
-		uibcport = entrylist[-1]
-		uibcport = uibcport.split('\r')
-		uibcport = uibcport[0]
-		uibcport = uibcport.split('=')
-		uibcport = uibcport[1]
+		lines = entry.split("\r\n")
+		uibc_line = next((line for line in lines if line.startswith("wfd_uibc_capability:")), None)
+		uibcport = None
+		if uibc_line:
+			uibc_content = uibc_line.split("wfd_uibc_capability:")[1].strip()
+			for item in uibc_content.split(";"):
+				if item.startswith("port="):
+					uibcport = item.split("=")[1]
+					break
 		print('uibcport:'+uibcport+"\n")
 		if 'none' not in uibcport and enable_mouse_keyboard == 1:
 			usehidc = True
