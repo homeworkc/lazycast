@@ -278,9 +278,7 @@ print("<--------\n" + s_data)
 sock.sendall(s_data.encode())
 
 usehidc = False
-print(data)
 messagelist=data.split('\r\n\r\n')
-print(messagelist)
 for entry in messagelist:
 	if 'wfd_uibc_capability:' in entry:
 		lines = entry.split("\r\n")
